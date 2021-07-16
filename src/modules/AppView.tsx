@@ -2,15 +2,15 @@ import React, {useEffect, useState} from "react";
 import styled from "@emotion/styled";
 
 const storagePrefix = 'repeater-items'
+const allKey = 'all'
+const tempKey = 'temp'
 
 // If someone else is using this, just modify this list to make it non-salsa specific
 const listItems = {
-    'on-1-moves': 'On 1 - Moves',
-    'on-1-combos': 'On 1 - Combos',
-    'on-1-everything': 'On 1 - Everything',
-    'on-2-moves': 'On 2 - Moves',
-    'on-2-combos': 'On 2 - Combos',
-    'on-2-everything': 'On 2 - Everything',
+    moves: 'Moves',
+    combos: 'Combos',
+    [allKey]: 'Everything',
+    [tempKey]: 'Temporary'
 }
 
 const defaultListName = Object.keys(listItems)[0]
@@ -27,7 +27,22 @@ export default function AppView() {
     useEffect(() => {
         setIsTimerEnabled(false)
 
-        const storedText = window.localStorage.getItem(getTextStorageKey()) || ""
+        let storedText
+
+        console.log(allKey, listName)
+        if (listName === allKey) {
+            storedText = Object.keys(listItems)
+                .filter(key => key !== allKey)
+                .filter(key => key !== tempKey)
+                .reduce((runningText, currentKey) =>
+                    runningText + window.localStorage.getItem(getTextStorageKey(currentKey)) || ""
+            , "")
+        } else {
+            storedText = window.localStorage.getItem(getTextStorageKey()) || ""
+        }
+
+        console.log(storedText)
+
         updateText(storedText)
 
         const storedPeriod = +(window.localStorage.getItem(getPeriodStorageKey()) || defaultPeriod)
@@ -53,13 +68,16 @@ export default function AppView() {
         </option>
     )
 
+    const onTextChangeHandler = listName !== allKey ?
+        (e: any) => updateText(e.target.value) : undefined
+
     return <Root>
         <Main>
             <Page>
                 <select onChange={e => handleListChange(e.target.value)} value={listName}>
                     {listItemsView}
                 </select>
-                <ItemView onChange={e => updateText(e.target.value)} value={text} />
+                <ItemView onChange={onTextChangeHandler} value={text} />
                 <input type="number" min="100" value={period} onChange={e => handlePeriodChange(e.target.value as any)} />
                 <button onClick={toggleSayingRandomWords}>
                     {isTimerEnabled && "Stop"}
@@ -122,8 +140,9 @@ export default function AppView() {
         return text.split('\n')
     }
 
-    function getTextStorageKey() {
-        return `${storagePrefix}-${listName}`
+    function getTextStorageKey(listNameOverride?: string) {
+        const resolvedListName = listNameOverride || listName
+        return `${storagePrefix}-${resolvedListName}`
     }
 
     function getPeriodStorageKey() {
