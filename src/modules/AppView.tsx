@@ -41,8 +41,6 @@ export default function AppView() {
             storedText = window.localStorage.getItem(getTextStorageKey()) || ""
         }
 
-        console.log(storedText)
-
         updateText(storedText)
 
         const storedPeriod = +(window.localStorage.getItem(getPeriodStorageKey()) || defaultPeriod)
