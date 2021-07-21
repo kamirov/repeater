@@ -2,10 +2,19 @@ import React, {useEffect, useState} from "react";
 import styled from "@emotion/styled";
 
 const storagePrefix = 'repeater-items'
+
+// TODO: Combine styles and lists. They're basically the same thing and I'm just lazily duplicating code
+
+// If someone is using this for other styles, just add them to this object
+const styleItems = {
+    salsa: 'Salsa',
+    salsaSolo: 'Salsa (Solo)',
+    shuffling: 'Shuffling',
+    bachata: 'Bachata',
+}
+
 const allKey = 'all'
 const tempKey = 'temp'
-
-// If someone else is using this, just modify this list to make it non-salsa specific
 const listItems = {
     moves: 'Moves',
     combos: 'Combos',
@@ -13,12 +22,14 @@ const listItems = {
     [tempKey]: 'Temporary'
 }
 
-const defaultListName = Object.keys(listItems)[0]
+const defaultStyleNameKey = Object.keys(styleItems)[0]
+const defaultListNameKey = Object.keys(listItems)[0]
 const defaultPeriod = 7000
 
 export default function AppView() {
 
-    const [listName, setListName] = useState(defaultListName)
+    const [styleNameKey, setStyleNameKey] = useState(defaultStyleNameKey)
+    const [listNameKey, setListNameKey] = useState(defaultListNameKey)
     const [text, setText] = useState("")
     const [period, setPeriod] = useState(defaultPeriod as number)
     const [isTimerEnabled, setIsTimerEnabled] = useState(false)
@@ -29,23 +40,22 @@ export default function AppView() {
 
         let storedText
 
-        console.log(allKey, listName)
-        if (listName === allKey) {
+        if (listNameKey === allKey) {
             storedText = Object.keys(listItems)
                 .filter(key => key !== allKey)
                 .filter(key => key !== tempKey)
-                .reduce((runningText, currentKey) =>
-                    runningText + window.localStorage.getItem(getTextStorageKey(currentKey)) || ""
+                .reduce((runningText, currentListKey) =>
+                    runningText + (window.localStorage.getItem(getTextStorageKey(styleNameKey, currentListKey)) || "")
             , "")
         } else {
-            storedText = window.localStorage.getItem(getTextStorageKey()) || ""
+            storedText = window.localStorage.getItem(getTextStorageKey(styleNameKey, listNameKey)) || ""
         }
 
         updateText(storedText)
 
-        const storedPeriod = +(window.localStorage.getItem(getPeriodStorageKey()) || defaultPeriod)
+        const storedPeriod = +(window.localStorage.getItem(getPeriodStorageKey(styleNameKey, listNameKey)) || defaultPeriod)
         setPeriod(storedPeriod)
-    }, [listName])
+    }, [styleNameKey, listNameKey])
 
     useEffect(() => {
         if (isTimerEnabled) {
@@ -66,18 +76,30 @@ export default function AppView() {
         </option>
     )
 
-    const onTextChangeHandler = listName !== allKey ?
+    const styleItemsView = Object.keys(styleItems).map(styleItemKey =>
+        <option
+            key={styleItemKey}
+            value={styleItemKey}
+        >
+            {(styleItems as any)[styleItemKey]}
+        </option>
+    )
+
+    const onTextChangeHandler = listNameKey !== allKey ?
         (e: any) => updateText(e.target.value) : undefined
 
     return <Root>
         <Main>
             <Page>
-                <select onChange={e => handleListChange(e.target.value)} value={listName}>
+                <select onChange={e => handleStyleChange(e.target.value)} value={styleNameKey}>
+                    {styleItemsView}
+                </select>
+                <select onChange={e => handleListChange(e.target.value)} value={listNameKey}>
                     {listItemsView}
                 </select>
-                <ItemView onChange={onTextChangeHandler} value={text} />
+                <ItemView onChange={onTextChangeHandler} value={text} disabled={listNameKey === allKey} />
                 <input type="number" min="100" value={period} onChange={e => handlePeriodChange(e.target.value as any)} />
-                <button onClick={toggleSayingRandomWords}>
+                <button onClick={toggleSayingRandomWords} disabled={!text}>
                     {isTimerEnabled && "Stop"}
                     {!isTimerEnabled && "Start"}
                 </button>
@@ -85,14 +107,20 @@ export default function AppView() {
         </Main>
     </Root>
 
-    function handleListChange(listName: string) {
-        setListName(listName)
+    function handleListChange(newlistNameKey: string) {
+        setIsTimerEnabled(false)
+        setListNameKey(newlistNameKey)
+    }
+
+    function handleStyleChange(newStyleNameKey: string) {
+        setIsTimerEnabled(false)
+        setStyleNameKey(newStyleNameKey)
     }
 
     function handlePeriodChange(period: number) {
-        console.log("Period change: " + period)
+        setIsTimerEnabled(false)
         setPeriod(period)
-        window.localStorage.setItem(getPeriodStorageKey(), period + "")
+        window.localStorage.setItem(getPeriodStorageKey(styleNameKey, listNameKey), period + "")
     }
 
     function say(item: string) {
@@ -131,22 +159,22 @@ export default function AppView() {
 
     function updateText(nextText: string) {
         setText(nextText)
-        window.localStorage.setItem(getTextStorageKey(), nextText)
+        window.localStorage.setItem(getTextStorageKey(styleNameKey, listNameKey), nextText)
     }
 
     function textToItems() {
         return text.split('\n')
     }
-
-    function getTextStorageKey(listNameOverride?: string) {
-        const resolvedListName = listNameOverride || listName
-        return `${storagePrefix}-${resolvedListName}`
-    }
-
-    function getPeriodStorageKey() {
-        return `${storagePrefix}-${listName}-period`
-    }
 }
+
+function getTextStorageKey(styleNameKey: string, listNameKey: string) {
+    return `${storagePrefix}-${styleNameKey}-${listNameKey}`
+}
+
+function getPeriodStorageKey(styleNameKey: string, listNameKey: string) {
+    return `${getTextStorageKey(styleNameKey, listNameKey)}-period`
+}
+
 
 const Root = styled.div`
 display: flex;
