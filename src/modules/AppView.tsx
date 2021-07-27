@@ -143,7 +143,7 @@ export default function AppView() {
             // Speak the utterance
             synthesis.speak(utterance);
         } else {
-            console.log('Text-to-speech not supported.');
+            alert('Text-to-speech not supported.');
         }
     }
 
