@@ -44,14 +44,18 @@ export default function AppView() {
             storedText = Object.keys(listItems)
                 .filter(key => key !== allKey)
                 .filter(key => key !== tempKey)
-                .reduce((runningText, currentListKey) =>
-                    runningText + (window.localStorage.getItem(getTextStorageKey(styleNameKey, currentListKey)) || "")
-            , "")
+                .reduce((runningText, currentListKey) => {
+                    const currentText = window.localStorage.getItem(getTextStorageKey(styleNameKey, currentListKey))
+                    if (currentText) {
+                        return runningText + '\n' + currentText
+                    }
+                    return runningText
+                }, "")
         } else {
             storedText = window.localStorage.getItem(getTextStorageKey(styleNameKey, listNameKey)) || ""
         }
 
-        updateText(storedText)
+        updateText(sanitizeText(storedText))
 
         const storedPeriod = +(window.localStorage.getItem(getPeriodStorageKey(styleNameKey, listNameKey)) || defaultPeriod)
         setPeriod(storedPeriod)
@@ -97,7 +101,7 @@ export default function AppView() {
                 <select onChange={e => handleListChange(e.target.value)} value={listNameKey}>
                     {listItemsView}
                 </select>
-                <ItemView onChange={onTextChangeHandler} value={text} disabled={listNameKey === allKey} />
+                <ItemView onChange={onTextChangeHandler} onBlur={handleBlur} value={text} disabled={listNameKey === allKey} />
                 <input type="number" min="100" value={period} onChange={e => handlePeriodChange(e.target.value as any)} />
                 <button onClick={toggleSayingRandomWords} disabled={!text}>
                     {isTimerEnabled && "Stop"}
@@ -106,6 +110,10 @@ export default function AppView() {
             </Page>
         </Main>
     </Root>
+
+    function handleBlur() {
+        updateText(sanitizeText(text))
+    }
 
     function handleListChange(newlistNameKey: string) {
         setIsTimerEnabled(false)
@@ -165,6 +173,11 @@ export default function AppView() {
     function textToItems() {
         return text.split('\n')
     }
+
+}
+
+function sanitizeText(text: string) {
+    return text.split("\n").filter(item => item).sort().join("\n");
 }
 
 function getTextStorageKey(styleNameKey: string, listNameKey: string) {
