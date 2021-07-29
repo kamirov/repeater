@@ -166,6 +166,7 @@ export default function AppView() {
     }
 
     function updateText(nextText: string) {
+        setIsTimerEnabled(false)
         setText(nextText)
         window.localStorage.setItem(getTextStorageKey(styleNameKey, listNameKey), nextText)
     }
@@ -177,7 +178,7 @@ export default function AppView() {
 }
 
 function sanitizeText(text: string) {
-    return text.split("\n").filter(item => item).sort().join("\n");
+    return text.toLowerCase().split("\n").filter(item => item).sort().join("\n");
 }
 
 function getTextStorageKey(styleNameKey: string, listNameKey: string) {
