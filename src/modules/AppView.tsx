@@ -11,6 +11,7 @@ const styleItems = {
     salsaSolo: 'Salsa (Solo)',
     shuffling: 'Shuffling',
     bachata: 'Bachata',
+    hiphop: 'Hip Hop',
 }
 
 const allKey = 'all'
