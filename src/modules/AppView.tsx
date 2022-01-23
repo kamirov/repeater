@@ -10,6 +10,9 @@ const styleItems = {
     salsa: 'Salsa',
     salsaSolo: 'Salsa (Solo)',
     shuffling: 'Shuffling',
+    dominican: 'Dominican',
+    kizomba: 'Kizomba',
+    dominicanSolo: 'Dominican (Solo)',
     bachata: 'Bachata',
     hiphop: 'Hip Hop',
 }
