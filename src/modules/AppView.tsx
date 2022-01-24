@@ -7,14 +7,15 @@ const storagePrefix = 'repeater-items'
 
 // If someone is using this for other styles, just add them to this object
 const styleItems = {
+    bachata: 'Bachata',
+    bachataSolo: 'Bachata (Solo)',
+    dominican: 'Dominican',
+    hipHop: 'Hip Hop',
+    kizomba: 'Kizomba',
     salsa: 'Salsa',
     salsaSolo: 'Salsa (Solo)',
     shuffling: 'Shuffling',
-    dominican: 'Dominican',
-    kizomba: 'Kizomba',
-    dominicanSolo: 'Dominican (Solo)',
-    bachata: 'Bachata',
-    hiphop: 'Hip Hop',
+    zouk: 'Zouk'
 }
 
 const allKey = 'all'
