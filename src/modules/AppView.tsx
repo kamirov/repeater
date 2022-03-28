@@ -4,43 +4,21 @@ import StyleList from "./style/StyleList";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../redux/redux.types";
 import StyleRedux from "./style/StyleRedux";
+import MoveTypeFilter from "./move/MoveTypeFilter";
+import MoveRedux from "./move/MoveRedux";
+import {Move, MoveType} from "./move/move.types";
+import MoveItem from "./move/MoveItem";
 
 const storagePrefix = 'repeater-items'
 
-// TODO: Combine styles and lists. They're basically the same thing and I'm just lazily duplicating code
-
-// If someone is using this for other styles, just add them to this object
-const styleItems = {
-    bachata: 'Bachata',
-    bachataSolo: 'Bachata (Solo)',
-    dominican: 'Dominican',
-    hipHop: 'Hip Hop',
-    kizomba: 'Kizomba',
-    salsa: 'Salsa',
-    salsaSolo: 'Salsa (Solo)',
-    shuffling: 'Shuffling',
-    zouk: 'Zouk'
-}
-
-const allKey = 'all'
-const tempKey = 'temp'
-const listItems = {
-    moves: 'Moves',
-    combos: 'Combos',
-    [allKey]: 'Everything',
-    [tempKey]: 'Temporary'
-}
-
-const defaultStyleNameKey = Object.keys(styleItems)[0]
-const defaultListNameKey = Object.keys(listItems)[0]
 const defaultPeriod = 7000
 
 export default function AppView() {
 
     const styleState = useSelector((state: RootState) => state.style)
+    const moveState = useSelector((state: RootState) => state.move)
     const dispatch = useDispatch()
 
-    const [listNameKey, setListNameKey] = useState(defaultListNameKey)
     const [text, setText] = useState("")
     const [period, setPeriod] = useState(defaultPeriod as number)
     const [isTimerEnabled, setIsTimerEnabled] = useState(false)
@@ -49,28 +27,9 @@ export default function AppView() {
     useEffect(() => {
         setIsTimerEnabled(false)
 
-        let storedText
-
-        if (listNameKey === allKey) {
-            storedText = Object.keys(listItems)
-                .filter(key => key !== allKey)
-                .filter(key => key !== tempKey)
-                .reduce((runningText, currentListKey) => {
-                    const currentText = window.localStorage.getItem(getTextStorageKey(styleState.activeStyleKey, currentListKey))
-                    if (currentText) {
-                        return runningText + '\n' + currentText
-                    }
-                    return runningText
-                }, "")
-        } else {
-            storedText = window.localStorage.getItem(getTextStorageKey(styleState.activeStyleKey, listNameKey)) || ""
-        }
-
-        updateText(sanitizeText(storedText))
-
-        const storedPeriod = +(window.localStorage.getItem(getPeriodStorageKey(styleState.activeStyleKey, listNameKey)) || defaultPeriod)
+        const storedPeriod = +(window.localStorage.getItem(getPeriodStorageKey(styleState.activeStyleKey, moveState.activeMoveType)) || defaultPeriod)
         setPeriod(storedPeriod)
-    }, [styleState.activeStyleKey, listNameKey])
+    }, [styleState.activeStyleKey, moveState.activeMoveType])
 
     useEffect(() => {
         if (isTimerEnabled) {
@@ -82,44 +41,32 @@ export default function AppView() {
         }
     }, [isTimerEnabled])
 
-    const listItemsView = Object.keys(listItems).map(listItemKey =>
-        <option
-            key={listItemKey}
-            value={listItemKey}
-        >
-            {(listItems as any)[listItemKey]}
-        </option>
-    )
+    // TODO Use strict equality as soon as we stop storing data in JSON files (and can thus use enums correctly)
+    const moves: Move[] = moveState.moves
+            .filter(m => m.styleKey === styleState.activeStyleKey)
+            .filter(m => moveState.activeMoveType === MoveType.All || m.type == moveState.activeMoveType)
 
-    const styleItemsView = Object.keys(styleItems).map(styleItemKey =>
-        <option
-            key={styleItemKey}
-            value={styleItemKey}
-        >
-            {(styleItems as any)[styleItemKey]}
-        </option>
-    )
-
-    const onTextChangeHandler = listNameKey !== allKey ?
-        (e: any) => updateText(e.target.value) : undefined
+    const moveItems = moves.map(m => <MoveItem move={m} key={m.key} /> )
 
     return <Root>
         <Main>
             <Page>
                 <StyleList
-                    onChange={(itemKey: string) => handleStyleChange(itemKey)}
+                    onChange={handleStyleChange}
                     items={styleState.styles}
                     activeItemKey={styleState.activeStyleKey}
                 />
-                {/*<select onChange={e => handleListChange(e.target.value)} value={listNameKey}>*/}
-                {/*    {listItemsView}*/}
-                {/*</select>*/}
-                <ItemView onChange={onTextChangeHandler} onBlur={handleBlur} value={text} disabled={listNameKey === allKey} />
-                <input type="number" min="100" value={period} onChange={e => handlePeriodChange(e.target.value as any)} />
-                <button onClick={toggleSayingRandomWords} disabled={!text}>
-                    {isTimerEnabled && "Stop"}
-                    {!isTimerEnabled && "Start"}
-                </button>
+                <MoveTypeFilter
+                    onChange={handleListChange}
+                    activeMoveType={moveState.activeMoveType} />
+                {moveItems}
+
+                {/*<ItemView onChange={onTextChangeHandler} onBlur={handleBlur} value={text} disabled={moveState.activeMoveType === allKey} />*/}
+                {/*<input type="number" min="100" value={period} onChange={e => handlePeriodChange(e.target.value as any)} />*/}
+                {/*<button onClick={toggleSayingRandomWords} disabled={!text}>*/}
+                {/*    {isTimerEnabled && "Stop"}*/}
+                {/*    {!isTimerEnabled && "Start"}*/}
+                {/*</button>*/}
             </Page>
         </Main>
     </Root>
@@ -128,9 +75,9 @@ export default function AppView() {
         updateText(sanitizeText(text))
     }
 
-    function handleListChange(newlistNameKey: string) {
+    function handleListChange(moveType: MoveType) {
         setIsTimerEnabled(false)
-        setListNameKey(newlistNameKey)
+        dispatch(MoveRedux.setActiveMoveType(moveType))
     }
 
     function handleStyleChange(newStyleNameKey: string) {
@@ -142,7 +89,7 @@ export default function AppView() {
     function handlePeriodChange(period: number) {
         setIsTimerEnabled(false)
         setPeriod(period)
-        window.localStorage.setItem(getPeriodStorageKey(styleState.activeStyleKey, listNameKey), period + "")
+        window.localStorage.setItem(getPeriodStorageKey(styleState.activeStyleKey, moveState.activeMoveType), period + "")
     }
 
     function say(item: string) {
@@ -182,7 +129,7 @@ export default function AppView() {
     function updateText(nextText: string) {
         setIsTimerEnabled(false)
         setText(nextText)
-        window.localStorage.setItem(getTextStorageKey(styleState.activeStyleKey, listNameKey), nextText)
+        window.localStorage.setItem(getTextStorageKey(styleState.activeStyleKey, moveState.activeMoveType), nextText)
     }
 
     function textToItems() {
@@ -195,12 +142,12 @@ function sanitizeText(text: string) {
     return text.toLowerCase().split("\n").filter(item => item).sort().join("\n");
 }
 
-function getTextStorageKey(styleNameKey: string, listNameKey: string) {
-    return `${storagePrefix}-${styleNameKey}-${listNameKey}`
+function getTextStorageKey(styleNameKey: string, activeMoveType: MoveType) {
+    return `${storagePrefix}-${styleNameKey}-${activeMoveType}`
 }
 
-function getPeriodStorageKey(styleNameKey: string, listNameKey: string) {
-    return `${getTextStorageKey(styleNameKey, listNameKey)}-period`
+function getPeriodStorageKey(styleNameKey: string, activeMoveType: MoveType) {
+    return `${getTextStorageKey(styleNameKey, activeMoveType)}-period`
 }
 
 
