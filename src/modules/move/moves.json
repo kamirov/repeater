@@ -15,7 +15,7 @@
         "description": null,
         "link": null,
         "type": "simple",
-        "isLearned": false
+        "isLearned": true
     },
     {
         "key": "barrel-roll",
@@ -25,6 +25,33 @@
         "link": null,
         "type": "simple",
         "isLearned": false
+    },
+    {
+        "key": "backhand-pass",
+        "name": "Backhand pass",
+        "styleKey": "salsa",
+        "description": null,
+        "link": null,
+        "type": "simple",
+        "isLearned": false
+    },
+    {
+        "key": "cape",
+        "name": "Cape",
+        "styleKey": "salsa",
+        "description": null,
+        "link": null,
+        "type": "simple",
+        "isLearned": false
+    },
+    {
+        "key": "cross-body-lead",
+        "name": "Cross-body lead",
+        "styleKey": "salsa",
+        "description": null,
+        "link": null,
+        "type": "simple",
+        "isLearned": true
     },
     {
         "key": "around-the-world",
