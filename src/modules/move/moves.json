@@ -1,0 +1,47 @@
+[
+    {
+        "key": "360",
+        "name": "360",
+        "styleKey": "salsa",
+        "description": null,
+        "link": null,
+        "type": "simple",
+        "isLearned": false
+    },
+    {
+        "key": "arm-spiral",
+        "name": "Arm spiral",
+        "styleKey": "salsa",
+        "description": null,
+        "link": null,
+        "type": "simple",
+        "isLearned": false
+    },
+    {
+        "key": "barrel-roll",
+        "name": "Barrel roll",
+        "styleKey": "salsa",
+        "description": null,
+        "link": null,
+        "type": "simple",
+        "isLearned": false
+    },
+    {
+        "key": "around-the-world",
+        "name": "Around the World",
+        "styleKey": "salsa",
+        "description": null,
+        "link": null,
+        "type": "combo",
+        "isLearned": false
+    },
+    {
+        "key": "hammerlock-hip-roll",
+        "name": "Hammerlock hip roll",
+        "styleKey": "sensual-bachata",
+        "description": null,
+        "link": null,
+        "type": "simple",
+        "isLearned": false
+    }
+]
