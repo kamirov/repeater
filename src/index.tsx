@@ -3,7 +3,17 @@ import ReactDOM from 'react-dom';
 import './index.scss';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-ReactDOM.render(<App/>,
+import {Provider} from "react-redux";
+import {CssBaseline} from "@material-ui/core";
+import {BrowserRouter} from "react-router-dom";
+import store from "./redux/store";
+ReactDOM.render(
+    <Provider store={store}>
+        <CssBaseline/>
+        <BrowserRouter>
+            <App/>
+        </BrowserRouter>
+    </Provider>,
     document.getElementById('root')
 );
 
