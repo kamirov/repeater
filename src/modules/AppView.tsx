@@ -1,5 +1,9 @@
 import React, {useEffect, useState} from "react";
 import styled from "@emotion/styled";
+import StyleList from "./style/StyleList";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "../redux/redux.types";
+import StyleRedux from "./style/StyleRedux";
 
 const storagePrefix = 'repeater-items'
 
@@ -33,7 +37,9 @@ const defaultPeriod = 7000
 
 export default function AppView() {
 
-    const [styleNameKey, setStyleNameKey] = useState(defaultStyleNameKey)
+    const styleState = useSelector((state: RootState) => state.style)
+    const dispatch = useDispatch()
+
     const [listNameKey, setListNameKey] = useState(defaultListNameKey)
     const [text, setText] = useState("")
     const [period, setPeriod] = useState(defaultPeriod as number)
@@ -50,21 +56,21 @@ export default function AppView() {
                 .filter(key => key !== allKey)
                 .filter(key => key !== tempKey)
                 .reduce((runningText, currentListKey) => {
-                    const currentText = window.localStorage.getItem(getTextStorageKey(styleNameKey, currentListKey))
+                    const currentText = window.localStorage.getItem(getTextStorageKey(styleState.activeStyleKey, currentListKey))
                     if (currentText) {
                         return runningText + '\n' + currentText
                     }
                     return runningText
                 }, "")
         } else {
-            storedText = window.localStorage.getItem(getTextStorageKey(styleNameKey, listNameKey)) || ""
+            storedText = window.localStorage.getItem(getTextStorageKey(styleState.activeStyleKey, listNameKey)) || ""
         }
 
         updateText(sanitizeText(storedText))
 
-        const storedPeriod = +(window.localStorage.getItem(getPeriodStorageKey(styleNameKey, listNameKey)) || defaultPeriod)
+        const storedPeriod = +(window.localStorage.getItem(getPeriodStorageKey(styleState.activeStyleKey, listNameKey)) || defaultPeriod)
         setPeriod(storedPeriod)
-    }, [styleNameKey, listNameKey])
+    }, [styleState.activeStyleKey, listNameKey])
 
     useEffect(() => {
         if (isTimerEnabled) {
@@ -100,12 +106,14 @@ export default function AppView() {
     return <Root>
         <Main>
             <Page>
-                <select onChange={e => handleStyleChange(e.target.value)} value={styleNameKey}>
-                    {styleItemsView}
-                </select>
-                <select onChange={e => handleListChange(e.target.value)} value={listNameKey}>
-                    {listItemsView}
-                </select>
+                <StyleList
+                    onChange={(itemKey: string) => handleStyleChange(itemKey)}
+                    items={styleState.styles}
+                    activeItemKey={styleState.activeStyleKey}
+                />
+                {/*<select onChange={e => handleListChange(e.target.value)} value={listNameKey}>*/}
+                {/*    {listItemsView}*/}
+                {/*</select>*/}
                 <ItemView onChange={onTextChangeHandler} onBlur={handleBlur} value={text} disabled={listNameKey === allKey} />
                 <input type="number" min="100" value={period} onChange={e => handlePeriodChange(e.target.value as any)} />
                 <button onClick={toggleSayingRandomWords} disabled={!text}>
@@ -126,14 +134,15 @@ export default function AppView() {
     }
 
     function handleStyleChange(newStyleNameKey: string) {
+        dispatch(StyleRedux.setActiveStyleKey(newStyleNameKey))
+
         setIsTimerEnabled(false)
-        setStyleNameKey(newStyleNameKey)
     }
 
     function handlePeriodChange(period: number) {
         setIsTimerEnabled(false)
         setPeriod(period)
-        window.localStorage.setItem(getPeriodStorageKey(styleNameKey, listNameKey), period + "")
+        window.localStorage.setItem(getPeriodStorageKey(styleState.activeStyleKey, listNameKey), period + "")
     }
 
     function say(item: string) {
@@ -173,7 +182,7 @@ export default function AppView() {
     function updateText(nextText: string) {
         setIsTimerEnabled(false)
         setText(nextText)
-        window.localStorage.setItem(getTextStorageKey(styleNameKey, listNameKey), nextText)
+        window.localStorage.setItem(getTextStorageKey(styleState.activeStyleKey, listNameKey), nextText)
     }
 
     function textToItems() {
