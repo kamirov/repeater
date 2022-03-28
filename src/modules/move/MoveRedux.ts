@@ -19,7 +19,7 @@ const initialMoves: Move[] = moves
 
 const initialState: MoveState = {
     moves: initialMoves,
-    activeMoveType: MoveType.All
+    activeMoveType: MoveType.Simple
 }
 
 const actions = {
