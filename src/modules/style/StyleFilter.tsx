@@ -11,7 +11,7 @@ type Props = {
     className?: string
 }
 
-function StyleList(props: Props) {
+function StyleFilter(props: Props) {
 
     // TODO: Type event
     const handleChange = (event: any) => {
@@ -37,4 +37,4 @@ function StyleList(props: Props) {
     </div>
 }
 
-export default StyleList;
+export default StyleFilter;

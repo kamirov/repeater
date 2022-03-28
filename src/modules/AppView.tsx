@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import styled from "@emotion/styled";
-import StyleList from "./style/StyleList";
+import StyleFilter from "./style/StyleFilter";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../redux/redux.types";
 import StyleRedux from "./style/StyleRedux";
@@ -51,7 +51,7 @@ export default function AppView() {
     return <Root>
         <Main>
             <Page>
-                <StyleList
+                <StyleFilter
                     onChange={handleStyleChange}
                     items={styleState.styles}
                     activeItemKey={styleState.activeStyleKey}
