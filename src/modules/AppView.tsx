@@ -8,6 +8,7 @@ import MoveTypeFilter from "./move/MoveTypeFilter";
 import MoveRedux from "./move/MoveRedux";
 import {Move, MoveType} from "./move/move.types";
 import MoveItem from "./move/MoveItem";
+import OrderableList from "./ordering/OrderableList";
 
 const storagePrefix = 'repeater-items'
 
@@ -46,7 +47,12 @@ export default function AppView() {
             .filter(m => m.styleKey === styleState.activeStyleKey)
             .filter(m => moveState.activeMoveType === MoveType.All || m.type == moveState.activeMoveType)
 
-    const moveItems = moves.map(m => <MoveItem move={m} key={m.key} /> )
+    const learningMoves = moves.filter(m => !m.isLearned)
+    const learnedMoves = moves.filter(m => m.isLearned)
+
+    const toMoveItem = (m: Move) => <MoveItem move={m} key={m.key} />
+    const learningMoveItems = learningMoves.map(toMoveItem)
+    const learnedMoveItems = learnedMoves.map(toMoveItem)
 
     return <Root>
         <Main>
@@ -59,7 +65,16 @@ export default function AppView() {
                 <MoveTypeFilter
                     onChange={handleListChange}
                     activeMoveType={moveState.activeMoveType} />
-                {moveItems}
+
+
+                <OrderableList label="Learning">
+                    {learningMoveItems}
+                </OrderableList>
+
+                <OrderableList label="Learned">
+                    {learnedMoveItems}
+                </OrderableList>
+
 
                 {/*<ItemView onChange={onTextChangeHandler} onBlur={handleBlur} value={text} disabled={moveState.activeMoveType === allKey} />*/}
                 {/*<input type="number" min="100" value={period} onChange={e => handlePeriodChange(e.target.value as any)} />*/}
