@@ -4,35 +4,35 @@ import {Action} from "../../redux/redux.types";
 
 export type StyleState = {
     styles: Style[]
-    activeStyleKey: string
+    activeStyleId: string
 }
 
 export default {
     setStyles,
-    setActiveStyleKey,
+    setActiveStyleId,
 
     reducer
 }
 
 const initialStyles: Style[] = [
     {
-        key: 'salsa',
+        id: 'salsa',
         name: 'Salsa'
     },
     {
-        key: 'sensual-bachata',
+        id: 'sensual-bachata',
         name: "Sensual Bachata"
     }
 ]
 
 const initialState: StyleState = {
     styles: initialStyles,
-    activeStyleKey: initialStyles[0].key
+    activeStyleId: initialStyles[0].id
 }
 
 const actions = {
     setStyles: 'common/setStyles',
-    setActiveStyleKey: 'common/setActiveStyleKey',
+    setActiveStyleId: 'common/setActiveStyleId',
 }
 
 function setStyles(styles: Style[]) {
@@ -44,12 +44,12 @@ function setStyles(styles: Style[]) {
     }
 }
 
-function setActiveStyleKey(key: string) {
+function setActiveStyleId(id: string) {
     return (dispatch: Dispatch) => {
 
         dispatch({
-            type: actions.setActiveStyleKey,
-            payload: key
+            type: actions.setActiveStyleId,
+            payload: id
         })
     }
 }
@@ -62,10 +62,10 @@ function reducer(state = initialState, action: Action): StyleState {
                 ...state,
                 styles: action.payload
             }
-        case actions.setActiveStyleKey:
+        case actions.setActiveStyleId:
             return {
                 ...state,
-                activeStyleKey: action.payload
+                activeStyleId: action.payload
             }
         default:
             return state

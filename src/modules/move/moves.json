@@ -1,6 +1,6 @@
 [
     {
-        "key": "360",
+        "id": "360",
         "name": "360",
         "styleKey": "salsa",
         "description": null,
@@ -9,7 +9,7 @@
         "isLearned": false
     },
     {
-        "key": "arm-spiral",
+        "id": "arm-spiral",
         "name": "Arm spiral",
         "styleKey": "salsa",
         "description": null,
@@ -18,7 +18,7 @@
         "isLearned": true
     },
     {
-        "key": "barrel-roll",
+        "id": "barrel-roll",
         "name": "Barrel roll",
         "styleKey": "salsa",
         "description": null,
@@ -27,7 +27,7 @@
         "isLearned": false
     },
     {
-        "key": "backhand-pass",
+        "id": "backhand-pass",
         "name": "Backhand pass",
         "styleKey": "salsa",
         "description": null,
@@ -36,7 +36,7 @@
         "isLearned": false
     },
     {
-        "key": "cape",
+        "id": "cape",
         "name": "Cape",
         "styleKey": "salsa",
         "description": null,
@@ -45,7 +45,7 @@
         "isLearned": false
     },
     {
-        "key": "cross-body-lead",
+        "id": "cross-body-lead",
         "name": "Cross-body lead",
         "styleKey": "salsa",
         "description": null,
@@ -54,7 +54,7 @@
         "isLearned": true
     },
     {
-        "key": "around-the-world",
+        "id": "around-the-world",
         "name": "Around the World",
         "styleKey": "salsa",
         "description": null,
@@ -63,7 +63,7 @@
         "isLearned": false
     },
     {
-        "key": "hammerlock-hip-roll",
+        "id": "hammerlock-hip-roll",
         "name": "Hammerlock hip roll",
         "styleKey": "sensual-bachata",
         "description": null,

@@ -28,9 +28,9 @@ export default function AppView() {
     useEffect(() => {
         setIsTimerEnabled(false)
 
-        const storedPeriod = +(window.localStorage.getItem(getPeriodStorageKey(styleState.activeStyleKey, moveState.activeMoveType)) || defaultPeriod)
+        const storedPeriod = +(window.localStorage.getItem(getPeriodStorageKey(styleState.activeStyleId, moveState.activeMoveType)) || defaultPeriod)
         setPeriod(storedPeriod)
-    }, [styleState.activeStyleKey, moveState.activeMoveType])
+    }, [styleState.activeStyleId, moveState.activeMoveType])
 
     useEffect(() => {
         if (isTimerEnabled) {
@@ -44,13 +44,13 @@ export default function AppView() {
 
     // TODO Use strict equality as soon as we stop storing data in JSON files (and can thus use enums correctly)
     const moves: Move[] = moveState.moves
-            .filter(m => m.styleKey === styleState.activeStyleKey)
+            .filter(m => m.styleKey === styleState.activeStyleId)
             .filter(m => moveState.activeMoveType === MoveType.All || m.type == moveState.activeMoveType)
 
     const learningMoves = moves.filter(m => !m.isLearned)
     const learnedMoves = moves.filter(m => m.isLearned)
 
-    const toMoveItem = (m: Move) => <MoveItem move={m} key={m.key} />
+    const toMoveItem = (m: Move) => <MoveItem move={m} key={m.id} />
     const learningMoveItems = learningMoves.map(toMoveItem)
     const learnedMoveItems = learnedMoves.map(toMoveItem)
 
@@ -60,7 +60,7 @@ export default function AppView() {
                 <StyleFilter
                     onChange={handleStyleChange}
                     items={styleState.styles}
-                    activeItemKey={styleState.activeStyleKey}
+                    activeItemId={styleState.activeStyleId}
                 />
                 <MoveTypeFilter
                     onChange={handleListChange}
@@ -95,8 +95,8 @@ export default function AppView() {
         dispatch(MoveRedux.setActiveMoveType(moveType))
     }
 
-    function handleStyleChange(newStyleNameKey: string) {
-        dispatch(StyleRedux.setActiveStyleKey(newStyleNameKey))
+    function handleStyleChange(styleId: string) {
+        dispatch(StyleRedux.setActiveStyleId(styleId))
 
         setIsTimerEnabled(false)
     }
@@ -104,7 +104,7 @@ export default function AppView() {
     function handlePeriodChange(period: number) {
         setIsTimerEnabled(false)
         setPeriod(period)
-        window.localStorage.setItem(getPeriodStorageKey(styleState.activeStyleKey, moveState.activeMoveType), period + "")
+        window.localStorage.setItem(getPeriodStorageKey(styleState.activeStyleId, moveState.activeMoveType), period + "")
     }
 
     function say(item: string) {
@@ -144,7 +144,7 @@ export default function AppView() {
     function updateText(nextText: string) {
         setIsTimerEnabled(false)
         setText(nextText)
-        window.localStorage.setItem(getTextStorageKey(styleState.activeStyleKey, moveState.activeMoveType), nextText)
+        window.localStorage.setItem(getTextStorageKey(styleState.activeStyleId, moveState.activeMoveType), nextText)
     }
 
     function textToItems() {

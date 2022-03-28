@@ -5,7 +5,7 @@ import {Style} from "./style.types";
 type Props = {
     onChange?: (key: string) => void
     items: Style[]
-    activeItemKey: string
+    activeItemId: string
 
     id?: string
     className?: string
@@ -16,18 +16,18 @@ function StyleFilter(props: Props) {
     // TODO: Type event
     const handleChange = (event: any) => {
         if (typeof props.onChange !== 'undefined') {
-            const itemKey = event.target.value
-            props.onChange(itemKey)
+            const id = event.target.value
+            props.onChange(id)
         }
     }
 
-    const menuItems = props.items.map(i => <MenuItem value={i.key} key={i.key}>{i.name}</MenuItem>)
+    const menuItems = props.items.map(i => <MenuItem value={i.id} key={i.id}>{i.name}</MenuItem>)
 
     return <div id={props.id} className={`${props.className} style-list`}>
         <FormControl fullWidth>
             <InputLabel>Styles</InputLabel>
             <Select
-                value={props.activeItemKey}
+                value={props.activeItemId}
                 label="Styles"
                 onChange={handleChange}
             >

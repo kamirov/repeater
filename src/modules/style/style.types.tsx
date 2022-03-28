@@ -1,4 +1,4 @@
 export type Style = {
-    key: string
+    id: string
     name: string
 }

@@ -15,8 +15,8 @@ function MoveTypeFilter(props: Props) {
     // TODO: Type event
     const handleChange = (event: any) => {
         if (typeof props.onChange !== 'undefined') {
-            const itemKey = event.target.value
-            props.onChange(itemKey)
+            const id = event.target.value
+            props.onChange(id)
         }
     }
 
