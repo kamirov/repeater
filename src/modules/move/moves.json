@@ -9,6 +9,51 @@
         "isLearned": false
     },
     {
+        "id": "361",
+        "name": "361",
+        "styleKey": "salsa",
+        "description": null,
+        "link": "https://google.com",
+        "type": "simple",
+        "isLearned": false
+    },
+    {
+        "id": "362",
+        "name": "362",
+        "styleKey": "salsa",
+        "description": null,
+        "link": "https://google.com",
+        "type": "simple",
+        "isLearned": false
+    },
+    {
+        "id": "363",
+        "name": "363",
+        "styleKey": "salsa",
+        "description": null,
+        "link": "https://google.com",
+        "type": "simple",
+        "isLearned": false
+    },
+    {
+        "id": "364",
+        "name": "364",
+        "styleKey": "salsa",
+        "description": null,
+        "link": "https://google.com",
+        "type": "simple",
+        "isLearned": false
+    },
+    {
+        "id": "365",
+        "name": "365",
+        "styleKey": "salsa",
+        "description": null,
+        "link": "https://google.com",
+        "type": "simple",
+        "isLearned": false
+    },
+    {
         "id": "arm-spiral",
         "name": "Arm spiral",
         "styleKey": "salsa",
