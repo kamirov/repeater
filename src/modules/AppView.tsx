@@ -10,10 +10,12 @@ import MoveItem from "./move/MoveItem";
 import OrderableList from "./ordering/OrderableList";
 import {Orderable} from "./ordering/ordering.types";
 import moveRedux from "./move/MoveRedux";
+import SelectionBar from "./selection/SelectionBar";
+import {SelectionService} from "./selection/SelectionService";
 
 const storagePrefix = 'repeater-items'
 
-const defaultPeriod = 7000
+const defaultPeriod = 1000
 
 export default function AppView() {
 
@@ -22,21 +24,24 @@ export default function AppView() {
     const dispatch = useDispatch()
 
     const [text, setText] = useState("")
-    const [period, setPeriod] = useState(defaultPeriod as number)
+
+    const [comboPeriod, setComboPeriod] = useState(defaultPeriod as number)
+    const [simplePeriod, setSimplePeriod] = useState(defaultPeriod as number)
+
     const [isTimerEnabled, setIsTimerEnabled] = useState(false)
     const [intervalId, setIntervalId] = useState(0 as any)
 
     useEffect(() => {
         setIsTimerEnabled(false)
 
-        const storedPeriod = +(window.localStorage.getItem(getPeriodStorageKey(styleState.activeStyleId, moveState.activeMoveType)) || defaultPeriod)
-        setPeriod(storedPeriod)
+        // const storedPeriod = +(window.localStorage.getItem(getPeriodStorageKey(styleState.activeStyleId, moveState.activeMoveType)) || defaultPeriod)
+        // setComboPeriod(storedPeriod)
     }, [styleState.activeStyleId, moveState.activeMoveType])
 
     useEffect(() => {
         if (isTimerEnabled) {
-            sayRandomWord()
-            setIntervalId(setInterval(() => sayRandomWord(), period))
+            saySelection()
+            setIntervalId(setInterval(() => saySelection(), simplePeriod))
         } else {
             clearInterval(intervalId)
             setIntervalId(0)
@@ -61,6 +66,8 @@ export default function AppView() {
     const learningMoveItems = learningMoves.map(toOrderableMoveItem)
     const learnedMoveItems = learnedMoves.map(toOrderableMoveItem)
 
+    const buttonText = isTimerEnabled ? "Stop" : "Start"
+
     return <Root>
         <Main>
             <Page>
@@ -70,7 +77,16 @@ export default function AppView() {
                     activeItemId={styleState.activeStyleId}
                 />
 
-                {learningMoveItems.length &&
+                <SelectionBar
+                    buttonText={buttonText}
+                    simplePeriod={simplePeriod}
+                    comboPeriod={comboPeriod}
+                    onComboPeriodChange={handleComboPeriodChange}
+                    onSimplePeriodChange={handleSimplePeriodChange}
+                    onToggleSelection={toggleSayingRandomWords}
+                />
+
+                {Boolean(learningMoveItems.length) &&
                     <OrderableList
                         className="learning-list"
                         label="Learning"
@@ -79,7 +95,7 @@ export default function AppView() {
                     />
                 }
 
-                {learnedMoveItems.length &&
+                {Boolean(learnedMoveItems.length) &&
                     <OrderableList
                         className="learned-list"
                         label="Learned"
@@ -89,7 +105,7 @@ export default function AppView() {
                 }
 
                 {/*<ItemView onChange={onTextChangeHandler} onBlur={handleBlur} value={text} disabled={moveState.activeMoveType === allKey} />*/}
-                {/*<input type="number" min="100" value={period} onChange={e => handlePeriodChange(e.target.value as any)} />*/}
+                {/*<input type="number" min="100" value={period} onChange={e => handleComboPeriodChange(e.target.value as any)} />*/}
                 {/*<button onClick={toggleSayingRandomWords} disabled={!text}>*/}
                 {/*    {isTimerEnabled && "Stop"}*/}
                 {/*    {!isTimerEnabled && "Start"}*/}
@@ -139,31 +155,45 @@ export default function AppView() {
         setIsTimerEnabled(false)
     }
 
-    function handlePeriodChange(period: number) {
+    function handleSimplePeriodChange(period: number) {
         setIsTimerEnabled(false)
-        setPeriod(period)
-        window.localStorage.setItem(getPeriodStorageKey(styleState.activeStyleId, moveState.activeMoveType), period + "")
+        setSimplePeriod(period)
+    }
+
+    function handleComboPeriodChange(period: number) {
+        setIsTimerEnabled(false)
+        setComboPeriod(period)
+        // window.localStorage.setItem(getPeriodStorageKey(styleState.activeStyleId, moveState.activeMoveType), period + "")
     }
 
     function say(item: string) {
         console.log('saying item', item)
 
         if ('speechSynthesis' in window) {
-            const synthesis = window.speechSynthesis;
-
-            // Create an utterance object
-            const utterance = new SpeechSynthesisUtterance(item);
-
-            // Speak the utterance
-            synthesis.speak(utterance);
+            // const synthesis = window.speechSynthesis;
+            //
+            // // Create an utterance object
+            // const utterance = new SpeechSynthesisUtterance(item);
+            //
+            // // Speak the utterance
+            // synthesis.speak(utterance);
         } else {
             alert('Text-to-speech not supported.');
         }
     }
 
-    function sayRandomWord() {
-        const item = getRandomWord()
-        say(item)
+    function saySelection() {
+        const move = SelectionService.select([
+            {
+                arr: learningMoves,
+                strategy: 'random'
+            },
+            {
+                arr: learnedMoves,
+                strategy: 'random'
+            },
+        ])
+        console.log(move)
     }
 
     function toggleSayingRandomWords() {
