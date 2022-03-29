@@ -34,6 +34,9 @@ function SelectionBar(props: Props) {
     }
 
     return <div id={props.id} className={`${props.className} selection-bar`}>
+        <IconButton aria-label="add" onClick={handleClickAdd}>
+            <AddIcon />
+        </IconButton>
         <TextField
             label="Simple Period"
             type="number"
@@ -55,9 +58,6 @@ function SelectionBar(props: Props) {
         <Button variant="contained" color="primary" onClick={props.onToggleSelection}>
             {props.buttonText}
         </Button>
-        <IconButton aria-label="delete" onClick={handleClickAdd}>
-            <AddIcon />
-        </IconButton>
     </div>
 }
 
