@@ -18,6 +18,8 @@ export default {
     learnMove,
     unlearnMove,
 
+    addLearningMove,
+
     deleteLearningMove,
     deleteLearnedMove,
 
@@ -42,6 +44,7 @@ const actions = {
     learnMove: 'move/learnMove',
     unlearnMove: 'move/unlearnMove',
     setActiveMoveType: 'move/setActiveMoveType',
+    addLearningMove: 'move/addLearningMove',
     deleteLearningMove: 'move/deleteLearningMove',
     deleteLearnedMove: 'move/deleteLearnedMove'
 }
@@ -50,6 +53,15 @@ function updateMove(move: Move) {
     return (dispatch: Dispatch) => {
         dispatch({
             type: actions.updateMove,
+            payload: move
+        })
+    }
+}
+
+function addLearningMove(move: Move) {
+    return (dispatch: Dispatch) => {
+        dispatch({
+            type: actions.addLearningMove,
             payload: move
         })
     }
@@ -149,6 +161,16 @@ function reducer(state = initialState, action: Action): MoveState {
                     ...state.learningMoves,
                 ]
             }
+
+        case actions.addLearningMove:
+            return {
+                ...state,
+                learningMoves: [
+                    action.payload,
+                    ...state.learningMoves,
+                ]
+            }
+
         case actions.deleteLearningMove:
             return {
                 ...state,
