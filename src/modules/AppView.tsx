@@ -4,7 +4,6 @@ import StyleFilter from "./style/StyleFilter";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../redux/redux.types";
 import StyleRedux from "./style/StyleRedux";
-import MoveTypeFilter from "./move/MoveTypeFilter";
 import MoveRedux from "./move/MoveRedux";
 import {Move, MoveType} from "./move/move.types";
 import MoveItem from "./move/MoveItem";
@@ -50,7 +49,12 @@ export default function AppView() {
     const toOrderableMoveItem = (m: Move): Orderable => {
         return {
             id: m.id,
-            el: <MoveItem move={m} key={m.id} onToggleLearn={() => toggleLearn(m)} />
+            el: <MoveItem
+                move={m}
+                key={m.id}
+                onToggleLearn={() => toggleLearn(m)}
+                onDelete={() => deleteMove(m)}
+            />
         }
     }
 
@@ -65,20 +69,19 @@ export default function AppView() {
                     items={styleState.styles}
                     activeItemId={styleState.activeStyleId}
                 />
-                {/*<MoveTypeFilter*/}
-                {/*    onChange={handleListChange}*/}
-                {/*    activeMoveType={moveState.activeMoveType} />*/}
 
-                {learnedMoveItems &&
+                {learningMoveItems.length &&
                     <OrderableList
+                        className="learning-list"
                         label="Learning"
                         items={learningMoveItems}
                         onReorder={reorderLearningItems}
                     />
                 }
 
-                {learnedMoveItems &&
+                {learnedMoveItems.length &&
                     <OrderableList
+                        className="learned-list"
                         label="Learned"
                         items={learnedMoveItems}
                         onReorder={() => null}
@@ -94,6 +97,14 @@ export default function AppView() {
             </Page>
         </Main>
     </Root>
+
+    function deleteMove(move: Move) {
+        if (move.isLearned) {
+            dispatch(moveRedux.deleteLearnedMove(move))
+        } else {
+            dispatch(moveRedux.deleteLearningMove(move))
+        }
+    }
 
     function toggleLearn(move: Move) {
         if (move.isLearned) {
