@@ -2,7 +2,7 @@
     {
         "id": "360",
         "name": "360",
-        "styleKey": "salsa",
+        "styleId": "salsa",
         "description": null,
         "link": null,
         "type": "simple",
@@ -11,7 +11,7 @@
     {
         "id": "361",
         "name": "361",
-        "styleKey": "salsa",
+        "styleId": "salsa",
         "description": null,
         "link": "https://google.com",
         "type": "simple",
@@ -20,7 +20,7 @@
     {
         "id": "362",
         "name": "362",
-        "styleKey": "salsa",
+        "styleId": "salsa",
         "description": null,
         "link": "https://google.com",
         "type": "simple",
@@ -29,7 +29,7 @@
     {
         "id": "363",
         "name": "363",
-        "styleKey": "salsa",
+        "styleId": "salsa",
         "description": null,
         "link": "https://google.com",
         "type": "simple",
@@ -38,7 +38,7 @@
     {
         "id": "364",
         "name": "364",
-        "styleKey": "salsa",
+        "styleId": "salsa",
         "description": null,
         "link": "https://google.com",
         "type": "simple",
@@ -47,7 +47,7 @@
     {
         "id": "365",
         "name": "365",
-        "styleKey": "salsa",
+        "styleId": "salsa",
         "description": null,
         "link": "https://google.com",
         "type": "simple",
@@ -56,7 +56,7 @@
     {
         "id": "arm-spiral",
         "name": "Arm spiral",
-        "styleKey": "salsa",
+        "styleId": "salsa",
         "description": null,
         "link": null,
         "type": "simple",
@@ -65,7 +65,7 @@
     {
         "id": "barrel-roll",
         "name": "Barrel roll",
-        "styleKey": "salsa",
+        "styleId": "salsa",
         "description": null,
         "link": null,
         "type": "simple",
@@ -74,7 +74,7 @@
     {
         "id": "backhand-pass",
         "name": "Backhand pass",
-        "styleKey": "salsa",
+        "styleId": "salsa",
         "description": null,
         "link": null,
         "type": "simple",
@@ -83,7 +83,7 @@
     {
         "id": "cape",
         "name": "Cape",
-        "styleKey": "salsa",
+        "styleId": "salsa",
         "description": null,
         "link": null,
         "type": "simple",
@@ -92,7 +92,7 @@
     {
         "id": "cross-body-lead",
         "name": "Cross-body lead",
-        "styleKey": "salsa",
+        "styleId": "salsa",
         "description": null,
         "link": null,
         "type": "simple",
@@ -101,7 +101,7 @@
     {
         "id": "around-the-world",
         "name": "Around the World",
-        "styleKey": "salsa",
+        "styleId": "salsa",
         "description": null,
         "link": null,
         "type": "simple",
@@ -110,7 +110,7 @@
     {
         "id": "hammerlock-hip-roll",
         "name": "Hammerlock hip roll",
-        "styleKey": "salsa",
+        "styleId": "salsa",
         "description": null,
         "link": null,
         "type": "simple",
