@@ -1,5 +1,7 @@
+html {
+  margin: 1.5rem 1.5rem 0;
+}
 body {
-  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
   'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
   sans-serif;
@@ -12,10 +14,6 @@ code {
   monospace;
 }
 
-select {
-  width: 100%;
-}
-
 .move-item {
   display: flex;
   justify-content: space-between;
@@ -25,6 +23,15 @@ select {
   }
 }
 
+.selection-bar {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+
+  > {
+    flex-grow: 1;
+  }
+}
 
 .orderable-list-container {
   padding: 0.5rem 0;
