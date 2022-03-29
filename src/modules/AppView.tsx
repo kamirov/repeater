@@ -203,6 +203,8 @@ export default function AppView() {
     }
 }
 
+// TODO: Should move these to the stylesheet, or move the stylesheet into these styled blocks
+
 const Root = styled.div`
 display: flex;
 flex-direction: column;
@@ -211,9 +213,9 @@ min-height: 100vh;
 
 const Main = styled.main`
 display: flex;
-flex-direction: column;
-flex: 1;
-margin: 0 1rem;
+justify-content: center;
+align-items: flex-start;
+margin: 1rem 1rem;
 `
 
 const Page = styled.div`
@@ -221,6 +223,7 @@ display: block;
 margin: auto;
 max-width: 600px;
 width: 100%;
+flex-align: flex-start;
 position: relative;
 `
 

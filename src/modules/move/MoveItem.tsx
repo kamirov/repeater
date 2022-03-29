@@ -1,10 +1,11 @@
 import * as React from "react";
 import {Move} from "./move.types";
-import {Checkbox, FormControlLabel, FormGroup, IconButton, Switch} from "@material-ui/core";
+import {Checkbox, FormGroup, IconButton, Switch} from "@material-ui/core";
 import DeleteIcon from '@material-ui/icons/Delete';
 import PublicIcon from '@material-ui/icons/Public';
 import DirectionsRunIcon from '@material-ui/icons/DirectionsRun';
 import {UrlModule} from "../common/UrlModule";
+import {useState} from "react";
 
 type Props = {
     move: Move
@@ -19,6 +20,8 @@ type Props = {
 }
 
 function MoveItem(props: Props) {
+
+    const [showFields, setShowFields] = useState(false)
 
     const handleMoveTypeToggle = (event: any) => {
         props.onToggleMoveType()
@@ -40,23 +43,43 @@ function MoveItem(props: Props) {
         })
     }
 
+    const handleInputFocus = () => {
+        setShowFields(true)
+    }
+
+    const handleInputBlur = (event: any) => {
+        // if the blur was because of outside focus
+        // currentTarget is the parent element, relatedTarget is the clicked element
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+            setShowFields(false)
+        }
+    }
+
+
     const checkbox = <Checkbox className="checkbox"
         checked={props.move.isLearned}
         onChange={props.onToggleLearn}
     />
 
     const classNameAddendum = props.isActive ? 'active' : ''
+    const inputRowClassName = `input-row ${showFields ? 'visible' : ''}`
 
-    return <div id={props.id} className={`${props.className} move-item ${classNameAddendum}`}>
+    return <div
+        id={props.id}
+        className={`${props.className} move-item ${classNameAddendum}`}
+        onBlur={handleInputBlur}
+    >
         <div className="main-row">
             <FormGroup className={"check-container"}>
                 {checkbox}
                 <input
                     type="text"
                     autoComplete="off"
+                    aria-autocomplete={"none"}
                     value={props.move.name}
                     onChange={handleNameChange}
-                    placeholder="Name"
+                    onFocus={handleInputFocus}
+                    placeholder="Move"
                 />
             </FormGroup>
 
@@ -73,7 +96,7 @@ function MoveItem(props: Props) {
                 </IconButton>
             </div>
         </div>
-        <div className="input-row">
+        <div className={inputRowClassName}>
             <FormGroup className={"input-container"}>
                 <div className="icon">
                     <PublicIcon/>
@@ -81,22 +104,22 @@ function MoveItem(props: Props) {
                 <input
                     className="link"
                     type="text"
+                    aria-autocomplete={"none"}
                     autoComplete="off"
                     value={props.move.link || ""}
                     onChange={handleLinkChange}
-                    placeholder="Name"
+                    onFocus={handleInputFocus}
+                    placeholder="Link"
                 />
             </FormGroup>
         </div>
-        <div className="input-row">
+        <div className={inputRowClassName}>
             <FormGroup className={"input-container"}>
                 <div className="icon">
                     <DirectionsRunIcon/>
                 </div>
-                <FormControlLabel className="switch-label"
-                    control={<Switch checked={props.move.type === 'combo'} onChange={handleMoveTypeToggle} name="move-type" />}
-                    label="Combo"
-                />
+                <Switch className="switch" checked={props.move.type === 'combo'} onChange={handleMoveTypeToggle} name="move-type" />
+                <span className="switch-label">Combo</span>
             </FormGroup>
         </div>
     </div>

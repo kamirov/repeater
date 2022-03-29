@@ -60,6 +60,15 @@ code {
   > div {
   }
 
+  .input-row {
+    display: none;
+    transition: 0.3s;
+
+    &.visible {
+      display: block;
+    }
+  }
+
   .main-row {
     display: flex;
     justify-content: space-between;
@@ -77,8 +86,16 @@ code {
       font-size: 1rem;
     }
 
-    .switch-label, input {
+    input {
       margin-left: 1rem;
+    }
+
+    .switch {
+      margin-left: 0.6rem;
+    }
+
+    .switch-label {
+      margin-left: 0.2rem;
     }
 
     input {
