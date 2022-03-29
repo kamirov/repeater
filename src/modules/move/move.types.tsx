@@ -1,7 +1,7 @@
 export type Move = {
     id: string,
     name: string,
-    styleKey: string
+    styleId: string
     description: string | null
     link: string | null
     type: MoveType
