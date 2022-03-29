@@ -59,6 +59,7 @@ export default function AppView() {
                 isActive={activeMoveId === m.id}
                 onChange={handleMoveChange}
                 onToggleLearn={() => toggleLearn(m)}
+                onToggleMoveType={() => toggleMoveType(m)}
                 onDelete={() => deleteMove(m)}
             />
         }
@@ -140,6 +141,14 @@ export default function AppView() {
         } else {
             dispatch(MoveRedux.learnMove(move))
         }
+    }
+
+    function toggleMoveType(move: Move) {
+        const newMove: Move = {
+            ...move,
+            type: move.type === MoveType.Simple ? MoveType.Combo : MoveType.Simple
+        }
+        dispatch(MoveRedux.updateMove(newMove))
     }
 
     function reorderLearningItems(orderedItems: Orderable[]) {
