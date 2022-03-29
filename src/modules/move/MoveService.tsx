@@ -1,4 +1,4 @@
-import { Id } from "../common/id.module";
+import { IdModule } from "../common/IdModule";
 import {Move, MoveType} from "./move.types";
 
 export const MoveService = {
@@ -7,7 +7,7 @@ export const MoveService = {
 
 function createEmptyMove(styleId: string, type: MoveType): Move {
  return {
-     id: Id.generate(),
+     id: IdModule.generate(),
      name: "",
      styleId,
      description: null,

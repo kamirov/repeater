@@ -1,4 +1,4 @@
-import {ArrayHelper} from "../common/array.helper";
+import {ArrayHelper} from "../common/ArrayHelper";
 
 export const SelectionService = {
     select

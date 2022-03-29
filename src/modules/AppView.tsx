@@ -13,8 +13,6 @@ import SelectionBar from "./selection/SelectionBar";
 import {SelectionService} from "./selection/SelectionService";
 import {MoveService} from "./move/MoveService";
 
-const storagePrefix = 'repeater-items'
-
 const defaultPeriod = 1000
 
 export default function AppView() {
@@ -151,15 +149,6 @@ export default function AppView() {
         dispatch(MoveRedux.setLearningMoves(moves as Move[]))
     }
 
-    function handleBlur() {
-        updateText(sanitizeText(text))
-    }
-
-    function handleListChange(moveType: MoveType) {
-        setIsTimerEnabled(false)
-        dispatch(MoveRedux.setActiveMoveType(moveType))
-    }
-
     function handleStyleChange(styleId: string) {
         dispatch(StyleRedux.setActiveStyleId(styleId))
 
@@ -214,36 +203,11 @@ export default function AppView() {
             setIsTimerEnabled(true)
         }
     }
-
-    function getRandomWord() {
-        const items = textToItems()
-        return items[Math.floor(Math.random()*items.length)]
-    }
-
-    function updateText(nextText: string) {
-        setIsTimerEnabled(false)
-        setText(nextText)
-        window.localStorage.setItem(getTextStorageKey(styleState.activeStyleId, moveState.activeMoveType), nextText)
-    }
-
-    function textToItems() {
-        return text.split('\n')
-    }
-
 }
 
 function sanitizeText(text: string) {
     return text.toLowerCase().split("\n").filter(item => item).sort().join("\n");
 }
-
-function getTextStorageKey(styleNameKey: string, activeMoveType: MoveType) {
-    return `${storagePrefix}-${styleNameKey}-${activeMoveType}`
-}
-
-function getPeriodStorageKey(styleNameKey: string, activeMoveType: MoveType) {
-    return `${getTextStorageKey(styleNameKey, activeMoveType)}-period`
-}
-
 
 const Root = styled.div`
 display: flex;
