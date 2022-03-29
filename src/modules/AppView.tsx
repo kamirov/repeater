@@ -9,6 +9,8 @@ import MoveRedux from "./move/MoveRedux";
 import {Move, MoveType} from "./move/move.types";
 import MoveItem from "./move/MoveItem";
 import OrderableList from "./ordering/OrderableList";
+import {Orderable} from "./ordering/ordering.types";
+import moveRedux from "./move/MoveRedux";
 
 const storagePrefix = 'repeater-items'
 
@@ -42,17 +44,18 @@ export default function AppView() {
         }
     }, [isTimerEnabled])
 
-    // TODO Use strict equality as soon as we stop storing data in JSON files (and can thus use enums correctly)
-    const moves: Move[] = moveState.moves
-            .filter(m => m.styleKey === styleState.activeStyleId)
-            .filter(m => moveState.activeMoveType === MoveType.All || m.type == moveState.activeMoveType)
+    const learningMoves = moveState.learningMoves.filter(m => m.styleKey === styleState.activeStyleId)
+    const learnedMoves = moveState.learnedMoves.filter(m => m.styleKey === styleState.activeStyleId)
 
-    const learningMoves = moves.filter(m => !m.isLearned)
-    const learnedMoves = moves.filter(m => m.isLearned)
+    const toOrderableMoveItem = (m: Move): Orderable => {
+        return {
+            id: m.id,
+            el: <MoveItem move={m} key={m.id} onToggleLearn={() => toggleLearn(m)} />
+        }
+    }
 
-    const toMoveItem = (m: Move) => <MoveItem move={m} key={m.id} />
-    const learningMoveItems = learningMoves.map(toMoveItem)
-    const learnedMoveItems = learnedMoves.map(toMoveItem)
+    const learningMoveItems = learningMoves.map(toOrderableMoveItem)
+    const learnedMoveItems = learnedMoves.map(toOrderableMoveItem)
 
     return <Root>
         <Main>
@@ -62,19 +65,25 @@ export default function AppView() {
                     items={styleState.styles}
                     activeItemId={styleState.activeStyleId}
                 />
-                <MoveTypeFilter
-                    onChange={handleListChange}
-                    activeMoveType={moveState.activeMoveType} />
+                {/*<MoveTypeFilter*/}
+                {/*    onChange={handleListChange}*/}
+                {/*    activeMoveType={moveState.activeMoveType} />*/}
 
+                {learnedMoveItems &&
+                    <OrderableList
+                        label="Learning"
+                        items={learningMoveItems}
+                        onReorder={reorderLearningItems}
+                    />
+                }
 
-                <OrderableList label="Learning">
-                    {learningMoveItems}
-                </OrderableList>
-
-                <OrderableList label="Learned">
-                    {learnedMoveItems}
-                </OrderableList>
-
+                {learnedMoveItems &&
+                    <OrderableList
+                        label="Learned"
+                        items={learnedMoveItems}
+                        onReorder={() => null}
+                    />
+                }
 
                 {/*<ItemView onChange={onTextChangeHandler} onBlur={handleBlur} value={text} disabled={moveState.activeMoveType === allKey} />*/}
                 {/*<input type="number" min="100" value={period} onChange={e => handlePeriodChange(e.target.value as any)} />*/}
@@ -85,6 +94,24 @@ export default function AppView() {
             </Page>
         </Main>
     </Root>
+
+    function toggleLearn(move: Move) {
+        if (move.isLearned) {
+            dispatch(moveRedux.unlearnMove(move))
+        } else {
+            dispatch(moveRedux.learnMove(move))
+        }
+    }
+
+    function reorderLearningItems(orderedItems: Orderable[]) {
+        const moves = orderedItems.map(o => moveState.learningMoves.find(m => m.id === o.id))
+
+        if (moves.some(m => typeof m === 'undefined')) {
+            throw new Error(`Moves could not be parsed from reordered list`)
+        }
+
+        dispatch(moveRedux.setLearningMoves(moves as Move[]))
+    }
 
     function handleBlur() {
         updateText(sanitizeText(text))
