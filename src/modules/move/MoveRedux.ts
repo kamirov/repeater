@@ -12,8 +12,12 @@ export type MoveState = {
 export default {
     setLearningMoves,
     setActiveMoveType,
+
     learnMove,
     unlearnMove,
+
+    deleteLearningMove,
+    deleteLearnedMove,
 
     reducer
 }
@@ -31,10 +35,30 @@ const initialState: MoveState = {
 }
 
 const actions = {
-    setLearningMoves: 'common/setLearningMoves',
-    learnMove: 'common/learnMove',
-    unlearnMove: 'common/unlearnMove',
-    setActiveMoveType: 'common/setActiveMoveType',
+    setLearningMoves: 'move/setLearningMoves',
+    learnMove: 'move/learnMove',
+    unlearnMove: 'move/unlearnMove',
+    setActiveMoveType: 'move/setActiveMoveType',
+    deleteLearningMove: 'move/deleteLearningMove',
+    deleteLearnedMove: 'move/deleteLearnedMove'
+}
+
+function deleteLearningMove(move: Move) {
+    return (dispatch: Dispatch) => {
+        dispatch({
+            type: actions.deleteLearningMove,
+            payload: move.id
+        })
+    }
+}
+
+function deleteLearnedMove(move: Move) {
+    return (dispatch: Dispatch) => {
+        dispatch({
+            type: actions.deleteLearnedMove,
+            payload: move.id
+        })
+    }
 }
 
 function learnMove(move: Move) {
@@ -111,6 +135,20 @@ function reducer(state = initialState, action: Action): MoveState {
                         isLearned: false
                     },
                     ...state.learningMoves,
+                ]
+            }
+        case actions.deleteLearningMove:
+            return {
+                ...state,
+                learningMoves: [
+                    ...state.learningMoves.filter(m => m.id !== action.payload)
+                ]
+            }
+        case actions.deleteLearnedMove:
+            return {
+                ...state,
+                learnedMoves: [
+                    ...state.learnedMoves.filter(m => m.id !== action.payload)
                 ]
             }
         case actions.setLearningMoves:
