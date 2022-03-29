@@ -11,6 +11,8 @@ export default {
     setStyles,
     setActiveStyleId,
 
+    addStyle,
+
     reducer
 }
 
@@ -31,9 +33,20 @@ const initialState: StyleState = {
 }
 
 const actions = {
-    setStyles: 'common/setStyles',
-    setActiveStyleId: 'common/setActiveStyleId',
+    setStyles: 'style/setStyles',
+    addStyle: 'style/addStyle',
+    setActiveStyleId: 'style/setActiveStyleId',
 }
+
+function addStyle(style: Style) {
+    return (dispatch: Dispatch) => {
+        dispatch({
+            type: actions.addStyle,
+            payload: style
+        })
+    }
+}
+
 
 function setStyles(styles: Style[]) {
     return (dispatch: Dispatch) => {
@@ -54,9 +67,16 @@ function setActiveStyleId(id: string) {
     }
 }
 
-
 function reducer(state = initialState, action: Action): StyleState {
     switch (action.type) {
+        case actions.addStyle:
+            return {
+                ...state,
+                styles: [
+                    action.payload,
+                    ...state.styles,
+                ]
+            }
         case actions.setStyles:
             return {
                 ...state,

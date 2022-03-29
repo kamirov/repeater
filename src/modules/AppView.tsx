@@ -13,6 +13,7 @@ import SelectionBar from "./selection/SelectionBar";
 import {SelectionService} from "./selection/SelectionService";
 import {MoveService} from "./move/MoveService";
 import {AnnouncementService} from "./announcement/AnnouncementService";
+import {StyleService} from "./style/StyleService";
 
 const defaultPeriod = 1000
 
@@ -75,6 +76,7 @@ export default function AppView() {
                     onChange={handleStyleChange}
                     items={styleState.styles}
                     activeItemId={styleState.activeStyleId}
+                    onClickAdd={addNewStyle}
                 />
 
                 <SelectionBar
@@ -107,6 +109,13 @@ export default function AppView() {
             </Page>
         </Main>
     </Root>
+
+
+    function addNewStyle(name: string) {
+        const style = StyleService.createEmptyStyle(name)
+        console.log('style', style)
+        dispatch(StyleRedux.addStyle(style))
+    }
 
     function addNewMove(styleId: string, type: MoveType) {
         const move = MoveService.createEmptyMove(styleId, type)
