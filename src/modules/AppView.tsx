@@ -9,9 +9,9 @@ import {Move, MoveType} from "./move/move.types";
 import MoveItem from "./move/MoveItem";
 import OrderableList from "./ordering/OrderableList";
 import {Orderable} from "./ordering/ordering.types";
-import moveRedux from "./move/MoveRedux";
 import SelectionBar from "./selection/SelectionBar";
 import {SelectionService} from "./selection/SelectionService";
+import {MoveService} from "./move/MoveService";
 
 const storagePrefix = 'repeater-items'
 
@@ -48,8 +48,8 @@ export default function AppView() {
         }
     }, [isTimerEnabled])
 
-    const learningMoves = moveState.learningMoves.filter(m => m.styleKey === styleState.activeStyleId)
-    const learnedMoves = moveState.learnedMoves.filter(m => m.styleKey === styleState.activeStyleId)
+    const learningMoves = moveState.learningMoves.filter(m => m.styleId === styleState.activeStyleId)
+    const learnedMoves = moveState.learnedMoves.filter(m => m.styleId === styleState.activeStyleId)
 
     const toOrderableMoveItem = (m: Move): Orderable => {
         return {
@@ -85,6 +85,7 @@ export default function AppView() {
                     onComboPeriodChange={handleComboPeriodChange}
                     onSimplePeriodChange={handleSimplePeriodChange}
                     onToggleSelection={toggleSayingRandomWords}
+                    onClickAdd={(moveType) => addNewMove(styleState.activeStyleId, moveType)}
                 />
 
                 {Boolean(learningMoveItems.length) &&
@@ -115,23 +116,28 @@ export default function AppView() {
         </Main>
     </Root>
 
+    function addNewMove(styleId: string, type: MoveType) {
+        const move = MoveService.createEmptyMove(styleId, type)
+        dispatch(MoveRedux.addLearningMove(move))
+    }
+
     function handleMoveChange(move: Move) {
-        dispatch(moveRedux.updateMove(move))
+        dispatch(MoveRedux.updateMove(move))
     }
 
     function deleteMove(move: Move) {
         if (move.isLearned) {
-            dispatch(moveRedux.deleteLearnedMove(move))
+            dispatch(MoveRedux.deleteLearnedMove(move))
         } else {
-            dispatch(moveRedux.deleteLearningMove(move))
+            dispatch(MoveRedux.deleteLearningMove(move))
         }
     }
 
     function toggleLearn(move: Move) {
         if (move.isLearned) {
-            dispatch(moveRedux.unlearnMove(move))
+            dispatch(MoveRedux.unlearnMove(move))
         } else {
-            dispatch(moveRedux.learnMove(move))
+            dispatch(MoveRedux.learnMove(move))
         }
     }
 
@@ -142,7 +148,7 @@ export default function AppView() {
             throw new Error(`Moves could not be parsed from reordered list`)
         }
 
-        dispatch(moveRedux.setLearningMoves(moves as Move[]))
+        dispatch(MoveRedux.setLearningMoves(moves as Move[]))
     }
 
     function handleBlur() {

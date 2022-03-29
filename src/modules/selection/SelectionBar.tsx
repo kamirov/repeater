@@ -1,10 +1,13 @@
-import * as React from "react";
-import {Button, TextField} from "@material-ui/core";
+import * as React from "react"
+import {Button, IconButton, TextField} from "@material-ui/core"
+import AddIcon from '@material-ui/icons/Add'
+import {MoveType} from "../move/move.types";
 
 type Props = {
     onSimplePeriodChange: (period: number) => void
     onComboPeriodChange: (period: number) => void
     onToggleSelection: () => void
+    onClickAdd: (moveType: MoveType) => void
 
     simplePeriod: number
     comboPeriod: number
@@ -24,6 +27,10 @@ function SelectionBar(props: Props) {
     const handleComboPeriodChange = (event: any) => {
         const period = event.target.value
         props.onComboPeriodChange(period)
+    }
+
+    const handleClickAdd = (event: any) => {
+        props.onClickAdd(MoveType.Simple)
     }
 
     return <div id={props.id} className={`${props.className} selection-bar`}>
@@ -48,6 +55,9 @@ function SelectionBar(props: Props) {
         <Button variant="contained" color="primary" onClick={props.onToggleSelection}>
             {props.buttonText}
         </Button>
+        <IconButton aria-label="delete" onClick={handleClickAdd}>
+            <AddIcon />
+        </IconButton>
     </div>
 }
 
