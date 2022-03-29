@@ -59,13 +59,13 @@
         "styleKey": "salsa",
         "description": null,
         "link": null,
-        "type": "combo",
+        "type": "simple",
         "isLearned": false
     },
     {
         "id": "hammerlock-hip-roll",
         "name": "Hammerlock hip roll",
-        "styleKey": "sensual-bachata",
+        "styleKey": "salsa",
         "description": null,
         "link": null,
         "type": "simple",
