@@ -34,6 +34,7 @@ function MoveItem(props: Props) {
             {checkbox}
             <input
                 type="text"
+                autoComplete="off"
                 value={props.move.name}
                 onChange={handleNameChange}
                 placeholder="Name"
