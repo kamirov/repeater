@@ -16,6 +16,15 @@ select {
   width: 100%;
 }
 
+.move-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  > div {
+  }
+}
+
 
 .orderable-list-container {
   padding: 0.5rem 0;
@@ -31,5 +40,12 @@ select {
     font-weight: bold;
     color: #444;
     margin-bottom: 0.5rem;
+  }
+}
+
+.learned-list {
+
+  .orderable-list {
+    opacity: 0.5;
   }
 }
