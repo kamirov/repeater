@@ -1,6 +1,6 @@
 import * as React from "react";
 import {Move} from "./move.types";
-import {Checkbox, FormControlLabel, FormGroup, IconButton} from "@material-ui/core";
+import {Checkbox, FormGroup, IconButton, TextField} from "@material-ui/core";
 import DeleteIcon from '@material-ui/icons/Delete';
 import PublicIcon from '@material-ui/icons/Public';
 
@@ -8,12 +8,21 @@ type Props = {
     move: Move
     onToggleLearn: () => void
     onDelete: () => void
+    onChange: (move: Move) => void
 
     id?: string
     className?: string
 }
 
 function MoveItem(props: Props) {
+
+    const handleNameChange = (event: any) => {
+        const name = event.target.value
+        props.onChange({
+            ...props.move,
+            name
+        })
+    }
 
     const checkbox = <Checkbox
         checked={props.move.isLearned}
@@ -22,7 +31,13 @@ function MoveItem(props: Props) {
 
     return <div id={props.id} className={`${props.className} move-item`}>
         <FormGroup className="check-container">
-            <FormControlLabel control={checkbox} label={props.move.name} />
+            {checkbox}
+            <input
+                type="text"
+                value={props.move.name}
+                onChange={handleNameChange}
+                placeholder="Name"
+            />
         </FormGroup>
         <div className="icons-container">
             {props.move.link &&

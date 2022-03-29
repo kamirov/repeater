@@ -13,6 +13,8 @@ export default {
     setLearningMoves,
     setActiveMoveType,
 
+    updateMove,
+
     learnMove,
     unlearnMove,
 
@@ -36,11 +38,21 @@ const initialState: MoveState = {
 
 const actions = {
     setLearningMoves: 'move/setLearningMoves',
+    updateMove: 'move/updateMove',
     learnMove: 'move/learnMove',
     unlearnMove: 'move/unlearnMove',
     setActiveMoveType: 'move/setActiveMoveType',
     deleteLearningMove: 'move/deleteLearningMove',
     deleteLearnedMove: 'move/deleteLearnedMove'
+}
+
+function updateMove(move: Move) {
+    return (dispatch: Dispatch) => {
+        dispatch({
+            type: actions.updateMove,
+            payload: move
+        })
+    }
 }
 
 function deleteLearningMove(move: Move) {
@@ -151,6 +163,25 @@ function reducer(state = initialState, action: Action): MoveState {
                     ...state.learnedMoves.filter(m => m.id !== action.payload)
                 ]
             }
+        case actions.updateMove:
+            const move = action.payload as Move
+
+            const movesArray = move.isLearned ? state.learnedMoves : state.learningMoves
+            const index = movesArray.findIndex(m => m.id === move.id)
+
+            if (index === -1) {
+                throw new Error(`Move ${move.id} could not be found in moves array`)
+            }
+
+            const newMovesArray = [...movesArray]
+            newMovesArray[index] = move
+
+            return {
+                ...state,
+                learningMoves: move.isLearned ? state.learningMoves : newMovesArray,
+                learnedMoves: move.isLearned ? newMovesArray : state.learnedMoves
+            }
+
         case actions.setLearningMoves:
             return {
                 ...state,

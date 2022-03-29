@@ -57,6 +57,7 @@ export default function AppView() {
             el: <MoveItem
                 move={m}
                 key={m.id}
+                onChange={handleMoveChange}
                 onToggleLearn={() => toggleLearn(m)}
                 onDelete={() => deleteMove(m)}
             />
@@ -113,6 +114,10 @@ export default function AppView() {
             </Page>
         </Main>
     </Root>
+
+    function handleMoveChange(move: Move) {
+        dispatch(moveRedux.updateMove(move))
+    }
 
     function deleteMove(move: Move) {
         if (move.isLearned) {
