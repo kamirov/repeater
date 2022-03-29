@@ -1,7 +1,6 @@
 import {Dispatch} from 'redux'
 import {Action} from "../../redux/redux.types";
 import {Move, MoveType} from "./move.types";
-import moves from './moves.json'
 
 export type MoveState = {
     learningMoves: Move[]
@@ -26,15 +25,9 @@ export default {
     reducer
 }
 
-// @ts-ignore
-const initialLearningMoves: Move[] = moves.filter(m => !m.isLearned)
-
-// @ts-ignore
-const initialLearnedMoves: Move[] = moves.filter(m => m.isLearned)
-
 const initialState: MoveState = {
-    learningMoves: initialLearningMoves,
-    learnedMoves: initialLearnedMoves,
+    learningMoves: [],
+    learnedMoves: [],
     activeMoveType: MoveType.Simple
 }
 
