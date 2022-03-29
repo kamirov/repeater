@@ -12,6 +12,7 @@ import {Orderable} from "./ordering/ordering.types";
 import SelectionBar from "./selection/SelectionBar";
 import {SelectionService} from "./selection/SelectionService";
 import {MoveService} from "./move/MoveService";
+import {AnnouncementService} from "./announcement/AnnouncementService";
 
 const defaultPeriod = 1000
 
@@ -21,7 +22,7 @@ export default function AppView() {
     const moveState = useSelector((state: RootState) => state.move)
     const dispatch = useDispatch()
 
-    const [activeMoveId, setActiveMoveId] = useState(null)
+    const [activeMoveId, setActiveMoveId] = useState(null as string | null)
 
     const [comboPeriod, setComboPeriod] = useState(defaultPeriod as number)
     const [simplePeriod, setSimplePeriod] = useState(defaultPeriod as number)
@@ -31,9 +32,6 @@ export default function AppView() {
 
     useEffect(() => {
         setIsTimerEnabled(false)
-
-        // const storedPeriod = +(window.localStorage.getItem(getPeriodStorageKey(styleState.activeStyleId, moveState.activeMoveType)) || defaultPeriod)
-        // setComboPeriod(storedPeriod)
     }, [styleState.activeStyleId, moveState.activeMoveType])
 
     useEffect(() => {
@@ -85,7 +83,7 @@ export default function AppView() {
                     comboPeriod={comboPeriod}
                     onComboPeriodChange={handleComboPeriodChange}
                     onSimplePeriodChange={handleSimplePeriodChange}
-                    onToggleSelection={toggleSayingRandomWords}
+                    onToggleSelection={toggleAnnouncements}
                     onClickAdd={(moveType) => addNewMove(styleState.activeStyleId, moveType)}
                 />
 
@@ -106,13 +104,6 @@ export default function AppView() {
                         onReorder={() => null}
                     />
                 }
-
-                {/*<ItemView onChange={onTextChangeHandler} onBlur={handleBlur} value={text} disabled={moveState.activeMoveType === allKey} />*/}
-                {/*<input type="number" min="100" value={period} onChange={e => handleComboPeriodChange(e.target.value as any)} />*/}
-                {/*<button onClick={toggleSayingRandomWords} disabled={!text}>*/}
-                {/*    {isTimerEnabled && "Stop"}*/}
-                {/*    {!isTimerEnabled && "Start"}*/}
-                {/*</button>*/}
             </Page>
         </Main>
     </Root>
@@ -166,23 +157,6 @@ export default function AppView() {
     function handleComboPeriodChange(period: number) {
         setIsTimerEnabled(false)
         setComboPeriod(period)
-        // window.localStorage.setItem(getPeriodStorageKey(styleState.activeStyleId, moveState.activeMoveType), period + "")
-    }
-
-    function say(item: string) {
-        console.log('saying item', item)
-
-        if ('speechSynthesis' in window) {
-            // const synthesis = window.speechSynthesis;
-            //
-            // // Create an utterance object
-            // const utterance = new SpeechSynthesisUtterance(item);
-            //
-            // // Speak the utterance
-            // synthesis.speak(utterance);
-        } else {
-            alert('Text-to-speech not supported.');
-        }
     }
 
     function selectMove() {
@@ -195,23 +169,20 @@ export default function AppView() {
                 arr: learnedMoves,
                 strategy: 'random'
             },
-        ])
+        ]) as Move
 
         setActiveMoveId(move.id)
-        console.log(move)
+
+        AnnouncementService.announce([move])
     }
 
-    function toggleSayingRandomWords() {
+    function toggleAnnouncements() {
         if (isTimerEnabled) {
             setIsTimerEnabled(false)
         } else {
             setIsTimerEnabled(true)
         }
     }
-}
-
-function sanitizeText(text: string) {
-    return text.toLowerCase().split("\n").filter(item => item).sort().join("\n");
 }
 
 const Root = styled.div`
