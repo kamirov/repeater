@@ -21,7 +21,7 @@ export default function AppView() {
     const moveState = useSelector((state: RootState) => state.move)
     const dispatch = useDispatch()
 
-    const [text, setText] = useState("")
+    const [activeMoveId, setActiveMoveId] = useState(null)
 
     const [comboPeriod, setComboPeriod] = useState(defaultPeriod as number)
     const [simplePeriod, setSimplePeriod] = useState(defaultPeriod as number)
@@ -37,9 +37,11 @@ export default function AppView() {
     }, [styleState.activeStyleId, moveState.activeMoveType])
 
     useEffect(() => {
+        setActiveMoveId(null)
+
         if (isTimerEnabled) {
-            saySelection()
-            setIntervalId(setInterval(() => saySelection(), simplePeriod))
+            selectMove()
+            setIntervalId(setInterval(() => selectMove(), simplePeriod))
         } else {
             clearInterval(intervalId)
             setIntervalId(0)
@@ -55,6 +57,7 @@ export default function AppView() {
             el: <MoveItem
                 move={m}
                 key={m.id}
+                isActive={activeMoveId === m.id}
                 onChange={handleMoveChange}
                 onToggleLearn={() => toggleLearn(m)}
                 onDelete={() => deleteMove(m)}
@@ -182,7 +185,7 @@ export default function AppView() {
         }
     }
 
-    function saySelection() {
+    function selectMove() {
         const move = SelectionService.select([
             {
                 arr: learningMoves,
@@ -193,6 +196,8 @@ export default function AppView() {
                 strategy: 'random'
             },
         ])
+
+        setActiveMoveId(move.id)
         console.log(move)
     }
 

@@ -9,6 +9,7 @@ type Props = {
     onToggleLearn: () => void
     onDelete: () => void
     onChange: (move: Move) => void
+    isActive: boolean
 
     id?: string
     className?: string
@@ -29,8 +30,10 @@ function MoveItem(props: Props) {
         onChange={props.onToggleLearn}
     />
 
-    return <div id={props.id} className={`${props.className} move-item`}>
-        <FormGroup className="check-container">
+    const classNameAddendum = props.isActive ? 'active' : ''
+
+    return <div id={props.id} className={`${props.className} move-item ${classNameAddendum}`}>
+        <FormGroup className={"check-container"}>
             {checkbox}
             <input
                 type="text"

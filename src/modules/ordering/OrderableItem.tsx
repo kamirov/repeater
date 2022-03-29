@@ -6,10 +6,6 @@ import { useDrag, useDrop } from 'react-dnd'
 import type { XYCoord, Identifier } from 'dnd-core'
 
 const style = {
-    border: '1px dashed gray',
-    padding: '0.5rem 1rem',
-    marginBottom: '.5rem',
-    backgroundColor: 'white',
     cursor: 'move',
 }
 
