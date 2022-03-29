@@ -10,6 +10,5 @@ export type Move = {
 
 export enum MoveType {
     'Simple' = 'simple',
-    'Combo' = 'combo',
-    'All' = 'all'
+    'Combo' = 'combo'
 }
