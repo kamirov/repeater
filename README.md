@@ -30,6 +30,7 @@ Tool to help you remember dance patterns. Specify a dance style, add moves and c
 
 # TODO
 
+- Add linkages, where there reader will read multiple random items in a row (e.g. "cross-body lead, then left-hand turn, then right-hand turn")
 - Add in a backend to persist values remotely
 - Add in user support to persist values per user (will probably skip out on this, unless people start using this app)
 - Add an infra configuration via Terraform
