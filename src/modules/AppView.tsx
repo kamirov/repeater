@@ -7,7 +7,6 @@ import StyleRedux from "./style/StyleRedux";
 import MoveRedux from "./move/MoveRedux";
 import {Move, MoveType} from "./move/move.types";
 import MoveItem from "./move/MoveItem";
-import OrderableList from "./ordering/OrderableList";
 import {Orderable} from "./ordering/ordering.types";
 import SelectionBar from "./selection/SelectionBar";
 import {SelectionService, StrategicArray} from "./selection/SelectionService";
@@ -15,10 +14,20 @@ import {MoveService} from "./move/MoveService";
 import {AnnouncementService} from "./announcement/AnnouncementService";
 import {StyleService} from "./style/StyleService";
 import {StorageModule} from "./common/StorageModule";
+import MoveList from "./move/MoveList";
+
 
 // A bit messy. Eventually can move this to an announcement redux state (see the to-do around the timer below)
-const initialSimplePeriod = parseInt(StorageModule.get('simple-period') || '4000')
-const initialComboPeriod = parseInt(StorageModule.get('combo-period') || '12000')
+const storedSimplePeriod = StorageModule.get('simple-period')
+const storedComboPeriod = StorageModule.get('combo-period')
+const initialSimplePeriod = storedSimplePeriod === null ? 4000 : parseInt(storedSimplePeriod)
+const initialComboPeriod = storedComboPeriod === null ? 12000 : parseInt(storedComboPeriod)
+
+// Similar here, but with a selection redux state
+const storedLearningWeight = StorageModule.get('learning-weight')
+const storedLearnedWeight = StorageModule.get('learned-weight')
+const initialLearningWeight = storedLearningWeight === null ? 70 : parseInt(storedLearningWeight)
+const initialLearnedWeight = storedLearnedWeight === null ? 30 : parseInt(storedLearnedWeight)
 
 export default function AppView() {
 
@@ -26,7 +35,12 @@ export default function AppView() {
     const moveState = useSelector((state: RootState) => state.move)
     const dispatch = useDispatch()
 
-    const [activeMove, setActiveMove] = useState(null as Move | null)
+    const [activeMoves, setActiveMoves] = useState([] as Move[])
+    const [activeMoveCount, setActiveMoveCount] = useState(1)
+
+    const [learningWeight, setLearningWeight] = useState(initialLearningWeight)
+    const [learnedWeight, setLearnedWeight] = useState(initialLearnedWeight)
+
 
     // TODO: These values all pertain to the announcements. The states should be moved to a redux state for that module,
     //  and the components should be moved to ones from that module
@@ -40,7 +54,7 @@ export default function AppView() {
     }, [styleState.activeStyleId, moveState.activeMoveType])
 
     useEffect(() => {
-        setActiveMove(null)
+        setActiveMoves([])
 
         if (isTimerEnabled) {
             tick()
@@ -51,14 +65,18 @@ export default function AppView() {
     }, [isTimerEnabled])
 
     useEffect(() => {
-        if (activeMove) {
-            AnnouncementService.announce([activeMove])
+        if (activeMoves.length) {
+            AnnouncementService.announce(activeMoves)
 
-            const period = activeMove.type === MoveType.Simple ? simplePeriod : comboPeriod
+            let period = 0
+            for (const activeMove of activeMoves) {
+                const movePeriod = activeMove.type === MoveType.Simple ? simplePeriod : comboPeriod
+                period += movePeriod
+            }
 
             setIntervalId(setTimeout(() => tick(), period))
         }
-    }, [activeMove])
+    }, [activeMoves])
 
     const learningMoves = moveState.learningMoves.filter(m => m.styleId === styleState.activeStyleId)
     const learnedMoves = moveState.learnedMoves.filter(m => m.styleId === styleState.activeStyleId)
@@ -69,7 +87,7 @@ export default function AppView() {
             el: <MoveItem
                 move={m}
                 key={m.id}
-                isActive={Boolean(activeMove && activeMove.id === m.id)}
+                isActive={Boolean(activeMoves.find(am => am.id === m.id))}
                 onChange={handleMoveChange}
                 onToggleLearn={() => toggleLearn(m)}
                 onToggleMoveType={() => toggleMoveType(m)}
@@ -83,8 +101,10 @@ export default function AppView() {
 
     const buttonText = isTimerEnabled ? "Stop" : "Start"
 
-    const minMovesForAnnouncement = 2
-    const toggleIsDisabled = (learningMoves.length + learnedMoves.length < minMovesForAnnouncement)
+    const toggleIsDisabled = (learningMoves.length + learnedMoves.length < activeMoveCount)
+
+    const showLearningList = Boolean(learningMoveItems.length)
+    const showLearnedList = Boolean(learnedMoveItems.length)
 
     return <Root>
         <Main>
@@ -101,33 +121,56 @@ export default function AppView() {
                     buttonText={buttonText}
                     simplePeriod={simplePeriod}
                     comboPeriod={comboPeriod}
+                    activeMoveCount={activeMoveCount}
                     onComboPeriodChange={handleComboPeriodChange}
                     onSimplePeriodChange={handleSimplePeriodChange}
                     onToggleSelection={toggleAnnouncements}
+                    onActiveMoveCountChange={handleActiveMoveCountChange}
                     toggleIsDisabled={toggleIsDisabled}
                     onClickAdd={(moveType) => addNewMove(styleState.activeStyleId, moveType)}
                 />
 
-                {Boolean(learningMoveItems.length) &&
-                    <OrderableList
-                        className="learning-list"
-                        label="Learning"
-                        items={learningMoveItems}
-                        onReorder={reorderLearningItems}
-                    />
+                {showLearningList && <MoveList
+                    label="Learning"
+                    items={learningMoveItems}
+                    className="learning-move-list"
+                    weight={showLearnedList ? learningWeight : undefined}
+                    onWeightChange={showLearnedList ? handleLearningWeightChange : undefined}
+                    onReorder={reorderLearningItems}
+                />
                 }
 
-                {Boolean(learnedMoveItems.length) &&
-                    <OrderableList
-                        className="learned-list"
-                        label="Learned"
-                        items={learnedMoveItems}
-                        onReorder={() => null}
-                    />
+                {showLearnedList && <MoveList
+                    label="Learned"
+                    className="learned-move-list"
+                    items={learnedMoveItems}
+                />
                 }
             </Page>
         </Main>
     </Root>
+
+    function handleLearningWeightChange(newLearningWeight: number) {
+        resetTimer()
+
+        const resolvedLearningWeight = Math.min(
+            Math.max(0, newLearningWeight), 100
+        )
+        const resolvedLearnedWeight = 100 - resolvedLearningWeight
+
+        setLearningWeight(resolvedLearningWeight)
+        setLearnedWeight(resolvedLearnedWeight)
+
+        // Avoid an infinite loop edge case
+        if (activeMoveCount === learnedMoves.length + learningMoves.length) {
+            if (resolvedLearningWeight === 100 || resolvedLearningWeight === 0) {
+                handleActiveMoveCountChange(1)
+            }
+        }
+
+        StorageModule.set('learning-weight', resolvedLearningWeight)
+        StorageModule.set('learned-weight', resolvedLearnedWeight)
+    }
 
     function removeStyle(styleId: string) {
         resetTimer()
@@ -227,18 +270,40 @@ export default function AppView() {
         setIsTimerEnabled(false)
     }
 
+    function handleActiveMoveCountChange(count: number) {
+        resetTimer()
+
+        // Avoid an infinite loop edge case
+        if (count === learnedMoves.length + learningMoves.length) {
+            if (learningWeight === 100) {
+                handleLearningWeightChange(99)
+            }
+            if (learningWeight === 0) {
+                handleLearningWeightChange(1)
+            }
+        }
+
+        if (count < 1) {
+            setActiveMoveCount(1)
+        } else {
+            setActiveMoveCount(count)
+        }
+    }
+
     function selectMove() {
         if (toggleIsDisabled) {
-            throw new Error("Cannot start selecting moves until there are at least 2 moves")
+            throw new Error(`Cannot start selecting moves until there are at least ${activeMoveCount} moves`)
         }
 
         const strategicArrays: StrategicArray[] = []
+        const weights: number[] = []
 
         if (learningMoves.length) {
             strategicArrays.push({
                 arr: learningMoves,
                 strategy: 'priority'
             })
+            weights.push(learningWeight)
         }
 
         if (learnedMoves.length) {
@@ -246,19 +311,24 @@ export default function AppView() {
                 arr: learnedMoves,
                 strategy: 'random'
             })
+            weights.push(learnedWeight)
         }
 
         if (!strategicArrays.length) {
             throw new Error("No strategic arrays available")
         }
 
-        const move = SelectionService.select(strategicArrays) as Move
+        const moves: Move[] = []
+        for (let i = 0; i < activeMoveCount ; i++) {
+            let move = SelectionService.select(strategicArrays, weights) as Move
+            while (moves.find(m => m.id === move.id)) {
+                move = SelectionService.select(strategicArrays, weights) as Move
+            }
 
-        if (activeMove && move.id === activeMove.id) {
-            selectMove()
-        } else {
-            setActiveMove(move)
+            moves.push(move)
         }
+
+        setActiveMoves(moves)
     }
 
 
@@ -275,17 +345,19 @@ export default function AppView() {
     function handleSimplePeriodChange(period: number) {
         resetTimer()
 
-        setIsTimerEnabled(false)
-        setSimplePeriod(period)
-        StorageModule.set('simple-period', period)
+        const resolvedPeriod = Math.max(1, period)
+
+        setSimplePeriod(resolvedPeriod)
+        StorageModule.set('simple-period', resolvedPeriod)
     }
 
     function handleComboPeriodChange(period: number) {
         resetTimer()
 
-        setIsTimerEnabled(false)
-        setComboPeriod(period)
-        StorageModule.set('combo-period', period)
+        const resolvedPeriod = Math.max(1, period)
+
+        setComboPeriod(resolvedPeriod)
+        StorageModule.set('combo-period', resolvedPeriod)
     }
 
     function toggleAnnouncements() {
