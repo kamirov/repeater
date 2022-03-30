@@ -23,14 +23,20 @@ Tool to help you remember dance patterns. Specify a dance style, add moves and c
 
 ## Selection strategy
 
-- There is a 50% chance that the next move will be from the Learning pile, and a 50% chance that it will be from the Learned pile
+- There is a N% chance that the next move will be from the Learning pile, and a 100-N% chance that it will be from the Learned pile, where N is the weight set above the Learning pile
 - If it is from the Learned pile, then each item in the pile has an equal chance to get selected
 - If it is from the Learning pile, then there is a 50% chance that the item will be from the prioritized subset (golden ones), and 50% chance that it will be from the non-prioritized subset. Within each subset, each item has an equal chance to get selected
 
 
+# Running locally
+
+- Check out the repository
+- Install dependencies with `yarn`
+- Run with `yarn start`
+
+
 # TODO
 
-- Add linkages, where there reader will read multiple random items in a row (e.g. "cross-body lead, then left-hand turn, then right-hand turn")
 - Improve the selection strategy. Ultimately the point is to prioritize learning items, and within them to further prioritize a few select ones, but at the same time to not neglect the ones you've already learned. The current approach is not perfect, but roughly gets us there. It definitely has problems with some edge cases (e.g. when there are very few learned items, it actually ends up prioritizing them)
 - Add in a backend to persist values remotely
 - Add in user support to persist values per user (will probably skip out on this, unless people start using this app)
