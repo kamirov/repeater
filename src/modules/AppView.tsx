@@ -254,9 +254,3 @@ width: 100%;
 flex-align: flex-start;
 position: relative;
 `
-
-const ItemView = styled.textarea`
-height: 400px;
-width: 100%;
-display: block;
-`
