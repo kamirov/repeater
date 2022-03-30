@@ -6,12 +6,12 @@ export const SelectionService = {
 
 export type SelectionStrategy = 'random'
 
-export type StrategicArrays = {
+export type StrategicArray = {
     arr: any[],
     strategy: SelectionStrategy
 }
 
-function select(strategicArrays: StrategicArrays[]) {
+function select(strategicArrays: StrategicArray[]) {
     const strategicArray = ArrayHelper.randomElement(strategicArrays)
 
     if (strategicArray.strategy === 'random') {

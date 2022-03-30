@@ -10,7 +10,7 @@ import MoveItem from "./move/MoveItem";
 import OrderableList from "./ordering/OrderableList";
 import {Orderable} from "./ordering/ordering.types";
 import SelectionBar from "./selection/SelectionBar";
-import {SelectionService} from "./selection/SelectionService";
+import {SelectionService, StrategicArray} from "./selection/SelectionService";
 import {MoveService} from "./move/MoveService";
 import {AnnouncementService} from "./announcement/AnnouncementService";
 import {StyleService} from "./style/StyleService";
@@ -113,8 +113,12 @@ export default function AppView() {
         </Main>
     </Root>
 
+    function resetTimer() {
+        setIsTimerEnabled(false)
+    }
 
     function removeStyle(styleId: string) {
+        resetTimer()
 
         const remainingStyles = styleState.styles.filter(s => s.id !== styleId)
 
@@ -136,20 +140,28 @@ export default function AppView() {
     }
 
     function addNewStyle(name: string) {
+        resetTimer()
+
         const style = StyleService.createEmptyStyle(name)
         dispatch(StyleRedux.addStyle(style))
     }
 
     function addNewMove(styleId: string, type: MoveType) {
+        resetTimer()
+
         const move = MoveService.createEmptyMove(styleId, type)
         dispatch(MoveRedux.addLearningMove(move))
     }
 
     function handleMoveChange(move: Move) {
+        resetTimer()
+
         dispatch(MoveRedux.updateMove(move))
     }
 
     function deleteMove(move: Move) {
+        resetTimer()
+
         if (move.isLearned) {
             dispatch(MoveRedux.deleteLearnedMove(move))
         } else {
@@ -158,6 +170,8 @@ export default function AppView() {
     }
 
     function toggleLearn(move: Move) {
+        resetTimer()
+
         if (move.isLearned) {
             dispatch(MoveRedux.unlearnMove(move))
         } else {
@@ -166,6 +180,8 @@ export default function AppView() {
     }
 
     function toggleMoveType(move: Move) {
+        resetTimer()
+
         const newMove: Move = {
             ...move,
             type: move.type === MoveType.Simple ? MoveType.Combo : MoveType.Simple
@@ -174,6 +190,8 @@ export default function AppView() {
     }
 
     function reorderLearningItems(orderedItems: Orderable[]) {
+        resetTimer()
+
         const moves = orderedItems.map(o => moveState.learningMoves.find(m => m.id === o.id))
 
         if (moves.some(m => typeof m === 'undefined')) {
@@ -184,6 +202,8 @@ export default function AppView() {
     }
 
     function handleStyleChange(styleId: string) {
+        resetTimer()
+
         const style = styleState.styles.find(s => s.id === styleId)
 
         if (typeof style === 'undefined') {
@@ -196,26 +216,42 @@ export default function AppView() {
     }
 
     function handleSimplePeriodChange(period: number) {
+        resetTimer()
+
         setIsTimerEnabled(false)
         setSimplePeriod(period)
     }
 
     function handleComboPeriodChange(period: number) {
+        resetTimer()
+
         setIsTimerEnabled(false)
         setComboPeriod(period)
     }
 
     function selectMove() {
-        const move = SelectionService.select([
-            {
+
+        const strategicArrays: StrategicArray[] = []
+
+        if (learningMoves.length) {
+            strategicArrays.push({
                 arr: learningMoves,
                 strategy: 'random'
-            },
-            {
+            })
+        }
+
+        if (learnedMoves.length) {
+            strategicArrays.push({
                 arr: learnedMoves,
                 strategy: 'random'
-            },
-        ]) as Move
+            })
+        }
+
+        if (!strategicArrays.length) {
+            throw new Error("No strategic arrays available")
+        }
+
+        const move = SelectionService.select(strategicArrays) as Move
 
         setActiveMoveId(move.id)
 
