@@ -1,3 +1,7 @@
+// TODO: This file, like most CSS files in the world, is a stylish toilet bowl.
+//  I'd like to move these to inline styles via styled, but I'm still not too sure on how to deal with shared styles
+//  among many different components
+
 $font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
 sans-serif;
@@ -144,23 +148,39 @@ code {
 }
 
 .orderable-list-container {
-  padding: 0.5rem 0;
-  margin: 0.5rem 0;
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
   border-bottom: 1px solid #aaa;
 
   &:last-child {
     border-bottom: none;
   }
+}
 
-  .label {
-    display: inline-block;
+.move-list-header {
+  margin-top: 2rem;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .list-label {
+    flex-grow: 2;
     font-weight: bold;
     color: #444;
-    margin-bottom: 0.5rem;
+  }
+  .weight {
+    display: inline-block;
+    outline: none;
+    border: none;
+    background: transparent;
+    font-family: $font-family;
+    font-size: 0.9rem;
+    text-align: right;
   }
 }
 
-.learning-list {
+.learning-move-list {
 
   .orderable-item {
     // If changing this number, make sure to change it in the selection service as well
@@ -170,7 +190,7 @@ code {
   }
 }
 
-.learned-list {
+.learned-move-list {
 
   .orderable-list {
     opacity: 0.5;
