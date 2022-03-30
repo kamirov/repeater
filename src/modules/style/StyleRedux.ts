@@ -17,14 +17,11 @@ export default {
     reducer
 }
 
+// TODO: Allow to run the app with no initial styles, and fill in the styles from scratch
 const initialStyles: Style[] = [
     {
         id: 'salsa',
         name: 'Salsa'
-    },
-    {
-        id: 'sensual-bachata',
-        name: "Sensual Bachata"
     }
 ]
 
