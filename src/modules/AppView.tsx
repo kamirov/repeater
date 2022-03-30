@@ -83,6 +83,9 @@ export default function AppView() {
 
     const buttonText = isTimerEnabled ? "Stop" : "Start"
 
+    const minMovesForAnnouncement = 2
+    const toggleIsDisabled = (learningMoves.length + learnedMoves.length < minMovesForAnnouncement)
+
     return <Root>
         <Main>
             <Page>
@@ -101,7 +104,7 @@ export default function AppView() {
                     onComboPeriodChange={handleComboPeriodChange}
                     onSimplePeriodChange={handleSimplePeriodChange}
                     onToggleSelection={toggleAnnouncements}
-                    toggleIsDisabled={learningMoves.length === 0 && learnedMoves.length === 0}
+                    toggleIsDisabled={toggleIsDisabled}
                     onClickAdd={(moveType) => addNewMove(styleState.activeStyleId, moveType)}
                 />
 
@@ -225,6 +228,10 @@ export default function AppView() {
     }
 
     function selectMove() {
+        if (toggleIsDisabled) {
+            throw new Error("Cannot start selecting moves until there are at least 2 moves")
+        }
+
         const strategicArrays: StrategicArray[] = []
 
         if (learningMoves.length) {
@@ -247,7 +254,11 @@ export default function AppView() {
 
         const move = SelectionService.select(strategicArrays) as Move
 
-        setActiveMove(move)
+        if (activeMove && move.id === activeMove.id) {
+            selectMove()
+        } else {
+            setActiveMove(move)
+        }
     }
 
 
@@ -281,6 +292,9 @@ export default function AppView() {
         if (isTimerEnabled) {
             setIsTimerEnabled(false)
         } else {
+            if (toggleIsDisabled) {
+                throw new Error("Cannot start announcing until there are at least 2 moves")
+            }
             setIsTimerEnabled(true)
         }
     }
