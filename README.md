@@ -31,6 +31,7 @@ Tool to help you remember dance patterns. Specify a dance style, add moves and c
 # TODO
 
 - Add linkages, where there reader will read multiple random items in a row (e.g. "cross-body lead, then left-hand turn, then right-hand turn")
+- Improve the selection strategy. Ultimately the point is to prioritize learning items, and within them to further prioritize a few select ones, but at the same time to not neglect the ones you've already learned. The current approach is not perfect, but roughly gets us there. It definitely has problems with some edge cases (e.g. when there are very few learned items, it actually ends up prioritizing them)
 - Add in a backend to persist values remotely
 - Add in user support to persist values per user (will probably skip out on this, unless people start using this app)
 - Add an infra configuration via Terraform
