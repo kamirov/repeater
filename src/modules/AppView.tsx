@@ -15,19 +15,18 @@ import {MoveService} from "./move/MoveService";
 import {AnnouncementService} from "./announcement/AnnouncementService";
 import {StyleService} from "./style/StyleService";
 
-const defaultPeriod = 1000
-
 export default function AppView() {
 
     const styleState = useSelector((state: RootState) => state.style)
     const moveState = useSelector((state: RootState) => state.move)
     const dispatch = useDispatch()
 
-    const [activeMoveId, setActiveMoveId] = useState(null as string | null)
+    const [activeMove, setActiveMove] = useState(null as Move | null)
 
-    const [comboPeriod, setComboPeriod] = useState(defaultPeriod as number)
-    const [simplePeriod, setSimplePeriod] = useState(defaultPeriod as number)
-
+    // TODO: These values all pertain to the announcements. The states should be moved to a redux state for that module,
+    //  and the components should be moved to ones from that module
+    const [comboPeriod, setComboPeriod] = useState(4000 as number)
+    const [simplePeriod, setSimplePeriod] = useState(1500 as number)
     const [isTimerEnabled, setIsTimerEnabled] = useState(false)
     const [intervalId, setIntervalId] = useState(0 as any)
 
@@ -36,16 +35,25 @@ export default function AppView() {
     }, [styleState.activeStyleId, moveState.activeMoveType])
 
     useEffect(() => {
-        setActiveMoveId(null)
+        setActiveMove(null)
 
         if (isTimerEnabled) {
-            selectMove()
-            setIntervalId(setInterval(() => selectMove(), simplePeriod))
+            tick()
         } else {
-            clearInterval(intervalId)
+            clearTimeout(intervalId)
             setIntervalId(0)
         }
     }, [isTimerEnabled])
+
+    useEffect(() => {
+        if (activeMove) {
+            AnnouncementService.announce([activeMove])
+
+            const period = activeMove.type === MoveType.Simple ? simplePeriod : comboPeriod
+
+            setIntervalId(setTimeout(() => tick(), period))
+        }
+    }, [activeMove])
 
     const learningMoves = moveState.learningMoves.filter(m => m.styleId === styleState.activeStyleId)
     const learnedMoves = moveState.learnedMoves.filter(m => m.styleId === styleState.activeStyleId)
@@ -56,7 +64,7 @@ export default function AppView() {
             el: <MoveItem
                 move={m}
                 key={m.id}
-                isActive={activeMoveId === m.id}
+                isActive={Boolean(activeMove && activeMove.id === m.id)}
                 onChange={handleMoveChange}
                 onToggleLearn={() => toggleLearn(m)}
                 onToggleMoveType={() => toggleMoveType(m)}
@@ -112,10 +120,6 @@ export default function AppView() {
             </Page>
         </Main>
     </Root>
-
-    function resetTimer() {
-        setIsTimerEnabled(false)
-    }
 
     function removeStyle(styleId: string) {
         resetTimer()
@@ -215,22 +219,7 @@ export default function AppView() {
         setIsTimerEnabled(false)
     }
 
-    function handleSimplePeriodChange(period: number) {
-        resetTimer()
-
-        setIsTimerEnabled(false)
-        setSimplePeriod(period)
-    }
-
-    function handleComboPeriodChange(period: number) {
-        resetTimer()
-
-        setIsTimerEnabled(false)
-        setComboPeriod(period)
-    }
-
     function selectMove() {
-
         const strategicArrays: StrategicArray[] = []
 
         if (learningMoves.length) {
@@ -253,9 +242,32 @@ export default function AppView() {
 
         const move = SelectionService.select(strategicArrays) as Move
 
-        setActiveMoveId(move.id)
+        setActiveMove(move)
+    }
 
-        AnnouncementService.announce([move])
+
+    // Announcements
+
+    function resetTimer() {
+        setIsTimerEnabled(false)
+    }
+
+    function tick() {
+        selectMove()
+    }
+
+    function handleSimplePeriodChange(period: number) {
+        resetTimer()
+
+        setIsTimerEnabled(false)
+        setSimplePeriod(period)
+    }
+
+    function handleComboPeriodChange(period: number) {
+        resetTimer()
+
+        setIsTimerEnabled(false)
+        setComboPeriod(period)
     }
 
     function toggleAnnouncements() {
