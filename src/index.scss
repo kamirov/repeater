@@ -52,9 +52,16 @@ code {
 
   transition-duration: 0.3s;
 
-  border: 1px dashed gray;
   padding: 0.5rem 1rem;
   margin-bottom: .5rem;
+
+  &.simple-move {
+    border: 1px dashed gray;
+  }
+
+  &.combo-move {
+    border: 1px solid gray;
+  }
 
 
   &.active {

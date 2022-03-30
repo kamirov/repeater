@@ -1,11 +1,11 @@
 import * as React from "react";
-import {Move} from "./move.types";
+import {useState} from "react";
+import {Move, MoveType} from "./move.types";
 import {Checkbox, FormGroup, IconButton, Switch} from "@material-ui/core";
 import DeleteIcon from '@material-ui/icons/Delete';
 import PublicIcon from '@material-ui/icons/Public';
 import DirectionsRunIcon from '@material-ui/icons/DirectionsRun';
 import {UrlModule} from "../common/UrlModule";
-import {useState} from "react";
 
 type Props = {
     move: Move
@@ -61,12 +61,15 @@ function MoveItem(props: Props) {
         onChange={props.onToggleLearn}
     />
 
-    const classNameAddendum = props.isActive ? 'active' : ''
+    let className = `${props.className} move-item `
+    className += props.isActive ? ' active ' : ''
+    className += props.move.type === MoveType.Combo ? ' combo-move ' : ' simple-move '
+
     const inputRowClassName = `input-row ${showFields ? 'visible' : ''}`
 
     return <div
         id={props.id}
-        className={`${props.className} move-item ${classNameAddendum}`}
+        className={className}
         onBlur={handleInputBlur}
     >
         <div className="main-row">
