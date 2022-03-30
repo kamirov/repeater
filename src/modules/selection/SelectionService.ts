@@ -22,9 +22,10 @@ function select(strategicArrays: StrategicArray[]) {
             const priorityArr = strategicArray.arr.slice(0, priorityItems)
             const nonPriorityArr = strategicArray.arr.slice(priorityItems)
 
-            console.log(priorityArr, nonPriorityArr)
+            const subArrayToPickFrom = nonPriorityArr.length ?
+                ArrayHelper.randomElement([priorityArr, nonPriorityArr]) :
+                priorityArr
 
-            const subArrayToPickFrom = ArrayHelper.randomElement([priorityArr, nonPriorityArr])
             return ArrayHelper.randomElement(subArrayToPickFrom)
     }
 }

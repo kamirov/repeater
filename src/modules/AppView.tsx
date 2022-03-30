@@ -26,7 +26,8 @@ export default function AppView() {
     const moveState = useSelector((state: RootState) => state.move)
     const dispatch = useDispatch()
 
-    const [activeMove, setActiveMove] = useState(null as Move | null)
+    const [activeMoves, setActiveMoves] = useState([] as Move[])
+    const [activeMoveCount, setActiveMoveCount] = useState(1)
 
     // TODO: These values all pertain to the announcements. The states should be moved to a redux state for that module,
     //  and the components should be moved to ones from that module
@@ -40,7 +41,7 @@ export default function AppView() {
     }, [styleState.activeStyleId, moveState.activeMoveType])
 
     useEffect(() => {
-        setActiveMove(null)
+        setActiveMoves([])
 
         if (isTimerEnabled) {
             tick()
@@ -51,14 +52,18 @@ export default function AppView() {
     }, [isTimerEnabled])
 
     useEffect(() => {
-        if (activeMove) {
-            AnnouncementService.announce([activeMove])
+        if (activeMoves.length) {
+            AnnouncementService.announce(activeMoves)
 
-            const period = activeMove.type === MoveType.Simple ? simplePeriod : comboPeriod
+            let period = 0
+            for (const activeMove of activeMoves) {
+                const movePeriod = activeMove.type === MoveType.Simple ? simplePeriod : comboPeriod
+                period += movePeriod
+            }
 
             setIntervalId(setTimeout(() => tick(), period))
         }
-    }, [activeMove])
+    }, [activeMoves])
 
     const learningMoves = moveState.learningMoves.filter(m => m.styleId === styleState.activeStyleId)
     const learnedMoves = moveState.learnedMoves.filter(m => m.styleId === styleState.activeStyleId)
@@ -69,7 +74,7 @@ export default function AppView() {
             el: <MoveItem
                 move={m}
                 key={m.id}
-                isActive={Boolean(activeMove && activeMove.id === m.id)}
+                isActive={Boolean(activeMoves.find(am => am.id === m.id))}
                 onChange={handleMoveChange}
                 onToggleLearn={() => toggleLearn(m)}
                 onToggleMoveType={() => toggleMoveType(m)}
@@ -83,8 +88,9 @@ export default function AppView() {
 
     const buttonText = isTimerEnabled ? "Stop" : "Start"
 
-    const minMovesForAnnouncement = 2
-    const toggleIsDisabled = (learningMoves.length + learnedMoves.length < minMovesForAnnouncement)
+    const toggleIsDisabled = (learningMoves.length + learnedMoves.length < activeMoveCount)
+
+    console.log('active moves', activeMoves)
 
     return <Root>
         <Main>
@@ -101,9 +107,11 @@ export default function AppView() {
                     buttonText={buttonText}
                     simplePeriod={simplePeriod}
                     comboPeriod={comboPeriod}
+                    activeMoveCount={activeMoveCount}
                     onComboPeriodChange={handleComboPeriodChange}
                     onSimplePeriodChange={handleSimplePeriodChange}
                     onToggleSelection={toggleAnnouncements}
+                    onActiveMoveCountChange={handleActiveMoveCountChange}
                     toggleIsDisabled={toggleIsDisabled}
                     onClickAdd={(moveType) => addNewMove(styleState.activeStyleId, moveType)}
                 />
@@ -227,9 +235,17 @@ export default function AppView() {
         setIsTimerEnabled(false)
     }
 
+    function handleActiveMoveCountChange(count: number) {
+        if (count < 1) {
+            setActiveMoveCount(1)
+        } else {
+            setActiveMoveCount(count)
+        }
+    }
+
     function selectMove() {
         if (toggleIsDisabled) {
-            throw new Error("Cannot start selecting moves until there are at least 2 moves")
+            throw new Error(`Cannot start selecting moves until there are at least ${activeMoveCount} moves`)
         }
 
         const strategicArrays: StrategicArray[] = []
@@ -252,13 +268,22 @@ export default function AppView() {
             throw new Error("No strategic arrays available")
         }
 
-        const move = SelectionService.select(strategicArrays) as Move
+        const moves: Move[] = []
+        for (let i = 0; i < activeMoveCount ; i++) {
+            let move = SelectionService.select(strategicArrays) as Move
+            console.log('found move', move)
+            while (moves.find(m => m.id === move.id)) {
+                move = SelectionService.select(strategicArrays) as Move
+                console.log('move was already in array, got another', move)
+            }
 
-        if (activeMove && move.id === activeMove.id) {
-            selectMove()
-        } else {
-            setActiveMove(move)
+            moves.push(move)
         }
+
+
+
+        console.log('setting active moves', moves)
+        setActiveMoves(moves)
     }
 
 

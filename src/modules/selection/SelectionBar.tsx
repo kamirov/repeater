@@ -8,7 +8,9 @@ type Props = {
     onComboPeriodChange: (period: number) => void
     onToggleSelection: () => void
     onClickAdd: (moveType: MoveType) => void
+    onActiveMoveCountChange: (count: number) => void
 
+    activeMoveCount: number
     toggleIsDisabled: boolean
     simplePeriod: number
     comboPeriod: number
@@ -28,6 +30,11 @@ function SelectionBar(props: Props) {
     const handleComboPeriodChange = (event: any) => {
         const period = event.target.value
         props.onComboPeriodChange(period)
+    }
+
+    const handleActiveMoveCountChange = (event: any) => {
+        const count = event.target.value
+        props.onActiveMoveCountChange(count)
     }
 
     const handleClickAdd = (event: any) => {
@@ -52,6 +59,15 @@ function SelectionBar(props: Props) {
             type="number"
             value={props.comboPeriod}
             onChange={handleComboPeriodChange}
+            InputLabelProps={{
+                shrink: true,
+            }}
+        />
+        <TextField
+            label="Moves"
+            type="number"
+            value={props.activeMoveCount}
+            onChange={handleActiveMoveCountChange}
             InputLabelProps={{
                 shrink: true,
             }}
