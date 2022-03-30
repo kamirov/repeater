@@ -17,8 +17,8 @@ import {StyleService} from "./style/StyleService";
 import {StorageModule} from "./common/StorageModule";
 
 // A bit messy. Eventually can move this to an announcement redux state (see the to-do around the timer below)
-const initialSimplePeriod = parseInt(StorageModule.get('simple-period') || '1500')
-const initialComboPeriod = parseInt(StorageModule.get('combo-period') || '4000')
+const initialSimplePeriod = parseInt(StorageModule.get('simple-period') || '4000')
+const initialComboPeriod = parseInt(StorageModule.get('combo-period') || '12000')
 
 export default function AppView() {
 
