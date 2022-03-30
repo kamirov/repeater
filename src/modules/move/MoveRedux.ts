@@ -1,6 +1,7 @@
 import {Dispatch} from 'redux'
 import {Action} from "../../redux/redux.types";
 import {Move, MoveType} from "./move.types";
+import {Style} from "../style/style.types";
 
 export type MoveState = {
     learningMoves: Move[]
@@ -22,6 +23,8 @@ export default {
     deleteLearningMove,
     deleteLearnedMove,
 
+    removeMovesBelongingToStyle,
+
     reducer
 }
 
@@ -39,7 +42,8 @@ const actions = {
     setActiveMoveType: 'move/setActiveMoveType',
     addLearningMove: 'move/addLearningMove',
     deleteLearningMove: 'move/deleteLearningMove',
-    deleteLearnedMove: 'move/deleteLearnedMove'
+    deleteLearnedMove: 'move/deleteLearnedMove',
+    removeMovesBelongingToStyle: 'move/removeMovesBelongingToStyle'
 }
 
 function updateMove(move: Move) {
@@ -74,6 +78,15 @@ function deleteLearnedMove(move: Move) {
         dispatch({
             type: actions.deleteLearnedMove,
             payload: move.id
+        })
+    }
+}
+
+function removeMovesBelongingToStyle(style: Style) {
+    return (dispatch: Dispatch) => {
+        dispatch({
+            type: actions.removeMovesBelongingToStyle,
+            payload: style
         })
     }
 }
@@ -177,6 +190,13 @@ function reducer(state = initialState, action: Action): MoveState {
                 learnedMoves: [
                     ...state.learnedMoves.filter(m => m.id !== action.payload)
                 ]
+            }
+        case actions.removeMovesBelongingToStyle:
+            const style: Style = action.payload
+            return {
+                ...state,
+                learnedMoves: state.learnedMoves.filter(m => m.styleId !== style.id),
+                learningMoves: state.learningMoves.filter(m => m.styleId !== style.id),
             }
         case actions.updateMove:
             const move = action.payload as Move

@@ -38,8 +38,12 @@ code {
   display: flex;
   justify-content: space-between;
 
+  .buttons-container {
+    display: flex;
+    justify-content: space-between;
+  }
+
   .add-icon {
-    margin-left: 1rem;
   }
 
 }

@@ -9,6 +9,7 @@ type Props = {
     onToggleSelection: () => void
     onClickAdd: (moveType: MoveType) => void
 
+    toggleIsDisabled: boolean
     simplePeriod: number
     comboPeriod: number
     buttonText: string
@@ -55,7 +56,7 @@ function SelectionBar(props: Props) {
                 shrink: true,
             }}
         />
-        <Button variant="contained" color="primary" onClick={props.onToggleSelection}>
+        <Button variant="contained" color="primary" onClick={props.onToggleSelection} disabled={props.toggleIsDisabled}>
             {props.buttonText}
         </Button>
     </div>

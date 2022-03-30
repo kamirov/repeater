@@ -9,9 +9,10 @@ export type StyleState = {
 
 export default {
     setStyles,
-    setActiveStyleId,
+    setActiveStyle,
 
     addStyle,
+    removeStyle,
 
     reducer
 }
@@ -35,7 +36,8 @@ const initialState: StyleState = {
 const actions = {
     setStyles: 'style/setStyles',
     addStyle: 'style/addStyle',
-    setActiveStyleId: 'style/setActiveStyleId',
+    removeStyle: 'style/removeStyle',
+    setActiveStyle: 'style/setActiveStyle',
 }
 
 function addStyle(style: Style) {
@@ -47,6 +49,14 @@ function addStyle(style: Style) {
     }
 }
 
+function removeStyle(style: Style) {
+    return (dispatch: Dispatch) => {
+        dispatch({
+            type: actions.removeStyle,
+            payload: style
+        })
+    }
+}
 
 function setStyles(styles: Style[]) {
     return (dispatch: Dispatch) => {
@@ -57,12 +67,12 @@ function setStyles(styles: Style[]) {
     }
 }
 
-function setActiveStyleId(id: string) {
+function setActiveStyle(style: Style) {
     return (dispatch: Dispatch) => {
 
         dispatch({
-            type: actions.setActiveStyleId,
-            payload: id
+            type: actions.setActiveStyle,
+            payload: style
         })
     }
 }
@@ -77,15 +87,23 @@ function reducer(state = initialState, action: Action): StyleState {
                     ...state.styles,
                 ]
             }
+        case actions.removeStyle:
+            const styleToRemove: Style = action.payload
+
+            return {
+                ...state,
+                styles: state.styles.filter(s => s.id !== styleToRemove.id)
+            }
         case actions.setStyles:
             return {
                 ...state,
                 styles: action.payload
             }
-        case actions.setActiveStyleId:
+        case actions.setActiveStyle:
+            const style: Style = action.payload
             return {
                 ...state,
-                activeStyleId: action.payload
+                activeStyleId: style.id
             }
         default:
             return state

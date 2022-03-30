@@ -78,6 +78,7 @@ export default function AppView() {
                     items={styleState.styles}
                     activeItemId={styleState.activeStyleId}
                     onClickAdd={addNewStyle}
+                    onRemove={removeStyle}
                 />
 
                 <SelectionBar
@@ -87,6 +88,7 @@ export default function AppView() {
                     onComboPeriodChange={handleComboPeriodChange}
                     onSimplePeriodChange={handleSimplePeriodChange}
                     onToggleSelection={toggleAnnouncements}
+                    toggleIsDisabled={learningMoves.length === 0 && learnedMoves.length === 0}
                     onClickAdd={(moveType) => addNewMove(styleState.activeStyleId, moveType)}
                 />
 
@@ -112,9 +114,29 @@ export default function AppView() {
     </Root>
 
 
+    function removeStyle(styleId: string) {
+
+        const remainingStyles = styleState.styles.filter(s => s.id !== styleId)
+
+        if (!remainingStyles.length) {
+            throw new Error(`Cannot remove a style when there is only one left`)
+        }
+
+        dispatch(StyleRedux.setActiveStyle(remainingStyles[0]))
+
+        const style = styleState.styles.find(s => s.id === styleId)
+
+        if (typeof style === 'undefined') {
+            throw new Error(`Couldn't find style with id '${styleId}'`)
+        }
+
+        dispatch(StyleRedux.removeStyle(style))
+        dispatch(MoveRedux.removeMovesBelongingToStyle(style))
+
+    }
+
     function addNewStyle(name: string) {
         const style = StyleService.createEmptyStyle(name)
-        console.log('style', style)
         dispatch(StyleRedux.addStyle(style))
     }
 
@@ -162,7 +184,13 @@ export default function AppView() {
     }
 
     function handleStyleChange(styleId: string) {
-        dispatch(StyleRedux.setActiveStyleId(styleId))
+        const style = styleState.styles.find(s => s.id === styleId)
+
+        if (typeof style === 'undefined') {
+            throw new Error("Could not find style while changing")
+        }
+
+        dispatch(StyleRedux.setActiveStyle(style))
 
         setIsTimerEnabled(false)
     }
