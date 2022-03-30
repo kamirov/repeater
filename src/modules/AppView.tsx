@@ -237,7 +237,7 @@ export default function AppView() {
         if (learningMoves.length) {
             strategicArrays.push({
                 arr: learningMoves,
-                strategy: 'random'
+                strategy: 'priority'
             })
         }
 

@@ -160,6 +160,16 @@ code {
   }
 }
 
+.learning-list {
+
+  .orderable-item {
+    // If changing this number, make sure to change it in the selection service as well
+    &:nth-child(-n+3) {
+      background: #fffaeb;
+    }
+  }
+}
+
 .learned-list {
 
   .orderable-list {
