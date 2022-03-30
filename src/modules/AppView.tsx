@@ -14,6 +14,11 @@ import {SelectionService, StrategicArray} from "./selection/SelectionService";
 import {MoveService} from "./move/MoveService";
 import {AnnouncementService} from "./announcement/AnnouncementService";
 import {StyleService} from "./style/StyleService";
+import {StorageModule} from "./common/StorageModule";
+
+// A bit messy. Eventually can move this to an announcement redux state (see the to-do around the timer below)
+const initialSimplePeriod = parseInt(StorageModule.get('simple-period') || '1500')
+const initialComboPeriod = parseInt(StorageModule.get('combo-period') || '4000')
 
 export default function AppView() {
 
@@ -25,8 +30,8 @@ export default function AppView() {
 
     // TODO: These values all pertain to the announcements. The states should be moved to a redux state for that module,
     //  and the components should be moved to ones from that module
-    const [comboPeriod, setComboPeriod] = useState(4000 as number)
-    const [simplePeriod, setSimplePeriod] = useState(1500 as number)
+    const [simplePeriod, setSimplePeriod] = useState(initialSimplePeriod)
+    const [comboPeriod, setComboPeriod] = useState(initialComboPeriod)
     const [isTimerEnabled, setIsTimerEnabled] = useState(false)
     const [intervalId, setIntervalId] = useState(0 as any)
 
@@ -261,6 +266,7 @@ export default function AppView() {
 
         setIsTimerEnabled(false)
         setSimplePeriod(period)
+        StorageModule.set('simple-period', period)
     }
 
     function handleComboPeriodChange(period: number) {
@@ -268,6 +274,7 @@ export default function AppView() {
 
         setIsTimerEnabled(false)
         setComboPeriod(period)
+        StorageModule.set('combo-period', period)
     }
 
     function toggleAnnouncements() {
