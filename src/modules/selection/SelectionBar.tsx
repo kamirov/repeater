@@ -23,17 +23,17 @@ type Props = {
 function SelectionBar(props: Props) {
 
     const handleSimplePeriodChange = (event: any) => {
-        const period = event.target.value
+        const period = parseInt(event.target.value) || 0
         props.onSimplePeriodChange(period)
     }
 
     const handleComboPeriodChange = (event: any) => {
-        const period = event.target.value
+        const period = parseInt(event.target.value) || 0
         props.onComboPeriodChange(period)
     }
 
     const handleActiveMoveCountChange = (event: any) => {
-        const count = event.target.value
+        const count = parseInt(event.target.value) || 0
         props.onActiveMoveCountChange(count)
     }
 
@@ -46,7 +46,7 @@ function SelectionBar(props: Props) {
             <AddIcon />
         </IconButton>
         <TextField
-            label="Simple Period"
+            label="Simple period (ms)"
             type="number"
             value={props.simplePeriod}
             onChange={handleSimplePeriodChange}
@@ -55,7 +55,7 @@ function SelectionBar(props: Props) {
             }}
         />
         <TextField
-            label="Combo Period"
+            label="Combo period (ms)"
             type="number"
             value={props.comboPeriod}
             onChange={handleComboPeriodChange}
@@ -64,8 +64,9 @@ function SelectionBar(props: Props) {
             }}
         />
         <TextField
-            label="Moves"
+            label="Chained moves"
             type="number"
+            title="This many moves will be read out on each iteration"
             value={props.activeMoveCount}
             onChange={handleActiveMoveCountChange}
             InputLabelProps={{
