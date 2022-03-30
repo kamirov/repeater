@@ -88,7 +88,7 @@ function MoveItem(props: Props) {
 
             <div className="icons-container">
                 {props.move.link &&
-                    <a href={UrlModule.qualify(props.move.link)} target="_blank">
+                    <a href={UrlModule.qualify(props.move.link)} target="_blank" rel="noopener noreferrer">
                         <IconButton>
                             <PublicIcon/>
                         </IconButton>
