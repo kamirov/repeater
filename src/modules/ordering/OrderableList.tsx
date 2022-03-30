@@ -5,7 +5,6 @@ import {Orderable} from "./ordering.types";
 import update from 'immutability-helper'
 
 type Props = {
-    label?: string
 
     items: Orderable[]
     onReorder: (items: Orderable[]) => void
@@ -16,8 +15,6 @@ type Props = {
 }
 
 function OrderableList(props: Props) {
-
-    const label = props.label ? <span className="label">{props.label}</span> : null
 
     const moveItem = useCallback((startIndex: number, endIndex: number) => {
         const reorderedItems = update(props.items, {
@@ -46,7 +43,6 @@ function OrderableList(props: Props) {
     )
 
     return <div id={props.id} className={`${props.className} orderable-list-container`}>
-        {label}
         <div className="orderable-list">
             {props.items.map((item, i) => renderItem(item, i))}
         </div>
