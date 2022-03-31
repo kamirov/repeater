@@ -16,7 +16,6 @@ import {StyleService} from "./style/StyleService";
 import {StorageModule} from "./common/StorageModule";
 import MoveList from "./move/MoveList";
 
-
 // A bit messy. Eventually can move this to an announcement redux state (see the to-do around the timer below)
 const storedSimplePeriod = StorageModule.get('simple-period')
 const storedComboPeriod = StorageModule.get('combo-period')
@@ -40,7 +39,6 @@ export default function AppView() {
 
     const [learningWeight, setLearningWeight] = useState(initialLearningWeight)
     const [learnedWeight, setLearnedWeight] = useState(initialLearnedWeight)
-
 
     // TODO: These values all pertain to the announcements. The states should be moved to a redux state for that module,
     //  and the components should be moved to ones from that module
@@ -81,6 +79,15 @@ export default function AppView() {
     const learningMoves = moveState.learningMoves.filter(m => m.styleId === styleState.activeStyleId)
     const learnedMoves = moveState.learnedMoves.filter(m => m.styleId === styleState.activeStyleId)
 
+    const enabledLearningMoves = learningMoves.filter(m => !m.isDisabled)
+    const enabledLearnedMoves = learnedMoves.filter(m => !m.isDisabled)
+
+    const allMoves = [...learningMoves, ...learnedMoves]
+    const allEnabledMoves = [...enabledLearningMoves, ...enabledLearnedMoves]
+
+    const enabledMovesCount = allEnabledMoves.length
+
+
     const toOrderableMoveItem = (m: Move): Orderable => {
         return {
             id: m.id,
@@ -101,7 +108,7 @@ export default function AppView() {
 
     const buttonText = isTimerEnabled ? "Stop" : "Start"
 
-    const toggleIsDisabled = (learningMoves.length + learnedMoves.length < activeMoveCount)
+    const toggleIsDisabled = (enabledMovesCount < activeMoveCount)
 
     const showLearningList = Boolean(learningMoveItems.length)
     const showLearnedList = Boolean(learnedMoveItems.length)
@@ -162,7 +169,7 @@ export default function AppView() {
         setLearnedWeight(resolvedLearnedWeight)
 
         // Avoid an infinite loop edge case
-        if (activeMoveCount === learnedMoves.length + learningMoves.length) {
+        if (activeMoveCount === enabledMovesCount) {
             if (resolvedLearningWeight === 100 || resolvedLearningWeight === 0) {
                 handleActiveMoveCountChange(1)
             }
@@ -274,7 +281,7 @@ export default function AppView() {
         resetTimer()
 
         // Avoid an infinite loop edge case
-        if (count === learnedMoves.length + learningMoves.length) {
+        if (count === enabledMovesCount) {
             if (learningWeight === 100) {
                 handleLearningWeightChange(99)
             }
@@ -298,17 +305,17 @@ export default function AppView() {
         const strategicArrays: StrategicArray[] = []
         const weights: number[] = []
 
-        if (learningMoves.length) {
+        if (enabledLearningMoves.length) {
             strategicArrays.push({
-                arr: learningMoves,
+                arr: enabledLearningMoves,
                 strategy: 'priority'
             })
             weights.push(learningWeight)
         }
 
-        if (learnedMoves.length) {
+        if (enabledLearnedMoves.length) {
             strategicArrays.push({
-                arr: learnedMoves,
+                arr: enabledLearnedMoves,
                 strategy: 'random'
             })
             weights.push(learnedWeight)
@@ -320,6 +327,7 @@ export default function AppView() {
 
         const moves: Move[] = []
         for (let i = 0; i < activeMoveCount ; i++) {
+
             let move = SelectionService.select(strategicArrays, weights) as Move
             while (moves.find(m => m.id === move.id)) {
                 move = SelectionService.select(strategicArrays, weights) as Move

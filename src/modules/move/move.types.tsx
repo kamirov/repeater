@@ -6,6 +6,7 @@ export type Move = {
     link: string | null
     type: MoveType
     isLearned: boolean
+    isDisabled?: boolean        // TODO: This is optional for historical reasons. Once all stored elements have this field, we should make it mandatory
 }
 
 export enum MoveType {
