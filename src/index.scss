@@ -101,10 +101,6 @@ code {
       font-size: 1rem;
     }
 
-    input {
-      margin-left: 1rem;
-    }
-
     .switch {
       margin-left: 0.6rem;
     }
@@ -113,7 +109,8 @@ code {
       margin-left: 0.2rem;
     }
 
-    input {
+    input, textarea {
+      margin-left: 1rem;
       flex-grow: 2;
       outline: none;
       border: none;
