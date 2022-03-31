@@ -1,10 +1,11 @@
 import * as React from "react";
 import {useState} from "react";
 import {Move, MoveType} from "./move.types";
-import {Checkbox, FormGroup, IconButton, Switch} from "@material-ui/core";
+import {Checkbox, FormGroup, IconButton, Switch, TextareaAutosize} from "@material-ui/core";
 import DeleteIcon from '@material-ui/icons/Delete';
 import PublicIcon from '@material-ui/icons/Public';
 import DirectionsRunIcon from '@material-ui/icons/DirectionsRun';
+import DescriptionIcon from '@material-ui/icons/Description';
 import {UrlModule} from "../common/UrlModule";
 
 type Props = {
@@ -40,6 +41,14 @@ function MoveItem(props: Props) {
         props.onChange({
             ...props.move,
             name
+        })
+    }
+
+    const handleDescriptionChange = (event: any) => {
+        const description = event.target.value
+        props.onChange({
+            ...props.move,
+            description
         })
     }
 
@@ -123,6 +132,20 @@ function MoveItem(props: Props) {
                 </div>
                 <Switch className="switch" checked={props.move.type === 'combo'} onChange={handleMoveTypeToggle} name="move-type" />
                 <span className="switch-label">Combo</span>
+            </FormGroup>
+        </div>
+        <div className={inputRowClassName}>
+            <FormGroup className={"input-container"}>
+                <div className="icon">
+                    <DescriptionIcon/>
+                </div>
+                <TextareaAutosize
+                    className="description"
+                    value={props.move.description || ""}
+                    onChange={handleDescriptionChange}
+                    onFocus={handleInputFocus}
+                    placeholder="Description"
+                />
             </FormGroup>
         </div>
     </div>
