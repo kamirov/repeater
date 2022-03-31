@@ -6,6 +6,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import PublicIcon from '@material-ui/icons/Public';
 import DirectionsRunIcon from '@material-ui/icons/DirectionsRun';
 import DescriptionIcon from '@material-ui/icons/Description';
+import BlockIcon from '@material-ui/icons/Block';
 import {UrlModule} from "../common/UrlModule";
 
 type Props = {
@@ -26,6 +27,17 @@ function MoveItem(props: Props) {
 
     const handleMoveTypeToggle = (event: any) => {
         props.onToggleMoveType()
+    }
+
+    const handleDisableToggle = (event: any) => {
+        const isDisabled = (typeof props.move.isDisabled === 'undefined') ?
+            true :
+            !props.move.isDisabled
+
+        props.onChange({
+            ...props.move,
+            isDisabled
+        })
     }
 
     const handleLinkChange = (event: any) => {
@@ -73,6 +85,7 @@ function MoveItem(props: Props) {
     let className = `${props.className} move-item `
     className += props.isActive ? ' active ' : ''
     className += props.move.type === MoveType.Combo ? ' combo-move ' : ' simple-move '
+    className += props.move.isDisabled ? ' disabled ' : ''
 
     const inputRowClassName = `input-row ${showFields ? 'visible' : ''}`
 
@@ -146,6 +159,15 @@ function MoveItem(props: Props) {
                     onFocus={handleInputFocus}
                     placeholder="Description"
                 />
+            </FormGroup>
+        </div>
+        <div className={inputRowClassName}>
+            <FormGroup className={"input-container"}>
+                <div className="icon">
+                    <BlockIcon/>
+                </div>
+                <Switch className="switch" checked={props.move.isDisabled} onChange={handleDisableToggle} name="move-type" />
+                <span className="switch-label">Disabled</span>
             </FormGroup>
         </div>
     </div>

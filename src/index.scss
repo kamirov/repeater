@@ -67,6 +67,11 @@ code {
     border: 1px solid gray;
   }
 
+  &.disabled {
+    color: #aaaaaa;
+    opacity: 0.2;
+  }
+
 
   &.active {
     background: #e0ffec;
@@ -190,6 +195,6 @@ code {
 .learned-move-list {
 
   .orderable-list {
-    opacity: 0.5;
+    opacity: 0.7;
   }
 }
