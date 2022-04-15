@@ -7,6 +7,7 @@ export type Move = {
     type: MoveType
     isLearned: boolean
     isDisabled?: boolean        // TODO: This is optional for historical reasons. Once all stored elements have this field, we should make it mandatory
+    period?: number
 }
 
 export enum MoveType {
