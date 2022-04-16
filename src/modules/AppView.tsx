@@ -15,6 +15,7 @@ import {AnnouncementService} from "./announcement/AnnouncementService";
 import {StyleService} from "./style/StyleService";
 import {StorageModule} from "./common/StorageModule";
 import MoveList from "./move/MoveList";
+import Footer from "./common/Footer";
 
 // A bit messy. Eventually can move this to an announcement redux state (see the to-do around the timer below)
 const storedSimplePeriod = StorageModule.get('simple-period')
@@ -153,6 +154,7 @@ export default function AppView() {
                     items={learnedMoveItems}
                 />
                 }
+                <Footer />
             </Page>
         </Main>
     </Root>
