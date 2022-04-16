@@ -97,6 +97,10 @@ code {
     align-items: center;
   }
 
+  .check-container {
+    flex-wrap: nowrap;
+  }
+
   .check-container, .input-container {
     display: flex;
     flex-direction: row;
