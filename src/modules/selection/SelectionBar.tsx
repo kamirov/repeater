@@ -48,6 +48,7 @@ function SelectionBar(props: Props) {
         <TextField
             label="Simple period (ms)"
             type="number"
+            className={"selection-field"}
             value={props.simplePeriod}
             onChange={handleSimplePeriodChange}
             InputLabelProps={{
@@ -57,6 +58,7 @@ function SelectionBar(props: Props) {
         <TextField
             label="Combo period (ms)"
             type="number"
+            className={"selection-field"}
             value={props.comboPeriod}
             onChange={handleComboPeriodChange}
             InputLabelProps={{
@@ -66,6 +68,7 @@ function SelectionBar(props: Props) {
         <TextField
             label="Chained moves"
             type="number"
+            className={"selection-field"}
             title="This many moves will be read out on each iteration"
             value={props.activeMoveCount}
             onChange={handleActiveMoveCountChange}
@@ -73,7 +76,13 @@ function SelectionBar(props: Props) {
                 shrink: true,
             }}
         />
-        <Button variant="contained" color="primary" onClick={props.onToggleSelection} disabled={props.toggleIsDisabled}>
+        <Button
+            variant="contained"
+            color="primary"
+            onClick={props.onToggleSelection}
+            disabled={props.toggleIsDisabled}
+            className={"selection-button"}
+        >
             {props.buttonText}
         </Button>
     </div>
