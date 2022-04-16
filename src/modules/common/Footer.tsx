@@ -57,7 +57,8 @@ function Footer(props: Props) {
     return <footer>
         <TextField
             className={"string-state " + (isValidState ? "valid" : "invalid")}
-            label={"State structure"}
+            label={"State structure (for sharing)"}
+            title={"Copy paste this field to another another browser with Repeater to share the app state"}
             value={stringState}
             onChange={(event: any) => setStringState(event.target.value)}
             InputLabelProps={{
