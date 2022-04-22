@@ -256,11 +256,16 @@ export default function AppView() {
     function reorderLearningItems(orderedItems: Orderable[]) {
         resetTimer()
 
-        const moves = orderedItems.map(o => moveState.learningMoves.find(m => m.id === o.id))
-
-        if (moves.some(m => typeof m === 'undefined')) {
+        const activeStyleMoves = orderedItems.map(o => moveState.learningMoves.find(m => m.id === o.id))
+        if (activeStyleMoves.some(m => typeof m === 'undefined')) {
             throw new Error(`Moves could not be parsed from reordered list`)
         }
+
+        const otherStyleMoves = moveState.learningMoves.filter(m => {
+            return !orderedItems.some(o => o.id === m.id)
+        })
+
+        const moves = activeStyleMoves.concat(otherStyleMoves)
 
         dispatch(MoveRedux.setLearningMoves(moves as Move[]))
     }

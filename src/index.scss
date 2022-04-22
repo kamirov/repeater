@@ -200,7 +200,7 @@ code {
 
   .orderable-item {
     // If changing this number, make sure to change it in the selection service as well
-    &:nth-child(-n+3) {
+    &:nth-child(-n+5) {
       background: #fffaeb;
     }
   }

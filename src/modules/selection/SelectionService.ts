@@ -41,7 +41,7 @@ function select(strategicArrays: StrategicArray[], weights: number[] = []) {
 
         // Splits list into a priority sublist and a nonpriority sublist, picks one of them at random, then picks a random element within
         case 'priority':
-            const priorityItems = 3     // If changing this, make sure to change it in CSS as well for .orderable-item
+            const priorityItems = 5     // If changing this, make sure to change it in CSS as well for .orderable-item
             const priorityArr = strategicArray.arr.slice(0, priorityItems)
             const nonPriorityArr = strategicArray.arr.slice(priorityItems)
 
