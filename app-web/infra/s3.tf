@@ -23,3 +23,15 @@ resource "aws_s3_bucket_versioning" "app" {
     status = "Enabled"
   }
 }
+
+resource "aws_s3_bucket_website_configuration" "app" {
+  bucket = aws_s3_bucket.app.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "index.html"
+  }
+}
