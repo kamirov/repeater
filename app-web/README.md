@@ -1,5 +1,7 @@
 # Repeater (Web Frontend)
 
+This is the React web frontend for Repeater
+
 # Usage notes
 
 - Any style or move changes you make will be automatically saved in your browser. If you refresh or close the page and reopen it, you'll see the changes are persisted. If you open the app on another device or if you clear your cache, nothing will be saved
