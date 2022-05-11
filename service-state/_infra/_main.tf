@@ -1,13 +1,13 @@
 terraform {
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
+      source = "hashicorp/aws"
     }
   }
 
   backend "s3" {
     bucket         = "repeater-infra"
-    key            = "terraform.tfstate"
+    key            = "service-state/terraform.tfstate"
     encrypt        = true
     region         = "us-east-1"
     dynamodb_table = "repeater-state-locks"

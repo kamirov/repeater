@@ -13,12 +13,12 @@ module "api_gateway" {
   create_api_domain_name = false
 
   # Access logs
-  default_stage_access_log_format          = "$context.identity.sourceIp - - [$context.requestTime] \"$context.httpMethod $context.routeKey $context.protocol\" $context.status $context.responseLength $context.requestId $context.integrationErrorMessage"
+  default_stage_access_log_format = "$context.identity.sourceIp - - [$context.requestTime] \"$context.httpMethod $context.routeKey $context.protocol\" $context.status $context.responseLength $context.requestId $context.integrationErrorMessage"
 
-  # Routes and integrations
+  # Routes and integrations (API surface)
   integrations = {
-    "$default" = {
-      lambda_arn = module.lambda.lambda_function_arn
+    "GET /state" = {
+      lambda_arn = module.lambda_get_state.lambda_function_arn
     }
   }
 }
