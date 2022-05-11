@@ -3,6 +3,7 @@ import reducer from "./reducer"
 import {createLogger} from 'redux-logger'
 import {RootState} from "./redux.types";
 import {StorageModule} from "../modules/common/StorageModule";
+import {BackendModule} from "../modules/common/BackendModule";
 
 const defaultMiddleware = getDefaultMiddleware({
     thunk: true,
@@ -34,10 +35,20 @@ if (process.env.NODE_ENV === 'development' && module.hot) {
 }
 
 function saveState(state: RootState) {
-    StorageModule.set('state', state)
+    if (BackendModule.getApiSecret()) {
+        return BackendModule.put('state', {
+            state
+        })
+    } else {
+        StorageModule.set('state', state)
+    }
 }
 function loadState(): any {
-    return StorageModule.get('state') || undefined
+    if (BackendModule.getApiSecret()) {
+        return BackendModule.get('state')
+    } else {
+        return StorageModule.get('state') || undefined
+    }
 }
 
 export default store
