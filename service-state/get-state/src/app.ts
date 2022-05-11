@@ -2,26 +2,8 @@ const AWS = require('aws-sdk');
 
 module.exports.handler = async (event) => {
 
-    console.log("Validating input")
-
-    for (const param of ['bucket', 'key']) {
-        if (!event.queryStringParameters || !event.queryStringParameters[param]) {
-            const error = `Query parameters missing required parameter '${param}'`
-
-            return {
-                statusCode: 400,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: error,
-            }
-        }
-    }
-
-    console.log("Parsing params")
-
-    const bucket = event.queryStringParameters['bucket']
-    const key = event.queryStringParameters['key']
+    const bucket = 'repeater-service-state-default'
+    const key = 'state'
 
     try {
         console.log("Instantiating S3 client")
@@ -32,7 +14,8 @@ module.exports.handler = async (event) => {
         }
 
         console.log("Getting S3 object using params:", params)
-        const state = await s3.getObject(params).promise();
+        const s3Object = await s3.getObject(params).promise();
+        const state = s3Object.Body.toString('utf-8');
 
         console.log("Returning state", state)
 
@@ -41,7 +24,7 @@ module.exports.handler = async (event) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(state),
+            body: state,
         };
 
     } catch (e: any) {
@@ -50,7 +33,7 @@ module.exports.handler = async (event) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: e.message(),
+            body: e.message,
         }
     }
 }
