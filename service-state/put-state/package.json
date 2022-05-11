@@ -17,6 +17,6 @@
   },
   "scripts": {
     "build": "rimraf ./build && tsc",
-    "postbuild": "cp package.json build/package.json && cd build && yarn"
+    "postbuild": "cp package.json build/package.json && cd build && yarn -prod"
   }
 }
