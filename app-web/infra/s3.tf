@@ -35,3 +35,25 @@ resource "aws_s3_bucket_website_configuration" "app" {
     key = "index.html"
   }
 }
+
+resource "aws_s3_bucket_policy" "app" {
+  bucket = aws_s3_bucket.app.id
+  policy = data.aws_iam_policy_document.app.json
+}
+
+data "aws_iam_policy_document" "app" {
+  statement {
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+
+    actions = [
+      "s3:GetObject"
+    ]
+
+    resources = [
+      "${aws_s3_bucket.app.arn}/*"
+    ]
+  }
+}
