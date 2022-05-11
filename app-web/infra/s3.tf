@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "app" {
-  bucket = "repeater-app-web"
+  bucket = "repeater-app-web-${terraform.workspace}"
 }
 
 resource "aws_s3_bucket_acl" "app" {
