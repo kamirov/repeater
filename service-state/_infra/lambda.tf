@@ -4,6 +4,7 @@ module "lambda_get_state" {
   function_name = "service-state-get-state-${terraform.workspace}"
   description   = "Gets frontend state"
 
+  publish = true
   runtime     = "nodejs14.x"
   handler     = "app.handler"
   timeout     = 10
@@ -19,6 +20,13 @@ module "lambda_get_state" {
       resources = ["${aws_s3_bucket.state.arn}/*"]
     }
   }
+
+  allowed_triggers = {
+    AllowExecutionFromAPIGateway = {
+      service    = "apigateway"
+      source_arn = "${module.api_gateway.apigatewayv2_api_execution_arn}/*/*"
+    }
+  }
 }
 
 
@@ -28,6 +36,7 @@ module "lambda_put_state" {
   function_name = "service-state-put-state-${terraform.workspace}"
   description   = "Stores frontend state"
 
+  publish = true
   runtime     = "nodejs14.x"
   handler     = "app.handler"
   timeout     = 10
@@ -41,6 +50,13 @@ module "lambda_put_state" {
       effect    = "Allow",
       actions   = ["s3:PutObject"],
       resources = ["${aws_s3_bucket.state.arn}/*"]
+    }
+  }
+
+  allowed_triggers = {
+    AllowExecutionFromAPIGateway = {
+      service    = "apigateway"
+      source_arn = "${module.api_gateway.apigatewayv2_api_execution_arn}/*/*"
     }
   }
 }
