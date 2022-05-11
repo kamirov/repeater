@@ -19,6 +19,9 @@ module "api_gateway" {
   integrations = {
     "GET /state" = {
       lambda_arn = module.lambda_get_state.lambda_function_arn
+    },
+    "PUT /state" = {
+      lambda_arn = module.lambda_put_state.lambda_function_arn
     }
   }
 }
