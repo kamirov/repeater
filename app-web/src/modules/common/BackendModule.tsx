@@ -8,7 +8,7 @@ export const BackendModule = {
     patch,
     get,
 
-    getApiSecret
+    isBackendEnabled
 }
 
 const apiSecretKey = 'api-secret'
@@ -19,6 +19,10 @@ let apiSecret: string
 function init() {
     apiSecret = getApiSecret()
     StorageModule.set(apiSecretKey, apiSecret)
+}
+
+function isBackendEnabled() {
+    return Boolean(getApiSecret())
 }
 
 function getApiSecret() {
