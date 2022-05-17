@@ -4,11 +4,14 @@ import {createLogger} from 'redux-logger'
 import {RootState} from "./redux.types";
 import {StorageModule} from "../modules/common/StorageModule";
 import {BackendModule} from "../modules/common/BackendModule";
+import {SyncModule} from "../modules/common/SyncModule";
 
 const defaultMiddleware = getDefaultMiddleware({
     thunk: true,
     serializableCheck: false,
 })
+
+const stateKey = 'state'
 
 const logger = createLogger()
 
@@ -35,20 +38,15 @@ if (process.env.NODE_ENV === 'development' && module.hot) {
 }
 
 function saveState(state: RootState) {
-    if (BackendModule.getApiSecret()) {
-        return BackendModule.put('state', {
-            state
-        })
-    } else {
-        StorageModule.set('state', state)
+    StorageModule.set(stateKey, state)
+    if (BackendModule.isBackendEnabled()) {
+        SyncModule.scheduleSync(state)
     }
 }
+
 function loadState(): any {
-    if (BackendModule.getApiSecret()) {
-        return BackendModule.get('state')
-    } else {
-        return StorageModule.get('state') || undefined
-    }
+    // Note, this can't be async, since this is the initial state; we do an async call later to refresh the state in case it's different between
+    return StorageModule.get(stateKey) || undefined
 }
 
 export default store
