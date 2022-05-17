@@ -1,4 +1,7 @@
 import * as React from "react";
+import {Button} from "@material-ui/core";
+import {BackendModule} from "./BackendModule";
+import {StorageModule} from "./StorageModule";
 type Props = {
     id?: string
     className?: string
@@ -18,65 +21,37 @@ function Footer(props: Props) {
     //     validateStringState()
     // }, [stringState])
     //
-    // function updateState() {
-    //     if (isValidState) {
-    //         try {
-    //             const parsedState = JSON.parse(stringState);
-    //             StorageModule.set('state', parsedState)
-    //             window.location.reload();
-    //         } catch (e) {
-    //             alert("Error updating stored state: " + e.message)
-    //             console.error(e)
-    //         }
-    //     } else {
-    //         alert("String state is currently invalid")
-    //     }
-    // }
-    //
-    // function validateStringState() {
-    //     let parsedState: RootState;
-    //     try {
-    //         parsedState = JSON.parse(stringState);
-    //         if (stateIsValid(parsedState)) {
-    //             setIsValidState(true)
-    //         } else {
-    //             setIsValidState(true)
-    //         }
-    //     } catch (e) {
-    //         setIsValidState(false)
-    //     }
-    // }
+
+    const backendEnabled =BackendModule.isBackendEnabled()
+    async function refreshState() {
+        if (backendEnabled) {
+            try {
+                const remoteState = await BackendModule.get('state')
+                StorageModule.set('state', remoteState)
+                window.location.reload();
+            } catch (e: any) {
+                alert("Error updating stored state: " + e.message)
+                console.error(e)
+            }
+        } else {
+            alert("No backend available")
+        }
+    }
 
     return <footer>
-        {/*<TextField*/}
-        {/*    className={"string-state " + (isValidState ? "valid" : "invalid")}*/}
-        {/*    label={"State structure (for sharing)"}*/}
-        {/*    title={"Copy paste this field to another another browser with Repeater to share the app state"}*/}
-        {/*    value={stringState}*/}
-        {/*    onChange={(event: any) => setStringState(event.target.value)}*/}
-        {/*    InputLabelProps={{*/}
-        {/*        shrink: true,*/}
-        {/*    }}*/}
-        {/*/>*/}
-        {/*<Button*/}
-        {/*    variant="contained"*/}
-        {/*    color="primary"*/}
-        {/*    onClick={updateState}*/}
-        {/*    className={"footer-button"}*/}
-        {/*>*/}
-        {/*    Update*/}
-        {/*</Button>*/}
+        {
+            backendEnabled &&
+            <Button
+                variant="contained"
+                color="primary"
+                onClick={refreshState}
+                fullWidth={true}
+                className={"footer-button"}
+            >
+                Sync State
+            </Button>
+        }
     </footer>
-
-    // function stateIsValid(possibleState: RootState) {
-    //     return possibleState.style &&
-    //         possibleState.style.activeStyleId &&
-    //         possibleState.style.styles.every(StyleService.isValidStyle) &&
-    //         possibleState.move &&
-    //         possibleState.move.activeMoveType &&
-    //         possibleState.move.learnedMoves.every(MoveService.isValidMove) &&
-    //         possibleState.move.learningMoves.every(MoveService.isValidMove)
-    // }
 }
 
 export default Footer;
