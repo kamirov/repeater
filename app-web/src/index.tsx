@@ -9,6 +9,7 @@ import {BrowserRouter} from "react-router-dom";
 import store from "./redux/store";
 import {HTML5Backend} from "react-dnd-html5-backend";
 import {DndProvider} from "react-dnd";
+
 ReactDOM.render(
     <Provider store={store}>
         <CssBaseline/>

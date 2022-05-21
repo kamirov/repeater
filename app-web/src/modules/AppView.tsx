@@ -88,7 +88,6 @@ export default function AppView() {
 
     const enabledMovesCount = allEnabledMoves.length
 
-
     const toOrderableMoveItem = (m: Move): Orderable => {
         return {
             id: m.id,
