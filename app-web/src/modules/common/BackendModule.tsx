@@ -22,7 +22,7 @@ function init() {
 }
 
 function isBackendEnabled() {
-    return Boolean(getApiSecret())
+    return Boolean(getApiSecret() === 'something-i-should-change')
 }
 
 function getApiSecret() {
