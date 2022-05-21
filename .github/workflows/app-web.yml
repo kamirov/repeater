@@ -1,13 +1,18 @@
-name: CI
+ name: CI (app-web)
 
 on:
   push:
-    branches:
-      - main
-    paths-ignore:
-      - README.md
-      - LICENSE
-      - .gitignore
+#    branches:
+#      - main
+    paths:
+      - 'app-web/**'
+      - '.github/workflows/app-web.yml'
+  workflow_dispatch:
+
+
+defaults:
+  run:
+    working-directory: ./app-web
 
 env:
   NODE_VERSION: 14.x
