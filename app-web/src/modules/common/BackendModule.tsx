@@ -8,21 +8,21 @@ export const BackendModule = {
     patch,
     get,
 
+    enableBackend,
     isBackendEnabled
 }
 
 const apiSecretKey = 'api-secret'
 
 const apiRoot = Environment.apiRoot
-let apiSecret: string
-
-function init() {
-    apiSecret = getApiSecret()
-    StorageModule.set(apiSecretKey, apiSecret)
-}
+const backendEnabledApiSecret = "something-i-should-change"
 
 function isBackendEnabled() {
-    return Boolean(getApiSecret() === 'something-i-should-change')
+    return Boolean(getApiSecret() === backendEnabledApiSecret)
+}
+
+function enableBackend() {
+    return StorageModule.set(apiSecretKey, backendEnabledApiSecret)
 }
 
 function getApiSecret() {
@@ -60,8 +60,8 @@ async function get(path: string, params?: any) {
 
 function getCommonHeaders() {
     const headers: HttpHeaders = {}
-    if (apiSecret) {
-        headers.Authorization = `Bearer ${apiSecret}`
+    if (isBackendEnabled()) {
+        headers.Authorization = `Bearer ${getApiSecret()}`
     }
 
     return headers
@@ -94,5 +94,3 @@ function catchError(error: any) {
 type HttpHeaders = {
     [headerName: string]: string
 }
-
-init()
