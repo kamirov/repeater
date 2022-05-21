@@ -2,8 +2,6 @@ name: CI (service-state)
 
 on:
   push:
-#    branches:
-#      - main
     paths:
       - 'service-core/**'
       - '.github/workflows/service-core.yml'

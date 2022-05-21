@@ -1,9 +1,7 @@
- name: CI (app-web)
+name: CI (app-web)
 
 on:
   push:
-#    branches:
-#      - main
     paths:
       - 'app-web/**'
       - '.github/workflows/app-web.yml'
