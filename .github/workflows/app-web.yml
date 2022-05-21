@@ -1,45 +1,27 @@
-name: CI
+name: CI (app-web)
 
 on:
   push:
     branches:
       - main
-    paths-ignore:
-      - README.md
-      - LICENSE
-      - .gitignore
+    paths:
+      - 'app-web/**'
+      - '.github/workflows/app-web.yml'
+  workflow_dispatch:
+
+
+defaults:
+  run:
+    working-directory: ./app-web
 
 env:
   NODE_VERSION: 14.x
 
 jobs:
-  build:
-    name: Build
-    timeout-minutes: 5
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Install dependencies
-        run: yarn
-      - name: Build project
-        run: CI= yarn build
-      - name: Archive build artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: build
-          path: ./build
-          if-no-files-found: error
-
   deploy:
     name: Deploy
     timeout-minutes: 5
     runs-on: ubuntu-latest
-    needs: build
 
     steps:
       - uses: actions/checkout@v2
@@ -47,16 +29,20 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      # Build
+      - name: Install dependencies
+        run: yarn
+      - name: Build project
+        run: CI= yarn build
+
+      # Deploy
       - name: Set AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - name: Retrieve build artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: build
-          path: ./build
       - name: Deploy
         run: yarn deploy
+

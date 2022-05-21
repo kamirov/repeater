@@ -17,6 +17,9 @@ function announce(moves: Move[]) {
         // Create an utterance object
         const utterance = new SpeechSynthesisUtterance(message);
 
+        // Set language (if device has another set)
+        utterance.lang = 'en-US';
+
         // Speak the utterance
         synthesis.speak(utterance);
     } else {

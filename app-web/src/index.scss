@@ -229,6 +229,16 @@ footer {
   }
 
   .footer-button {
-    width: $button-width;
+  }
+
+  .footer-message {
+    font-style: italic;
+    color: #aaa;
+    text-align: center;
+    width: 100%;
+
+    a {
+      color: #3a82ff;
+    }
   }
 }

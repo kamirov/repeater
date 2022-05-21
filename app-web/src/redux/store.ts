@@ -5,6 +5,7 @@ import {RootState} from "./redux.types";
 import {StorageModule} from "../modules/common/StorageModule";
 import {BackendModule} from "../modules/common/BackendModule";
 import {SyncModule} from "../modules/common/SyncModule";
+import {UrlModule} from "../modules/common/UrlModule";
 
 const defaultMiddleware = getDefaultMiddleware({
     thunk: true,
@@ -45,6 +46,13 @@ function saveState(state: RootState) {
 }
 
 function loadState(): any {
+
+    // TODO: Shouldn't be here, probably in a common reducer
+    const backendShouldEnable = Boolean(UrlModule.getFromQueryParams('backend-enabled'))
+    if (backendShouldEnable) {
+        BackendModule.enableBackend()
+    }
+
     // Note, this can't be async, since this is the initial state; we do an async call later to refresh the state in case it's different between
     return StorageModule.get(stateKey) || undefined
 }
