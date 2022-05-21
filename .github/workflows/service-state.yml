@@ -2,9 +2,6 @@ name: CI (service-state)
 
 on:
   push:
-    paths:
-      - 'service-core/**'
-      - '.github/workflows/service-core.yml'
   workflow_dispatch:
 
 defaults:
