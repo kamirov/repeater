@@ -22,7 +22,7 @@ function Footer(props: Props) {
     // }, [stringState])
     //
 
-    const backendEnabled =BackendModule.isBackendEnabled()
+    const backendEnabled = BackendModule.isBackendEnabled()
     async function refreshState() {
         if (backendEnabled) {
             try {
@@ -51,6 +51,9 @@ function Footer(props: Props) {
                 Sync State
             </Button>
         }
+        <div className="footer-message">
+            Made with ♡ by <a href="https://github.com/kamirov">@kamirov</a>. Want to contribute? Check out <a href="https://github.com/kamirov/repeater">the repo</a>.
+        </div>
     </footer>
 }
 
