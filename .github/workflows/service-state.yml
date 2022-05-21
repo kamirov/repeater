@@ -2,6 +2,11 @@ name: CI (service-state)
 
 on:
   push:
+    branches:
+      - main
+    paths:
+      - 'service-state/**'
+      - '.github/workflows/service-state.yml'
   workflow_dispatch:
 
 defaults:
