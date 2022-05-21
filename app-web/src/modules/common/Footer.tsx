@@ -52,7 +52,7 @@ function Footer(props: Props) {
             </Button>
         }
         <div className="footer-message">
-            Made with ♡ by <a href="https://github.com/kamirov">@kamirov</a>. Want to contribute? Check out <a href="https://github.com/kamirov/repeater">the repo</a>.
+            Made with ♡ by <a href="https://github.com/kamirov">@kamirov</a>. Want to contribute? Check out <a href="https://github.com/kamirov/repeater">the repo</a>
         </div>
     </footer>
 }
