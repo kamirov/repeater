@@ -12,8 +12,8 @@ env:
   NODE_VERSION: 14.x
 
 jobs:
-  build:
-    name: Build
+  deploy:
+    name: Deploy
     timeout-minutes: 5
     runs-on: ubuntu-latest
 
