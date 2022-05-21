@@ -32,6 +32,7 @@ This is the React web frontend for Repeater
 # TODO
 
 - Improve the selection strategy. Ultimately the point is to prioritize learning items, and within them to further prioritize a few select ones, but at the same time to not neglect the ones you've already learned. The current approach is not perfect, but roughly gets us there. It definitely has problems with some edge cases (e.g. when there are very few learned items, it actually ends up prioritizing them)
-- Add in a backend to persist values remotely
 - Add in user support to persist values per user (will probably skip out on this, unless people start using this app)
-- Add an infra configuration via Terraform
+- Add in some backend authorization. Maybe eventually add user support with credentials, but at least a secret on the backend will suffice
+- Add in deployment via Terraform. Maybe this is not needed. Think more on this
+
