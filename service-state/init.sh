@@ -3,4 +3,4 @@
 yarn --cwd get-state
 yarn --cwd put-state
 
-terraform -chdir=_infra init
+terraform -chdir=infra init

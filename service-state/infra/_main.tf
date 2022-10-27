@@ -1,19 +1,18 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
+      version = "~> 4.36.1"
     }
   }
 
   backend "s3" {
-    bucket         = "repeater-infra"
-    key            = "service-state/terraform.tfstate"
+    bucket         = "mika-1-prod-infra-state"
+    key            = "repeater-service-state.tfstate"
     encrypt        = true
     region         = "us-east-1"
-    dynamodb_table = "repeater-state-locks"
+    dynamodb_table = "mika-1-prod-infra-state-locks"
   }
-
-  required_version = ">= 1.1.5"
 }
 
 provider "aws" {

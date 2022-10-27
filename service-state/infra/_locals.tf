@@ -2,7 +2,7 @@ locals {
   org = "mika-1"
   env = "prod"
   app = "repeater"
-  component = "app-web"
+  component = "service-state"
   namespace = "${local.org}-${local.app}"
   fqn = "${local.namespace}-${local.env}-${local.component}"
 

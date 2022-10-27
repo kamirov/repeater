@@ -1,5 +1,7 @@
 resource "aws_s3_bucket" "app" {
-  bucket = "repeater-app-web-${terraform.workspace}"
+  bucket = local.fqn
+
+  tags = local.default_tags
 }
 
 resource "aws_s3_bucket_acl" "app" {

@@ -1,7 +1,7 @@
 module "api_gateway" {
   source = "registry.terraform.io/terraform-aws-modules/apigateway-v2/aws"
 
-  name          = "service-state-${terraform.workspace}"
+  name          = local.fqn
   protocol_type = "HTTP"
 
   cors_configuration = {
@@ -24,4 +24,6 @@ module "api_gateway" {
       lambda_arn = module.lambda_put_state.lambda_function_arn
     }
   }
+
+  tags = local.default_tags
 }

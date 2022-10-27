@@ -1,7 +1,7 @@
 locals {
   org = "mika-1"
   env = "prod"
-  app = "alengua"
+  app = "repeater"
   component = "app-web"
   namespace = "${local.org}-${local.app}"
   fqn = "${local.namespace}-${local.env}-${local.component}"

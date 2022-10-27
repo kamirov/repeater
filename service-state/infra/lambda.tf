@@ -1,11 +1,11 @@
 module "lambda_get_state" {
   source = "registry.terraform.io/terraform-aws-modules/lambda/aws"
 
-  function_name = "service-state-get-state-${terraform.workspace}"
+  function_name = "${local.fqn}-get-state"
   description   = "Gets frontend state"
 
   publish = true
-  runtime     = "nodejs14.x"
+  runtime     = "nodejs16.x"
   handler     = "app.handler"
   timeout     = 10
   memory_size = 256
@@ -27,17 +27,19 @@ module "lambda_get_state" {
       source_arn = "${module.api_gateway.apigatewayv2_api_execution_arn}/*/*"
     }
   }
+
+  tags = local.default_tags
 }
 
 
 module "lambda_put_state" {
   source = "registry.terraform.io/terraform-aws-modules/lambda/aws"
 
-  function_name = "service-state-put-state-${terraform.workspace}"
+  function_name = "${local.fqn}-put-state-${terraform.workspace}"
   description   = "Stores frontend state"
 
   publish = true
-  runtime     = "nodejs14.x"
+  runtime     = "nodejs16.x"
   handler     = "app.handler"
   timeout     = 10
   memory_size = 256
@@ -59,4 +61,6 @@ module "lambda_put_state" {
       source_arn = "${module.api_gateway.apigatewayv2_api_execution_arn}/*/*"
     }
   }
+
+  tags = local.default_tags
 }
