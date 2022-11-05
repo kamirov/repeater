@@ -14,7 +14,7 @@ defaults:
     working-directory: ./service-state
 
 env:
-  NODE_VERSION: 14.x
+  NODE_VERSION: 16.x
 
 jobs:
   deploy:
