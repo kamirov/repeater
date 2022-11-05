@@ -2,7 +2,9 @@ const AWS = require('aws-sdk');
 
 module.exports.handler = async (event) => {
 
-    const bucket = 'repeater-service-state-default'
+    // TODO: Should bring this into an env var
+    const bucket = 'mika-1-repeater-service-prod-service-state'
+
     const key = 'state'
 
     try {
