@@ -1,5 +1,5 @@
 {
-  "name": "service-dictionary",
+  "name": "service-state",
   "version": "0.0.1",
   "description": "",
   "main": "src/app.ts",
