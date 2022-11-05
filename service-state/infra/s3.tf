@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "state" {
-  bucket = "repeater-service-state-${terraform.workspace}"
+  bucket = local.fqn
 
   tags = local.default_tags
 }
