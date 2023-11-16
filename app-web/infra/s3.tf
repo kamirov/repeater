@@ -4,9 +4,21 @@ resource "aws_s3_bucket" "app" {
   tags = local.default_tags
 }
 
-resource "aws_s3_bucket_acl" "app" {
+resource "aws_s3_bucket_ownership_controls" "app" {
   bucket = aws_s3_bucket.app.id
-  acl    = "public-read"
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+  depends_on = [aws_s3_bucket_public_access_block.app]
+}
+
+resource "aws_s3_bucket_public_access_block" "app" {
+  bucket = aws_s3_bucket.app.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "app" {
@@ -41,6 +53,7 @@ resource "aws_s3_bucket_website_configuration" "app" {
 resource "aws_s3_bucket_policy" "app" {
   bucket = aws_s3_bucket.app.id
   policy = data.aws_iam_policy_document.app.json
+  depends_on = [aws_s3_bucket_public_access_block.app]
 }
 
 data "aws_iam_policy_document" "app" {

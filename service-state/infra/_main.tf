@@ -7,11 +7,11 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "mika-1-prod-infra-state"
+    bucket         = "mika-3-prod-infra-state"
     key            = "repeater-service-state.tfstate"
     encrypt        = true
     region         = "us-east-1"
-    dynamodb_table = "mika-1-prod-infra-state-locks"
+    dynamodb_table = "mika-3-prod-infra-state-locks"
   }
 }
 

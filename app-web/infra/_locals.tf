@@ -1,5 +1,5 @@
 locals {
-  org = "mika-1"
+  org = "mika-3"
   env = "prod"
   app = "repeater"
   component = "app-web"
