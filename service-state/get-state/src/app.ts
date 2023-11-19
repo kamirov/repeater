@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 module.exports.handler = async (event) => {
 
     // TODO: Should bring this into an env var
-    const bucket = 'mika-1-repeater-prod-service-state'
+    const bucket = 'mika-3-repeater-prod-service-state'
 
     const key = 'state'
 

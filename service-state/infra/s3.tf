@@ -7,6 +7,7 @@ resource "aws_s3_bucket" "state" {
 resource "aws_s3_bucket_acl" "state" {
   bucket = aws_s3_bucket.state.id
   acl    = "public-read"
+  depends_on = [aws_s3_bucket_ownership_controls.state]
 }
 
 resource "aws_s3_bucket_ownership_controls" "state" {
