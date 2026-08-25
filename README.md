@@ -1,8 +1,6 @@
 # Repeater
 
-Repeater is a browser-based dance practice studio. Create dance styles, collect and order the moves you are learning, then start a practice loop that calls moves aloud at a cadence you choose.
-
-This version is a frontend-only React application. Styles, moves, ordering, theme, and the global delay are stored locally in the current browser; there is no account, API, or cloud synchronization yet.
+Repeater is a browser-based dance practice studio. Dance styles, ordered moves, the active style, and the global practice delay are stored in Neon Postgres through authenticated Vercel Functions.
 
 ## Features
 
@@ -10,26 +8,62 @@ This version is a frontend-only React application. Styles, moves, ordering, them
 - Expandable move editors for names, reference URLs, and notes
 - Pointer, touch, and keyboard-accessible drag-and-drop ordering
 - Random spoken prompts with no immediate repeats when alternatives exist
+- Shared-secret access for every backend request
+- Optimistic saves with focused loading, error, retry, and rollback states
+- One-time import from the former browser-local data format
 - Light, dark, and system themes
-- Responsive desktop and mobile workspaces
-- Versioned, runtime-validated local storage
 
-## Local development
+## Environment
 
 Requirements:
 
 - Node.js 20.19 or newer
 - pnpm 10
+- A Neon Postgres database
 - A modern browser with the Web Speech API for spoken practice
 
-Install dependencies and start Vite:
+Copy `.env.example` to `.env.local` and set:
+
+```ini
+# Pooled connection used by Vercel Functions
+DATABASE_URL=postgresql://...
+
+# Direct connection used by Drizzle migrations
+DATABASE_URL_UNPOOLED=postgresql://...
+
+# Shared word or phrase entered in the frontend access dialog
+REPEATER_SECRET_WORD=...
+```
+
+Never use committed or previously exposed credentials. Configure the same variables in Vercel for preview and production deployments.
+
+## Local development
+
+Install dependencies and apply the committed database migrations:
 
 ```bash
 pnpm install
+pnpm db:migrate
+```
+
+Start the Vite frontend and local Vercel Functions together:
+
+```bash
 pnpm dev
 ```
 
-Vite prints the local URL, normally `http://localhost:5173`.
+`pnpm dev:vite` starts only the frontend and is useful for UI work with a separately hosted API.
+
+## Database changes
+
+The Drizzle schema lives in `server/db/schema.ts`. After changing it, generate and inspect a version-controlled migration before applying it:
+
+```bash
+pnpm db:generate
+pnpm db:migrate
+```
+
+Runtime requests use the pooled Neon URL; migrations prefer the unpooled URL.
 
 ## Quality checks
 
@@ -40,38 +74,26 @@ pnpm lint
 pnpm build
 ```
 
-Preview the production build locally:
-
-```bash
-pnpm preview
-```
-
-The production bundle is written to `dist/`.
-
 ## Deploying to Vercel
 
-The repository includes `vercel.json` with the Vite framework preset, `pnpm build`, and the `dist` output directory. The legacy AWS state service is excluded from Vercel uploads.
-
-Create a preview deployment from the repository root:
+The repository includes a Vite deployment configuration and root `api/` Vercel Functions. Add `DATABASE_URL` and `REPEATER_SECRET_WORD` to the Vercel project before deploying. `DATABASE_URL_UNPOOLED` is only needed in an environment that applies migrations.
 
 ```bash
-pnpm dlx vercel
+pnpm vercel
+pnpm vercel --prod
 ```
 
-Deploy to production:
+Apply migrations as an explicit release step; application startup does not run schema migrations automatically.
 
-```bash
-pnpm dlx vercel --prod
-```
+## Browser storage
 
-No environment variables are required for this frontend-only release.
+Canonical dance data is no longer stored in the browser. The browser retains only:
 
-## Local data
+- `repeater:secret-word:v1` for the shared backend secret
+- `repeater:theme` for the visual theme
 
-Canonical app data is stored under `repeater:app-data:v1`. The visual theme is stored separately under `repeater:theme`. The old `repeater-state` key is intentionally ignored and left unchanged.
-
-Local storage is origin-specific. Data saved on localhost, a Vercel preview URL, and a production domain does not automatically transfer between those origins.
+If the backend is empty and valid `repeater:app-data:v1` data exists, Repeater offers to import it atomically. The old key is removed only after a successful import. Choosing **Start fresh** leaves it untouched.
 
 ## Legacy backend
 
-`service-state/` contains the retained historical AWS state service. It is not imported, built, deployed, or called by the current frontend.
+`service-state/` contains the historical AWS/S3 state service. It remains excluded from the active frontend, Vercel build, and deployment.

@@ -1,4 +1,4 @@
-import { ChevronDown, ExternalLink, FileText, Trash2 } from "lucide-react";
+import { ChevronDown, ExternalLink, FileText, Loader2, RotateCcw, Trash2 } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -29,6 +29,10 @@ type MoveCardProps = {
   onExpandedChange: (expanded: boolean) => void;
   onChange: (move: Move) => void;
   onDelete: () => void;
+  saving?: boolean;
+  saveError?: string;
+  onFlush?: () => void;
+  onRetry?: () => void;
 };
 
 /** Shows a compact sortable move summary and an immediately persisted editor. */
@@ -40,6 +44,10 @@ export function MoveCard({
   onExpandedChange,
   onChange,
   onDelete,
+  saving = false,
+  saveError,
+  onFlush,
+  onRetry,
 }: MoveCardProps) {
   const displayName = move.name.trim() || "Untitled move";
   const validReference = isValidReferenceUrl(move.referenceUrl);
@@ -63,6 +71,7 @@ export function MoveCard({
           onClick={() => onExpandedChange(!expanded)}
         >
           <span className={cn("block truncate font-semibold", !move.name.trim() && "italic text-muted-foreground")}>{displayName}</span>
+          {saving ? <span className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><Loader2 className="size-3 animate-spin" /> Saving…</span> : null}
           {!expanded ? (
             <span className="mt-1 block truncate text-sm text-muted-foreground">
               {move.description.trim() || "Add notes, cues, or a reference video"}
@@ -118,6 +127,7 @@ export function MoveCard({
               placeholder="e.g. Cross-body lead"
               value={move.name}
               onChange={(event) => onChange({ ...move, name: event.target.value })}
+              onBlur={onFlush}
             />
             {!move.name.trim() ? <p className="text-xs text-muted-foreground">Name this move before including it in practice.</p> : null}
           </div>
@@ -132,6 +142,7 @@ export function MoveCard({
               aria-invalid={!validReference}
               aria-describedby={!validReference ? `move-url-error-${move.id}` : undefined}
               onChange={(event) => onChange({ ...move, referenceUrl: event.target.value })}
+              onBlur={onFlush}
             />
             {!validReference ? (
               <p id={`move-url-error-${move.id}`} className="text-xs font-medium text-destructive">
@@ -148,8 +159,15 @@ export function MoveCard({
               placeholder="Add a cue, technique note, or reminder…"
               value={move.description}
               onChange={(event) => onChange({ ...move, description: event.target.value })}
+              onBlur={onFlush}
             />
           </div>
+          {saveError ? (
+            <div role="alert" className="flex items-center justify-between gap-3 rounded-xl border border-destructive/25 bg-destructive/8 px-3 py-2 text-xs text-destructive">
+              <span>{saveError}</span>
+              <Button type="button" variant="ghost" size="sm" onClick={onRetry}><RotateCcw /> Retry</Button>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </article>

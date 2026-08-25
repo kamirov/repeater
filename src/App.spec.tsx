@@ -3,37 +3,71 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { RepeaterApp } from "@/App";
-import { createRepeaterStore } from "@/stores/repeaterStore";
+import type { RepeaterApi } from "@/lib/repeaterApi";
+import { REPEATER_SECRET_KEY, createRepeaterStore } from "@/stores/repeaterStore";
+import type { RepeaterDataV1 } from "@/types/repeater";
 
-const styleId = "00000000-0000-4000-8000-000000000001";
-const moveId = "00000000-0000-4000-8000-000000000101";
+const empty: RepeaterDataV1 = { version: 1, styles: [], activeStyleId: null, delaySeconds: 5 };
 
-describe("RepeaterApp", () => {
-  it("onboards an empty browser into its first style and move", async () => {
-    const user = userEvent.setup();
-    vi.spyOn(globalThis.crypto, "randomUUID")
-      .mockReturnValueOnce(styleId)
-      .mockReturnValueOnce(moveId);
-    const store = createRepeaterStore(localStorage);
-    render(<RepeaterApp store={store} />);
+function apiWithState(state = empty): RepeaterApi {
+  return {
+    getState: vi.fn().mockResolvedValue(state),
+    importState: vi.fn(), createStyle: vi.fn(), updateStyle: vi.fn(), deleteStyle: vi.fn(),
+    createMove: vi.fn(), updateMove: vi.fn(), deleteMove: vi.fn(), reorderMoves: vi.fn(), updateSettings: vi.fn(),
+  } as RepeaterApi;
+}
 
-    expect(screen.getByRole("heading", { name: /build your dance repertoire/i })).toBeVisible();
-    await user.click(screen.getByRole("button", { name: "Create your first style" }));
-    await user.type(screen.getByLabelText("Style name"), "Salsa");
-    await user.click(screen.getByRole("button", { name: "Create style" }));
+describe("RepeaterApp startup", () => {
+  it("requires the secret before showing application data", () => {
+    render(<RepeaterApp store={createRepeaterStore(localStorage, apiWithState())} />);
 
-    expect(screen.getByRole("heading", { name: "Salsa" })).toBeVisible();
-    await user.click(screen.getByRole("button", { name: "Add first move" }));
-    expect(screen.getByLabelText("Move name")).toBeVisible();
-    expect(store.getState().styles[0].moves[0].id).toBe(moveId);
+    expect(screen.getByRole("dialog")).toBeVisible();
+    expect(screen.getByRole("heading", { name: /enter the secret word/i })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: /build your dance repertoire/i })).not.toBeInTheDocument();
   });
 
-  it("shows a non-destructive warning for malformed stored data", () => {
-    localStorage.setItem("repeater:app-data:v1", "bad-data");
-    const store = createRepeaterStore(localStorage);
+  it("shows onboarding only after a successful empty backend response", async () => {
+    localStorage.setItem(REPEATER_SECRET_KEY, "secret");
+    const api = apiWithState();
+    render(<RepeaterApp store={createRepeaterStore(localStorage, api)} />);
 
-    render(<RepeaterApp store={store} />);
+    expect(screen.getByRole("status")).toHaveTextContent(/loading your dance library/i);
+    expect(await screen.findByRole("heading", { name: /build your dance repertoire/i })).toBeVisible();
+    expect(api.getState).toHaveBeenCalledWith("secret");
+  });
 
-    expect(screen.getByText(/saved repeater data could not be loaded/i)).toBeVisible();
+  it("accepts a submitted secret and opens an existing library", async () => {
+    const user = userEvent.setup();
+    const state: RepeaterDataV1 = {
+      version: 1,
+      styles: [{ id: "00000000-0000-4000-8000-000000000001", name: "Salsa", moves: [] }],
+      activeStyleId: "00000000-0000-4000-8000-000000000001",
+      delaySeconds: 5,
+    };
+    render(<RepeaterApp store={createRepeaterStore(localStorage, apiWithState(state))} />);
+
+    await user.type(screen.getByLabelText("Secret word"), "secret");
+    await user.click(screen.getByRole("button", { name: /unlock repeater/i }));
+
+    expect(await screen.findByRole("heading", { name: "Salsa" })).toBeVisible();
+    expect(screen.getByRole("button", { name: /add first move/i })).toBeVisible();
+  });
+
+  it("offers valid legacy data and allows starting fresh without deleting it", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem(REPEATER_SECRET_KEY, "secret");
+    localStorage.setItem("repeater:app-data:v1", JSON.stringify({
+      version: 1,
+      styles: [{ id: "00000000-0000-4000-8000-000000000001", name: "Salsa", moves: [] }],
+      activeStyleId: "00000000-0000-4000-8000-000000000001",
+      delaySeconds: 8,
+    }));
+    render(<RepeaterApp store={createRepeaterStore(localStorage, apiWithState())} />);
+
+    expect(await screen.findByRole("heading", { name: /import this browser’s library/i })).toBeVisible();
+    await user.click(screen.getByRole("button", { name: /start fresh/i }));
+
+    expect(screen.queryByRole("heading", { name: /import this browser’s library/i })).not.toBeInTheDocument();
+    expect(localStorage.getItem("repeater:app-data:v1")).not.toBeNull();
   });
 });

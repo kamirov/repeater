@@ -14,6 +14,11 @@ type MoveWorkspaceProps = {
   onChangeMove: (move: Move) => void;
   onDeleteMove: (moveId: string) => void;
   onReorderMoves: (moveIds: string[]) => void;
+  pendingMoveIds: Set<string>;
+  moveSaveErrors: Record<string, string>;
+  reordering: boolean;
+  onFlushMove: (moveId: string) => Promise<void>;
+  onRetryMove: (moveId: string) => Promise<void>;
 };
 
 /** Hosts the active style's heading, empty state, and sortable move editor. */
@@ -26,6 +31,11 @@ export function MoveWorkspace({
   onChangeMove,
   onDeleteMove,
   onReorderMoves,
+  pendingMoveIds,
+  moveSaveErrors,
+  reordering,
+  onFlushMove,
+  onRetryMove,
 }: MoveWorkspaceProps) {
   return (
     <section aria-labelledby="style-heading" className="min-w-0">
@@ -52,6 +62,11 @@ export function MoveWorkspace({
           onChange={onChangeMove}
           onDelete={onDeleteMove}
           onReorder={onReorderMoves}
+          pendingMoveIds={pendingMoveIds}
+          moveSaveErrors={moveSaveErrors}
+          reordering={reordering}
+          onFlush={onFlushMove}
+          onRetry={onRetryMove}
         />
       ) : (
         <Card className="border-dashed bg-card/60">

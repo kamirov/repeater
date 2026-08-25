@@ -1,10 +1,12 @@
-import { AlertTriangle, X } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { AlertTriangle, Loader2, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useStore } from "zustand";
 import type { StoreApi } from "zustand/vanilla";
 
+import { AccessDialog } from "@/components/AccessDialog";
 import { EmptyOnboarding } from "@/components/EmptyOnboarding";
+import { LegacyImportDialog } from "@/components/LegacyImportDialog";
 import { MobileNavigation } from "@/components/MobileNavigation";
 import { MoveWorkspace } from "@/components/MoveWorkspace";
 import { PracticeCard } from "@/components/PracticeCard";
@@ -38,6 +40,10 @@ export function RepeaterApp({
 function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
   const state = useStore(store);
   const [expandedMoveIds, setExpandedMoveIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    void store.getState().initialize();
+  }, [store]);
+
   const activeStyle = state.styles.find((style) => style.id === state.activeStyleId) ?? null;
   const moves = activeStyle?.moves ?? [];
   const eligibleMoveCount = moves.filter((move) => move.name.trim()).length;
@@ -53,28 +59,50 @@ function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
     () => ({
       styles: state.styles,
       activeStyleId: state.activeStyleId,
+      pendingStyleIds: state.pendingStyleIds,
       onCreate: (name: string) => {
-        state.addStyle(name);
+        void state.addStyle(name).catch(() => toast.error("The dance style could not be created."));
         setExpandedMoveIds(new Set());
       },
-      onRename: state.renameStyle,
+      onRename: (styleId: string, name: string) => {
+        void state.renameStyle(styleId, name).catch(() => toast.error("The dance style could not be renamed."));
+      },
       onDelete: (styleId: string) => {
-        state.deleteStyle(styleId);
+        void state.deleteStyle(styleId).catch(() => toast.error("The dance style was restored because deletion failed."));
         setExpandedMoveIds(new Set());
       },
       onSelect: (styleId: string) => {
         if (styleId === state.activeStyleId) return;
-        state.setActiveStyle(styleId);
+        void state.setActiveStyle(styleId);
         setExpandedMoveIds(new Set());
       },
     }),
     [state],
   );
 
-  const addMove = () => {
+  if (state.loadStatus === "loading") return <LoadingScreen />;
+  if (state.loadStatus === "error") {
+    return (
+      <div className="grid min-h-svh place-items-center bg-background px-4 text-center">
+        <div className="max-w-md">
+          <AlertTriangle className="mx-auto mb-4 size-9 text-destructive" />
+          <h1 className="font-display text-3xl font-medium">Repeater could not load</h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{state.loadError}</p>
+          <Button className="mt-6" onClick={() => void state.retryLoad()}><RefreshCw /> Try again</Button>
+        </div>
+      </div>
+    );
+  }
+  if (state.loadStatus === "locked") return <AccessDialog open error={state.authError} onSubmit={state.submitSecret} />;
+
+  const addMove = async () => {
     if (!activeStyle) return;
-    const moveId = state.addMove(activeStyle.id);
-    setExpandedMoveIds((current) => new Set([...current, moveId]));
+    try {
+      const moveId = await state.addMove(activeStyle.id);
+      setExpandedMoveIds((current) => new Set([...current, moveId]));
+    } catch {
+      toast.error("The move could not be added.");
+    }
   };
 
   const setMoveExpanded = (moveId: string, expanded: boolean) => {
@@ -93,7 +121,7 @@ function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
 
   const deleteMove = (moveId: string) => {
     if (!activeStyle) return;
-    state.deleteMove(activeStyle.id, moveId);
+    void state.deleteMove(activeStyle.id, moveId).catch(() => toast.error("The move was restored because deletion failed."));
     setMoveExpanded(moveId, false);
   };
 
@@ -104,14 +132,11 @@ function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
       </aside>
       <div className="min-w-0">
         <MobileNavigation {...navigationProps} />
-        {state.storageWarning ? (
+        {state.loadError ? (
           <div className="mx-auto mt-5 flex max-w-[1480px] items-start gap-3 px-4 sm:px-6 lg:px-8">
             <div role="alert" className="flex w-full items-start gap-3 rounded-2xl border border-destructive/25 bg-destructive/8 px-4 py-3 text-sm">
               <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />
-              <p className="flex-1 leading-relaxed">{state.storageWarning}</p>
-              <Button size="icon-sm" variant="ghost" aria-label="Dismiss storage warning" onClick={state.dismissStorageWarning}>
-                <X />
-              </Button>
+              <p className="flex-1 leading-relaxed">{state.loadError}</p>
             </div>
           </div>
         ) : null}
@@ -127,7 +152,12 @@ function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
               onExpandedChange={setMoveExpanded}
               onChangeMove={updateMove}
               onDeleteMove={deleteMove}
-              onReorderMoves={(moveIds) => state.reorderMoves(activeStyle.id, moveIds)}
+              pendingMoveIds={state.pendingMoveIds}
+              moveSaveErrors={state.moveSaveErrors}
+              reordering={state.reorderingStyleIds.has(activeStyle.id)}
+              onFlushMove={(moveId) => state.flushMove(activeStyle.id, moveId)}
+              onRetryMove={(moveId) => state.retryMove(activeStyle.id, moveId)}
+              onReorderMoves={(moveIds) => void state.reorderMoves(activeStyle.id, moveIds).catch(() => toast.error("The previous move order was restored."))}
             />
             <PracticeCard
               delaySeconds={state.delaySeconds}
@@ -137,12 +167,28 @@ function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
               countdownSeconds={practice.countdownSeconds}
               isSpeechSupported={practice.isSpeechSupported}
               onDelayChange={state.setDelaySeconds}
+              onDelayBlur={state.flushDelay}
+              delaySaveStatus={state.delaySaveStatus}
               onStart={practice.start}
               onStop={practice.stop}
             />
           </main>
         )}
       </div>
+      <LegacyImportDialog
+        data={state.legacyImport}
+        importing={state.importingLegacy}
+        onImport={state.importLegacyData}
+        onDismiss={state.dismissLegacyImport}
+      />
+    </div>
+  );
+}
+
+function LoadingScreen() {
+  return (
+    <div className="grid min-h-svh place-items-center bg-background text-center" role="status">
+      <div><Loader2 className="mx-auto mb-4 size-8 animate-spin text-primary" /><p className="font-display text-2xl">Loading your dance library…</p></div>
     </div>
   );
 }

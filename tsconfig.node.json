@@ -12,5 +12,12 @@
     "noEmit": true,
     "strict": true
   },
-  "include": ["vite.config.ts", "vitest.config.ts", "eslint.config.ts"]
+  "include": [
+    "vite.config.ts",
+    "vitest.config.ts",
+    "eslint.config.ts",
+    "drizzle.config.ts",
+    "api/**/*.ts",
+    "server/**/*.ts"
+  ]
 }

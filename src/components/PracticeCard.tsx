@@ -1,4 +1,4 @@
-import { Clock3, Play, Square, Volume2, Waves } from "lucide-react";
+import { Clock3, Loader2, Play, RotateCcw, Square, Volume2, Waves } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,8 @@ type PracticeCardProps = {
   countdownSeconds: number | null;
   isSpeechSupported: boolean;
   onDelayChange: (seconds: number) => void;
+  onDelayBlur?: () => Promise<void>;
+  delaySaveStatus?: "saving" | "error" | null;
   onStart: () => void;
   onStop: () => void;
 };
@@ -27,6 +29,8 @@ export function PracticeCard({
   countdownSeconds,
   isSpeechSupported,
   onDelayChange,
+  onDelayBlur,
+  delaySaveStatus,
   onStart,
   onStop,
 }: PracticeCardProps) {
@@ -71,11 +75,14 @@ export function PracticeCard({
                 if (!event.currentTarget.value) {
                   event.currentTarget.value = String(delaySeconds);
                 }
+                void onDelayBlur?.();
               }}
             />
             <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-semibold text-muted-foreground">seconds</span>
           </div>
           <p className="text-xs leading-relaxed text-muted-foreground">The countdown begins after each spoken move finishes.</p>
+          {delaySaveStatus === "saving" ? <p className="flex items-center gap-1 text-xs text-muted-foreground"><Loader2 className="size-3 animate-spin" /> Saving delay…</p> : null}
+          {delaySaveStatus === "error" ? <Button type="button" variant="ghost" size="sm" className="px-0 text-destructive" onClick={() => void onDelayBlur?.()}><RotateCcw /> Retry saving delay</Button> : null}
         </div>
 
         <div className="grid min-h-48 place-items-center rounded-2xl border border-primary/15 bg-background/55 p-5 text-center shadow-inner">

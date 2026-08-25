@@ -9,6 +9,7 @@ import type { DanceStyle } from "@/types/repeater";
 type MobileNavigationProps = {
   styles: DanceStyle[];
   activeStyleId: string | null;
+  pendingStyleIds?: Set<string>;
   onCreate: (name: string) => void;
   onRename: (styleId: string, name: string) => void;
   onDelete: (styleId: string) => void;

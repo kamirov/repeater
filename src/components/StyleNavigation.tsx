@@ -1,4 +1,4 @@
-import { Monitor, Moon, MoreHorizontal, Pencil, Plus, Sun, Trash2 } from "lucide-react";
+import { Loader2, Monitor, Moon, MoreHorizontal, Pencil, Plus, Sun, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { StyleDialog } from "@/components/StyleDialog";
@@ -27,6 +27,7 @@ import type { DanceStyle } from "@/types/repeater";
 type StyleNavigationProps = {
   styles: DanceStyle[];
   activeStyleId: string | null;
+  pendingStyleIds?: Set<string>;
   onCreate: (name: string) => void;
   onRename: (styleId: string, name: string) => void;
   onDelete: (styleId: string) => void;
@@ -39,6 +40,7 @@ type StyleNavigationProps = {
 export function StyleNavigation({
   styles,
   activeStyleId,
+  pendingStyleIds = new Set(),
   onCreate,
   onRename,
   onDelete,
@@ -71,6 +73,7 @@ export function StyleNavigation({
                 key={style.id}
                 style={style}
                 active={style.id === activeStyleId}
+                pending={pendingStyleIds.has(style.id)}
                 onSelect={() => {
                   onSelect(style.id);
                   onNavigate?.();
@@ -102,12 +105,14 @@ export function StyleNavigation({
 function StyleNavigationItem({
   style,
   active,
+  pending,
   onSelect,
   onRename,
   onDelete,
 }: {
   style: DanceStyle;
   active: boolean;
+  pending: boolean;
   onSelect: () => void;
   onRename: (name: string) => void;
   onDelete: () => void;
@@ -133,7 +138,7 @@ function StyleNavigationItem({
       >
         <span className="block truncate text-sm font-semibold">{style.name}</span>
         <span className="mt-0.5 block text-xs text-muted-foreground">
-          {style.moves.length} {style.moves.length === 1 ? "move" : "moves"}
+          {pending ? <span className="flex items-center gap-1"><Loader2 className="size-3 animate-spin" /> Saving…</span> : <>{style.moves.length} {style.moves.length === 1 ? "move" : "moves"}</>}
         </span>
       </button>
       <DropdownMenu>
@@ -145,6 +150,7 @@ function StyleNavigationItem({
                 size="icon-sm"
                 className="mr-1 opacity-65 group-hover:opacity-100"
                 aria-label={`Manage ${style.name}`}
+                disabled={pending}
               >
                 <MoreHorizontal />
               </Button>
@@ -173,7 +179,7 @@ function StyleNavigationItem({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {style.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This permanently removes the style and all {style.moves.length} of its moves from this browser.
+              This permanently removes the style and all {style.moves.length} of its moves from the shared library.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

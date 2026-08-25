@@ -31,6 +31,11 @@ type SortableMoveListProps = {
   onChange: (move: Move) => void;
   onDelete: (moveId: string) => void;
   onReorder: (orderedMoveIds: string[]) => void;
+  pendingMoveIds?: Set<string>;
+  moveSaveErrors?: Record<string, string>;
+  reordering?: boolean;
+  onFlush?: (moveId: string) => Promise<void>;
+  onRetry?: (moveId: string) => Promise<void>;
 };
 
 export function getReorderedMoveIds(ids: string[], activeId: string, overId: string): string[] {
@@ -49,6 +54,11 @@ export function SortableMoveList({
   onChange,
   onDelete,
   onReorder,
+  pendingMoveIds = new Set(),
+  moveSaveErrors = {},
+  reordering = false,
+  onFlush,
+  onRetry,
 }: SortableMoveListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -84,6 +94,11 @@ export function SortableMoveList({
               onExpandedChange={(expanded) => onExpandedChange(move.id, expanded)}
               onChange={onChange}
               onDelete={() => onDelete(move.id)}
+              saving={pendingMoveIds.has(move.id)}
+              saveError={moveSaveErrors[move.id]}
+              disabled={reordering}
+              onFlush={() => void onFlush?.(move.id)}
+              onRetry={() => void onRetry?.(move.id)}
             />
           ))}
         </div>
@@ -99,6 +114,11 @@ function SortableMove({
   onExpandedChange,
   onChange,
   onDelete,
+  saving,
+  saveError,
+  disabled,
+  onFlush,
+  onRetry,
 }: {
   move: Move;
   expanded: boolean;
@@ -106,8 +126,13 @@ function SortableMove({
   onExpandedChange: (expanded: boolean) => void;
   onChange: (move: Move) => void;
   onDelete: () => void;
+  saving: boolean;
+  saveError?: string;
+  disabled: boolean;
+  onFlush: () => void;
+  onRetry: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: move.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: move.id, disabled });
 
   return (
     <div
@@ -122,6 +147,10 @@ function SortableMove({
         onExpandedChange={onExpandedChange}
         onChange={onChange}
         onDelete={onDelete}
+        saving={saving}
+        saveError={saveError}
+        onFlush={onFlush}
+        onRetry={onRetry}
         dragHandle={
           <Button
             type="button"
@@ -129,6 +158,7 @@ function SortableMove({
             size="icon-sm"
             className="cursor-grab touch-none text-muted-foreground active:cursor-grabbing"
             aria-label={`Reorder ${move.name.trim() || "untitled move"}`}
+            disabled={disabled}
             {...attributes}
             {...listeners}
           >
