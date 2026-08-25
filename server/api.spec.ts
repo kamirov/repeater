@@ -37,6 +37,21 @@ function request(method: string, route: string[], body?: unknown, secret?: strin
 }
 
 describe("Repeater API", () => {
+  it("validates a secret through the public verification endpoint", async () => {
+    const repo = repository();
+    const handler = createApiHandler({ repository: repo, secret: "correct" });
+    const valid = response();
+    const invalid = response();
+
+    await handler(request("POST", ["auth", "secret-word", "validate"], { secretWord: "correct" }), valid as unknown as VercelResponse);
+    await handler(request("POST", ["auth", "secret-word", "validate"], { secretWord: "wrong" }), invalid as unknown as VercelResponse);
+
+    expect(valid.statusCode).toBe(200);
+    expect(valid.body).toEqual({ valid: true });
+    expect(invalid.body).toEqual({ valid: false });
+    expect(repo.getState).not.toHaveBeenCalled();
+  });
+
   it("rejects missing or incorrect secrets before touching the repository", async () => {
     const repo = repository();
     const handler = createApiHandler({ repository: repo, secret: "correct" });

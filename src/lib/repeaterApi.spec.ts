@@ -24,6 +24,7 @@ describe("createRepeaterApi", () => {
     const api = createRepeaterApi(fetcher as typeof fetch);
     const state = { version: 1 as const, styles: [], activeStyleId: null, delaySeconds: 5 };
 
+    await api.validateSecretWord("secret");
     await api.getState("secret");
     await api.importState("secret", state);
     await api.createStyle("secret", { id: styleId, name: "Salsa" });
@@ -35,8 +36,9 @@ describe("createRepeaterApi", () => {
     await api.reorderMoves("secret", styleId, [moveId]);
     await api.updateSettings("secret", { delaySeconds: 8 });
 
-    expect(fetcher).toHaveBeenCalledTimes(10);
-    expect(fetcher.mock.calls[0][1]?.headers).toMatchObject({ "X-Repeater-Secret": "secret" });
+    expect(fetcher).toHaveBeenCalledTimes(11);
+    expect(fetcher.mock.calls[0][1]?.headers).not.toHaveProperty("X-Repeater-Secret");
+    expect(fetcher.mock.calls[1][1]?.headers).toMatchObject({ "X-Repeater-Secret": "secret" });
     expect(fetcher.mock.calls.some(([path]) => path === `/api/styles/${styleId}/move-order`)).toBe(true);
   });
 

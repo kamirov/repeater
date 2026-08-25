@@ -12,7 +12,11 @@ export function createRepeaterApi(fetcher: typeof fetch = fetch) {
   async function request<T>(secret: string, path: string, init?: RequestInit): Promise<T> {
     const response = await fetcher(path, {
       ...init,
-      headers: { "Content-Type": "application/json", "X-Repeater-Secret": secret, ...init?.headers },
+      headers: {
+        "Content-Type": "application/json",
+        ...(secret ? { "X-Repeater-Secret": secret } : {}),
+        ...init?.headers,
+      },
     });
     if (!response.ok) {
       const payload = (await response.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
@@ -35,6 +39,13 @@ export function createRepeaterApi(fetcher: typeof fetch = fetch) {
   }
 
   return {
+    validateSecretWord: async (secretWord: string) => {
+      const result = await request<{ valid: boolean }>("", "/api/auth/secret-word/validate", {
+        method: "POST",
+        body: JSON.stringify({ secretWord }),
+      });
+      return result.valid === true;
+    },
     getState: (secret: string) => request<RepeaterDataV1>(secret, "/api/state"),
     importState: (secret: string, data: RepeaterDataV1) => request<RepeaterDataV1>(secret, "/api/state/import", { method: "POST", body: JSON.stringify(data) }),
     createStyle: (secret: string, style: Pick<DanceStyle, "id" | "name">) => request<DanceStyle>(secret, "/api/styles", { method: "POST", body: JSON.stringify(style) }),

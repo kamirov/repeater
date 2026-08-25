@@ -1,6 +1,7 @@
-import { neon } from "@neondatabase/serverless";
+import { neonConfig, Pool } from "@neondatabase/serverless";
 import { and, asc, count, eq, max } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/neon-http";
+import { drizzle } from "drizzle-orm/neon-serverless";
+import ws from "ws";
 
 import type { DanceStyle, Move, RepeaterDataV1 } from "../src/types/repeater";
 import { appSettings, danceStyles, moves } from "./db/schema";
@@ -8,6 +9,7 @@ import { appSettings, danceStyles, moves } from "./db/schema";
 export type SettingsPatch = Partial<Pick<RepeaterDataV1, "activeStyleId" | "delaySeconds">>;
 
 export interface RepeaterRepository {
+  close?(): Promise<void>;
   getState(): Promise<RepeaterDataV1>;
   importState(data: RepeaterDataV1): Promise<RepeaterDataV1>;
   createStyle(style: Pick<DanceStyle, "id" | "name">): Promise<DanceStyle>;
@@ -22,7 +24,9 @@ export interface RepeaterRepository {
 
 export function createDatabaseRepository(databaseUrl = process.env.DATABASE_URL): RepeaterRepository {
   if (!databaseUrl) throw new Error("DATABASE_URL is not configured.");
-  const db = drizzle(neon(databaseUrl));
+  neonConfig.webSocketConstructor = ws;
+  const pool = new Pool({ connectionString: databaseUrl });
+  const db = drizzle({ client: pool });
 
   const ensureSettings = async () => {
     await db.insert(appSettings).values({ id: 1 }).onConflictDoNothing();
@@ -60,6 +64,7 @@ export function createDatabaseRepository(databaseUrl = process.env.DATABASE_URL)
   };
 
   return {
+    close: () => pool.end(),
     getState,
     async importState(data) {
       await db.transaction(async (tx) => {

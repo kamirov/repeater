@@ -10,6 +10,7 @@ import {
   settingsPatchSchema,
   updateMoveSchema,
   updateStyleSchema,
+  validateSecretWordSchema,
 } from "./contracts";
 import {
   createDatabaseRepository,
@@ -43,16 +44,23 @@ export function createApiHandler(dependencies: Dependencies = {}) {
     if (!expectedSecret) {
       return response.status(500).json({ error: { code: "SERVER_MISCONFIGURED", message: "Server authentication is not configured." } });
     }
-    const providedSecret = request.headers["x-repeater-secret"];
-    const normalizedSecret = Array.isArray(providedSecret) ? providedSecret[0] : providedSecret;
-    if (!secretMatches(normalizedSecret, expectedSecret)) {
-      return response.status(401).json({ error: { code: "INVALID_SECRET", message: "The secret word is incorrect." } });
-    }
-
+    let ownedRepository: RepeaterRepository | undefined;
     try {
-      const repository = dependencies.repository ?? createDatabaseRepository();
       const parts = routeParts(request);
       const method = request.method ?? "GET";
+
+      if (method === "POST" && parts.join("/") === "auth/secret-word/validate") {
+        const { secretWord } = validateSecretWordSchema.parse(bodyOf(request));
+        return response.status(200).json({ valid: secretMatches(secretWord, expectedSecret) });
+      }
+
+      const providedSecret = request.headers["x-repeater-secret"];
+      const normalizedSecret = Array.isArray(providedSecret) ? providedSecret[0] : providedSecret;
+      if (!secretMatches(normalizedSecret, expectedSecret)) {
+        return response.status(401).json({ error: { code: "INVALID_SECRET", message: "The secret word is incorrect." } });
+      }
+
+      const repository = dependencies.repository ?? (ownedRepository = createDatabaseRepository());
 
       if (method === "GET" && parts.length === 1 && parts[0] === "state") {
         return response.status(200).json(await repository.getState());
@@ -111,6 +119,12 @@ export function createApiHandler(dependencies: Dependencies = {}) {
       }
       console.error("Repeater API request failed", error instanceof Error ? error.message : "Unknown error");
       return response.status(500).json({ error: { code: "INTERNAL_ERROR", message: "The request could not be completed." } });
+    } finally {
+      if (ownedRepository?.close) {
+        await ownedRepository.close().catch((error: unknown) => {
+          console.error("Repeater database connection cleanup failed", error instanceof Error ? error.message : "Unknown error");
+        });
+      }
     }
   };
 }

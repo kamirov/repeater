@@ -89,13 +89,31 @@ export function createRepeaterStore(storage?: Storage, api: RepeaterApi = create
       set({ loadStatus: "loading", loadError: null });
       try {
         const data = await api.getState(candidateSecret);
-        storage?.setItem(REPEATER_SECRET_KEY, candidateSecret);
         const legacy = data.styles.length ? { data: null, warning: null } : getLegacyData(storage);
         set({ ...data, loadStatus: "ready", authError: null, loadError: legacy.warning, legacyImport: legacy.data });
         return true;
       } catch (error) {
         if (error instanceof RepeaterApiError && error.code === "INVALID_SECRET") lockForAuth();
         else set({ loadStatus: "error", loadError: handleFailure(error) });
+        return false;
+      }
+    };
+    const validateAndHydrate = async (candidateSecret: string) => {
+      lastCandidateSecret = candidateSecret;
+      try {
+        const valid = await api.validateSecretWord(candidateSecret);
+        if (!valid) {
+          storage?.removeItem(REPEATER_SECRET_KEY);
+          set({ loadStatus: "locked", authError: "The secret word was not accepted." });
+          return false;
+        }
+        storage?.setItem(REPEATER_SECRET_KEY, candidateSecret);
+        return hydrate(candidateSecret);
+      } catch {
+        set({
+          loadStatus: "locked",
+          authError: "The secret word could not be validated. Check the backend and try again.",
+        });
         return false;
       }
     };
@@ -140,12 +158,12 @@ export function createRepeaterStore(storage?: Storage, api: RepeaterApi = create
       initialize: async () => {
         const stored = getSecret();
         if (!stored) set({ loadStatus: "locked" });
-        else await hydrate(stored);
+        else await validateAndHydrate(stored);
       },
       submitSecret: async (candidate) => {
         const normalized = candidate.trim();
         if (!normalized) return false;
-        const accepted = await hydrate(normalized);
+        const accepted = await validateAndHydrate(normalized);
         if (accepted && retryAfterAuth) {
           const retry = retryAfterAuth;
           retryAfterAuth = null;
@@ -155,7 +173,7 @@ export function createRepeaterStore(storage?: Storage, api: RepeaterApi = create
       },
       retryLoad: async () => {
         const stored = getSecret() || lastCandidateSecret;
-        if (stored) await hydrate(stored);
+        if (stored) await validateAndHydrate(stored);
         else set({ loadStatus: "locked" });
       },
       dismissLegacyImport: () => set({ legacyImport: null }),

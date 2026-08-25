@@ -41,3 +41,7 @@ export const settingsPatchSchema = z
   })
   .strict()
   .refine((value) => Object.keys(value).length > 0, "At least one setting is required.");
+
+export const validateSecretWordSchema = z
+  .object({ secretWord: z.string().trim().min(1) })
+  .strict();

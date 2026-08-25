@@ -12,6 +12,7 @@ const empty: RepeaterDataV1 = { version: 1, styles: [], activeStyleId: null, del
 
 function fakeApi(state: RepeaterDataV1 = empty): RepeaterApi {
   return {
+    validateSecretWord: vi.fn().mockResolvedValue(true),
     getState: vi.fn().mockResolvedValue(state),
     importState: vi.fn().mockImplementation(async (_secret, data) => data),
     createStyle: vi.fn().mockImplementation(async (_secret, style) => ({ ...style, moves: [] })),

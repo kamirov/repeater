@@ -52,11 +52,7 @@ Start the Vite frontend and local Vercel Functions together:
 pnpm dev
 ```
 
-The small development launcher keeps `vercel dev` separate from the framework command that Vercel starts internally, avoiding recursive invocation. To run Vite without backend functions instead, use:
-
-```bash
-pnpm dev:vite
-```
+Vite mounts the same API handler as local middleware, so this single command serves both the frontend and `/api/*` routes without requiring `vercel dev`.
 
 ## Database changes
 
@@ -83,8 +79,8 @@ pnpm build
 The repository includes a Vite deployment configuration and root `api/` Vercel Functions. Add `DATABASE_URL` and `REPEATER_SECRET_WORD` to the Vercel project before deploying. `DATABASE_URL_UNPOOLED` is only needed in an environment that applies migrations.
 
 ```bash
-pnpm vercel
-pnpm vercel --prod
+pnpm dlx vercel
+pnpm dlx vercel --prod
 ```
 
 Apply migrations as an explicit release step; application startup does not run schema migrations automatically.
