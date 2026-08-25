@@ -1,13 +1,77 @@
 # Repeater
 
-Tool to help you remember dance patterns. Specify a dance style, add moves and combos to the list, and this app will randomly read out items from the list based on periods you set. Initial moves on the list (marked in gold) are prioritized and are read out more often to help you better learn them. As you learn moves, check them off to mark them as 'learned', and they'll go into a separate pile.
+Repeater is a browser-based dance practice studio. Create dance styles, collect and order the moves you are learning, then start a practice loop that calls moves aloud at a cadence you choose.
 
-[Try it out!](http://repeater-app-web-default.s3-website-us-east-1.amazonaws.com)
+This version is a frontend-only React application. Styles, moves, ordering, theme, and the global delay are stored locally in the current browser; there is no account, API, or cloud synchronization yet.
 
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/3508147/160730809-2977451b-c97a-46e5-91a1-a15f02c3471e.png" />
-</p>
+## Features
 
-## Repo
+- Multiple dance styles with rename and delete controls
+- Expandable move editors for names, reference URLs, and notes
+- Pointer, touch, and keyboard-accessible drag-and-drop ordering
+- Random spoken prompts with no immediate repeats when alternatives exist
+- Light, dark, and system themes
+- Responsive desktop and mobile workspaces
+- Versioned, runtime-validated local storage
 
-This repo contains various components for the Repeater app. See their corresponding folders for how to run each, feature wishlists, and more information.
+## Local development
+
+Requirements:
+
+- Node.js 20.19 or newer
+- pnpm 10
+- A modern browser with the Web Speech API for spoken practice
+
+Install dependencies and start Vite:
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Vite prints the local URL, normally `http://localhost:5173`.
+
+## Quality checks
+
+```bash
+pnpm test
+pnpm test:coverage
+pnpm lint
+pnpm build
+```
+
+Preview the production build locally:
+
+```bash
+pnpm preview
+```
+
+The production bundle is written to `dist/`.
+
+## Deploying to Vercel
+
+The repository includes `vercel.json` with the Vite framework preset, `pnpm build`, and the `dist` output directory. The legacy AWS state service is excluded from Vercel uploads.
+
+Create a preview deployment from the repository root:
+
+```bash
+pnpm dlx vercel
+```
+
+Deploy to production:
+
+```bash
+pnpm dlx vercel --prod
+```
+
+No environment variables are required for this frontend-only release.
+
+## Local data
+
+Canonical app data is stored under `repeater:app-data:v1`. The visual theme is stored separately under `repeater:theme`. The old `repeater-state` key is intentionally ignored and left unchanged.
+
+Local storage is origin-specific. Data saved on localhost, a Vercel preview URL, and a production domain does not automatically transfer between those origins.
+
+## Legacy backend
+
+`service-state/` contains the retained historical AWS state service. It is not imported, built, deployed, or called by the current frontend.

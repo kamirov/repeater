@@ -1,0 +1,146 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Newsreader Variable", ui-serif, Georgia, serif;
+  --radius-sm: calc(var(--radius) - 5px);
+  --radius-md: calc(var(--radius) - 3px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 5px);
+}
+
+:root {
+  --radius: 0.9rem;
+  --background: oklch(0.973 0.016 75);
+  --foreground: oklch(0.235 0.025 48);
+  --card: oklch(0.995 0.008 76);
+  --card-foreground: oklch(0.235 0.025 48);
+  --popover: oklch(0.995 0.008 76);
+  --popover-foreground: oklch(0.235 0.025 48);
+  --primary: oklch(0.57 0.165 36);
+  --primary-foreground: oklch(0.985 0.01 75);
+  --secondary: oklch(0.918 0.035 72);
+  --secondary-foreground: oklch(0.31 0.045 48);
+  --muted: oklch(0.945 0.018 75);
+  --muted-foreground: oklch(0.505 0.028 55);
+  --accent: oklch(0.91 0.06 65);
+  --accent-foreground: oklch(0.28 0.04 48);
+  --destructive: oklch(0.58 0.22 26);
+  --border: oklch(0.873 0.026 68);
+  --input: oklch(0.855 0.03 67);
+  --ring: oklch(0.63 0.14 39);
+  --sidebar: oklch(0.945 0.027 68);
+  --sidebar-foreground: oklch(0.25 0.028 48);
+  --sidebar-primary: oklch(0.57 0.165 36);
+  --sidebar-primary-foreground: oklch(0.985 0.01 75);
+  --sidebar-accent: oklch(0.98 0.018 72);
+  --sidebar-accent-foreground: oklch(0.25 0.028 48);
+  --sidebar-border: oklch(0.85 0.035 65);
+  --sidebar-ring: oklch(0.63 0.14 39);
+  --practice-tint: oklch(0.96 0.035 58);
+}
+
+.dark {
+  --background: oklch(0.17 0.024 48);
+  --foreground: oklch(0.94 0.02 70);
+  --card: oklch(0.215 0.026 48);
+  --card-foreground: oklch(0.94 0.02 70);
+  --popover: oklch(0.225 0.028 48);
+  --popover-foreground: oklch(0.94 0.02 70);
+  --primary: oklch(0.69 0.16 42);
+  --primary-foreground: oklch(0.16 0.022 45);
+  --secondary: oklch(0.29 0.035 52);
+  --secondary-foreground: oklch(0.92 0.025 70);
+  --muted: oklch(0.255 0.028 49);
+  --muted-foreground: oklch(0.69 0.028 68);
+  --accent: oklch(0.32 0.055 52);
+  --accent-foreground: oklch(0.95 0.02 72);
+  --destructive: oklch(0.7 0.19 24);
+  --border: oklch(0.95 0.02 70 / 12%);
+  --input: oklch(0.95 0.02 70 / 18%);
+  --ring: oklch(0.69 0.13 43);
+  --sidebar: oklch(0.19 0.028 48);
+  --sidebar-foreground: oklch(0.93 0.02 70);
+  --sidebar-primary: oklch(0.69 0.16 42);
+  --sidebar-primary-foreground: oklch(0.16 0.022 45);
+  --sidebar-accent: oklch(0.275 0.035 50);
+  --sidebar-accent-foreground: oklch(0.94 0.02 70);
+  --sidebar-border: oklch(0.95 0.02 70 / 11%);
+  --sidebar-ring: oklch(0.69 0.13 43);
+  --practice-tint: oklch(0.245 0.04 45);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply bg-background;
+  }
+
+  body {
+    @apply min-h-svh bg-background font-sans text-foreground antialiased;
+    margin: 0;
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 24%, transparent);
+  }
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+}
+
+.app-canvas {
+  position: relative;
+  isolation: isolate;
+}
+
+.app-canvas::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  opacity: 0.28;
+  background-image: radial-gradient(color-mix(in oklab, var(--foreground) 14%, transparent) 0.7px, transparent 0.7px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(to bottom, black, transparent 70%);
+}

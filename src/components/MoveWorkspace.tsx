@@ -1,0 +1,70 @@
+import { Plus } from "lucide-react";
+
+import { SortableMoveList } from "@/components/SortableMoveList";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import type { DanceStyle, Move } from "@/types/repeater";
+
+type MoveWorkspaceProps = {
+  style: DanceStyle;
+  expandedMoveIds: Set<string>;
+  activeMoveId?: string;
+  onAddMove: () => void;
+  onExpandedChange: (moveId: string, expanded: boolean) => void;
+  onChangeMove: (move: Move) => void;
+  onDeleteMove: (moveId: string) => void;
+  onReorderMoves: (moveIds: string[]) => void;
+};
+
+/** Hosts the active style's heading, empty state, and sortable move editor. */
+export function MoveWorkspace({
+  style,
+  expandedMoveIds,
+  activeMoveId,
+  onAddMove,
+  onExpandedChange,
+  onChangeMove,
+  onDeleteMove,
+  onReorderMoves,
+}: MoveWorkspaceProps) {
+  return (
+    <section aria-labelledby="style-heading" className="min-w-0">
+      <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="mb-2 text-[0.68rem] font-bold uppercase tracking-[0.2em] text-primary">Move library</p>
+          <h1 id="style-heading" className="font-display text-4xl font-medium tracking-tight sm:text-5xl">{style.name}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {style.moves.length} {style.moves.length === 1 ? "move" : "moves"} · drag to arrange
+          </p>
+        </div>
+        {style.moves.length ? (
+          <Button onClick={onAddMove}>
+            <Plus /> Add move
+          </Button>
+        ) : null}
+      </div>
+      {style.moves.length ? (
+        <SortableMoveList
+          moves={style.moves}
+          expandedMoveIds={expandedMoveIds}
+          activeMoveId={activeMoveId}
+          onExpandedChange={onExpandedChange}
+          onChange={onChangeMove}
+          onDelete={onDeleteMove}
+          onReorder={onReorderMoves}
+        />
+      ) : (
+        <Card className="border-dashed bg-card/60">
+          <CardContent className="flex min-h-72 flex-col items-center justify-center text-center">
+            <div className="mb-5 grid size-12 place-items-center rounded-2xl bg-secondary text-secondary-foreground">
+              <Plus className="size-5" />
+            </div>
+            <h2 className="font-display text-2xl font-medium">Add the first move</h2>
+            <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">Start with one move you want in your body. You can add notes and a reference video after naming it.</p>
+            <Button className="mt-6" onClick={onAddMove}>Add first move</Button>
+          </CardContent>
+        </Card>
+      )}
+    </section>
+  );
+}
