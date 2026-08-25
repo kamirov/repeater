@@ -8,8 +8,8 @@
     "node": ">=20.19.0"
   },
   "scripts": {
-    "dev": "vercel dev",
-    "dev:vite": "vite",
+    "dev": "vite",
+    "dev:vercel": "vercel dev",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",

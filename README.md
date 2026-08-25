@@ -46,13 +46,17 @@ pnpm install
 pnpm db:migrate
 ```
 
-Start the Vite frontend and local Vercel Functions together:
+Start the Vite frontend by itself:
 
 ```bash
 pnpm dev
 ```
 
-`pnpm dev:vite` starts only the frontend and is useful for UI work with a separately hosted API.
+To run the frontend and local Vercel Functions together, use the separately named command so Vercel does not recursively invoke itself:
+
+```bash
+pnpm dev:vercel
+```
 
 ## Database changes
 
