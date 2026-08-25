@@ -145,17 +145,29 @@ export function createDatabaseRepository(databaseUrl = process.env.DATABASE_URL)
       });
     },
     async createMove(styleId, moveId) {
-      const [style] = await db.select({ id: danceStyles.id }).from(danceStyles).where(eq(danceStyles.id, styleId)).limit(1);
-      if (!style) return null;
-      const [existing] = await db.select().from(moves).where(eq(moves.id, moveId)).limit(1);
-      if (existing) {
-        return existing.styleId === styleId
-          ? { id: existing.id, name: existing.name, referenceUrl: existing.referenceUrl, description: existing.description }
-          : null;
-      }
-      const [position] = await db.select({ value: max(moves.position) }).from(moves).where(eq(moves.styleId, styleId));
-      const [created] = await db.insert(moves).values({ id: moveId, styleId, position: (position.value ?? -1) + 1 }).returning();
-      return { id: created.id, name: created.name, referenceUrl: created.referenceUrl, description: created.description };
+      return db.transaction(async (tx) => {
+        const [style] = await tx.select({ id: danceStyles.id }).from(danceStyles).where(eq(danceStyles.id, styleId)).limit(1);
+        if (!style) return null;
+        const [existing] = await tx.select().from(moves).where(eq(moves.id, moveId)).limit(1);
+        if (existing) {
+          return existing.styleId === styleId
+            ? { id: existing.id, name: existing.name, referenceUrl: existing.referenceUrl, description: existing.description }
+            : null;
+        }
+        const existingMoves = await tx
+          .select({ id: moves.id })
+          .from(moves)
+          .where(eq(moves.styleId, styleId))
+          .orderBy(asc(moves.position));
+        for (const [index, move] of existingMoves.entries()) {
+          await tx.update(moves).set({ position: -index - 1 }).where(eq(moves.id, move.id));
+        }
+        const [created] = await tx.insert(moves).values({ id: moveId, styleId, position: 0 }).returning();
+        for (const [index, move] of existingMoves.entries()) {
+          await tx.update(moves).set({ position: index + 1, updatedAt: new Date() }).where(eq(moves.id, move.id));
+        }
+        return { id: created.id, name: created.name, referenceUrl: created.referenceUrl, description: created.description };
+      });
     },
     async updateMove(styleId, moveId, patch) {
       const [updated] = await db

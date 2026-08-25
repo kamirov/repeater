@@ -25,7 +25,7 @@ import type { Move } from "@/types/repeater";
 
 type SortableMoveListProps = {
   moves: Move[];
-  expandedMoveIds: Set<string>;
+  expandedMoveId: string | null;
   activeMoveId?: string;
   onExpandedChange: (moveId: string, expanded: boolean) => void;
   onChange: (move: Move) => void;
@@ -48,7 +48,7 @@ export function getReorderedMoveIds(ids: string[], activeId: string, overId: str
 /** Provides pointer, touch, and keyboard sorting for the active style's moves. */
 export function SortableMoveList({
   moves,
-  expandedMoveIds,
+  expandedMoveId,
   activeMoveId,
   onExpandedChange,
   onChange,
@@ -89,7 +89,7 @@ export function SortableMoveList({
             <SortableMove
               key={move.id}
               move={move}
-              expanded={expandedMoveIds.has(move.id)}
+              expanded={expandedMoveId === move.id}
               active={move.id === activeMoveId}
               onExpandedChange={(expanded) => onExpandedChange(move.id, expanded)}
               onChange={onChange}

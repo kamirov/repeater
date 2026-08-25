@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { RepeaterApiError, type RepeaterApi } from "@/lib/repeaterApi";
 import { REPEATER_SECRET_KEY, REPEATER_STORAGE_KEY, createRepeaterStore } from "@/stores/repeaterStore";
-import type { RepeaterDataV1 } from "@/types/repeater";
+import type { Move, RepeaterDataV1 } from "@/types/repeater";
 
 const styleId = "00000000-0000-4000-8000-000000000001";
 const moveId = "00000000-0000-4000-8000-000000000101";
@@ -88,6 +88,30 @@ describe("createRepeaterStore", () => {
     expect(api.createMove).toHaveBeenCalledWith("secret", styleId, moveId);
   });
 
+  it("adds new moves to the top of the active style", async () => {
+    const state: RepeaterDataV1 = {
+      version: 1,
+      styles: [{
+        id: styleId,
+        name: "Salsa",
+        moves: [
+          { id: moveId, name: "One", referenceUrl: "", description: "" },
+          { id: moveTwoId, name: "Two", referenceUrl: "", description: "" },
+        ],
+      }],
+      activeStyleId: styleId,
+      delaySeconds: 5,
+    };
+    const newMoveId = "00000000-0000-4000-8000-000000000103";
+    vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValueOnce(newMoveId);
+    const store = createRepeaterStore(localStorage, fakeApi(state));
+    await store.getState().submitSecret("secret");
+
+    await store.getState().addMove(styleId);
+
+    expect(store.getState().styles[0].moves.map((move) => move.id)).toEqual([newMoveId, moveId, moveTwoId]);
+  });
+
   it("debounces move edits and keeps the latest values", async () => {
     vi.useFakeTimers();
     const state: RepeaterDataV1 = {
@@ -97,15 +121,23 @@ describe("createRepeaterStore", () => {
       delaySeconds: 5,
     };
     const api = fakeApi(state);
+    let resolveUpdate: ((move: Move) => void) | undefined;
+    vi.mocked(api.updateMove).mockImplementation(() => new Promise((resolve) => {
+      resolveUpdate = resolve;
+    }));
     const store = createRepeaterStore(localStorage, api);
     await store.getState().submitSecret("secret");
 
     store.getState().updateMove(styleId, moveId, { name: "Cross", referenceUrl: "", description: "" });
     store.getState().updateMove(styleId, moveId, { name: "Cross-body lead", referenceUrl: "", description: "" });
+    expect(store.getState().pendingMoveIds.has(moveId)).toBe(false);
     await vi.advanceTimersByTimeAsync(500);
 
     expect(api.updateMove).toHaveBeenCalledTimes(1);
     expect(api.updateMove).toHaveBeenCalledWith("secret", styleId, expect.objectContaining({ name: "Cross-body lead" }));
+    expect(store.getState().pendingMoveIds.has(moveId)).toBe(true);
+    resolveUpdate?.({ id: moveId, name: "Cross-body lead", referenceUrl: "", description: "" });
+    await vi.advanceTimersByTimeAsync(0);
     expect(store.getState().pendingMoveIds.has(moveId)).toBe(false);
     vi.useRealTimers();
   });

@@ -39,7 +39,8 @@ export function RepeaterApp({
 
 function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
   const state = useStore(store);
-  const [expandedMoveIds, setExpandedMoveIds] = useState<Set<string>>(new Set());
+  const [expandedMoveId, setExpandedMoveId] = useState<string | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   useEffect(() => {
     void store.getState().initialize();
   }, [store]);
@@ -62,19 +63,19 @@ function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
       pendingStyleIds: state.pendingStyleIds,
       onCreate: (name: string) => {
         void state.addStyle(name).catch(() => toast.error("The dance style could not be created."));
-        setExpandedMoveIds(new Set());
+        setExpandedMoveId(null);
       },
       onRename: (styleId: string, name: string) => {
         void state.renameStyle(styleId, name).catch(() => toast.error("The dance style could not be renamed."));
       },
       onDelete: (styleId: string) => {
         void state.deleteStyle(styleId).catch(() => toast.error("The dance style was restored because deletion failed."));
-        setExpandedMoveIds(new Set());
+        setExpandedMoveId(null);
       },
       onSelect: (styleId: string) => {
         if (styleId === state.activeStyleId) return;
         void state.setActiveStyle(styleId);
-        setExpandedMoveIds(new Set());
+        setExpandedMoveId(null);
       },
     }),
     [state],
@@ -99,19 +100,14 @@ function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
     if (!activeStyle) return;
     try {
       const moveId = await state.addMove(activeStyle.id);
-      setExpandedMoveIds((current) => new Set([...current, moveId]));
+      setExpandedMoveId(moveId);
     } catch {
       toast.error("The move could not be added.");
     }
   };
 
   const setMoveExpanded = (moveId: string, expanded: boolean) => {
-    setExpandedMoveIds((current) => {
-      const next = new Set(current);
-      if (expanded) next.add(moveId);
-      else next.delete(moveId);
-      return next;
-    });
+    setExpandedMoveId(expanded ? moveId : null);
   };
 
   const updateMove = (move: Move) => {
@@ -126,9 +122,13 @@ function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
   };
 
   return (
-    <div className="app-canvas min-h-svh bg-background text-foreground lg:grid lg:grid-cols-[280px_minmax(0,1fr)]">
+    <div className={`app-canvas min-h-svh bg-background text-foreground lg:grid ${sidebarCollapsed ? "lg:grid-cols-[64px_minmax(0,1fr)]" : "lg:grid-cols-[280px_minmax(0,1fr)]"}`}>
       <aside className="sticky top-0 hidden h-svh border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:block">
-        <StyleNavigation {...navigationProps} />
+        <StyleNavigation
+          {...navigationProps}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed((collapsed) => !collapsed)}
+        />
       </aside>
       <div className="min-w-0">
         <MobileNavigation {...navigationProps} />
@@ -146,7 +146,7 @@ function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
           <main className="mx-auto grid max-w-[1480px] gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
             <MoveWorkspace
               style={activeStyle}
-              expandedMoveIds={expandedMoveIds}
+              expandedMoveId={expandedMoveId}
               activeMoveId={practice.currentMove?.id}
               onAddMove={addMove}
               onExpandedChange={setMoveExpanded}

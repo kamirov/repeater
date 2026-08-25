@@ -7,7 +7,7 @@ import type { DanceStyle, Move } from "@/types/repeater";
 
 type MoveWorkspaceProps = {
   style: DanceStyle;
-  expandedMoveIds: Set<string>;
+  expandedMoveId: string | null;
   activeMoveId?: string;
   onAddMove: () => void;
   onExpandedChange: (moveId: string, expanded: boolean) => void;
@@ -24,7 +24,7 @@ type MoveWorkspaceProps = {
 /** Hosts the active style's heading, empty state, and sortable move editor. */
 export function MoveWorkspace({
   style,
-  expandedMoveIds,
+  expandedMoveId,
   activeMoveId,
   onAddMove,
   onExpandedChange,
@@ -43,9 +43,6 @@ export function MoveWorkspace({
         <div>
           <p className="mb-2 text-[0.68rem] font-bold uppercase tracking-[0.2em] text-primary">Move library</p>
           <h1 id="style-heading" className="font-display text-4xl font-medium tracking-tight sm:text-5xl">{style.name}</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {style.moves.length} {style.moves.length === 1 ? "move" : "moves"} · drag to arrange
-          </p>
         </div>
         {style.moves.length ? (
           <Button onClick={onAddMove}>
@@ -56,7 +53,7 @@ export function MoveWorkspace({
       {style.moves.length ? (
         <SortableMoveList
           moves={style.moves}
-          expandedMoveIds={expandedMoveIds}
+          expandedMoveId={expandedMoveId}
           activeMoveId={activeMoveId}
           onExpandedChange={onExpandedChange}
           onChange={onChangeMove}

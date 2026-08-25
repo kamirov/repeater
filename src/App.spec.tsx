@@ -54,6 +54,32 @@ describe("RepeaterApp startup", () => {
     expect(screen.getByRole("button", { name: /add first move/i })).toBeVisible();
   });
 
+  it("keeps only one move open and starts with a collapsed sidebar", async () => {
+    const user = userEvent.setup();
+    const state: RepeaterDataV1 = {
+      version: 1,
+      styles: [{
+        id: "00000000-0000-4000-8000-000000000001",
+        name: "Salsa",
+        moves: [
+          { id: "move-one", name: "One", referenceUrl: "", description: "" },
+          { id: "move-two", name: "Two", referenceUrl: "", description: "" },
+        ],
+      }],
+      activeStyleId: "00000000-0000-4000-8000-000000000001",
+      delaySeconds: 5,
+    };
+    localStorage.setItem(REPEATER_SECRET_KEY, "secret");
+    render(<RepeaterApp store={createRepeaterStore(localStorage, apiWithState(state))} />);
+
+    await user.click(await screen.findByRole("button", { name: /edit one/i }));
+    await user.click(screen.getByRole("button", { name: /edit two/i }));
+
+    expect(screen.getByRole("button", { name: /edit one/i })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: /collapse two/i })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("button", { name: "Expand style navigation" })).toBeVisible();
+  });
+
   it("offers valid legacy data and allows starting fresh without deleting it", async () => {
     const user = userEvent.setup();
     localStorage.setItem(REPEATER_SECRET_KEY, "secret");

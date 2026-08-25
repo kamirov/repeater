@@ -72,9 +72,9 @@ export function MoveCard({
         >
           <span className={cn("block truncate font-semibold", !move.name.trim() && "italic text-muted-foreground")}>{displayName}</span>
           {saving ? <span className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><Loader2 className="size-3 animate-spin" /> Saving…</span> : null}
-          {!expanded ? (
+          {!expanded && move.description.trim() ? (
             <span className="mt-1 block truncate text-sm text-muted-foreground">
-              {move.description.trim() || "Add notes, cues, or a reference video"}
+              {move.description.trim()}
             </span>
           ) : null}
         </button>

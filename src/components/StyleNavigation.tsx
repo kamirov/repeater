@@ -1,4 +1,4 @@
-import { Loader2, Monitor, Moon, MoreHorizontal, Pencil, Plus, Sun, Trash2 } from "lucide-react";
+import { ChevronsLeft, ChevronsRight, Loader2, Monitor, Moon, MoreHorizontal, Pencil, Plus, Sun, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { StyleDialog } from "@/components/StyleDialog";
@@ -33,6 +33,8 @@ type StyleNavigationProps = {
   onDelete: (styleId: string) => void;
   onSelect: (styleId: string) => void;
   onNavigate?: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
   className?: string;
 };
 
@@ -46,19 +48,36 @@ export function StyleNavigation({
   onDelete,
   onSelect,
   onNavigate,
+  collapsed = false,
+  onToggleCollapse,
   className,
 }: StyleNavigationProps) {
   const { theme, cycleTheme } = useTheme();
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
-      <div className="border-b border-sidebar-border px-5 py-6">
-        <Brand />
+      <div className={cn("flex items-center border-b border-sidebar-border", collapsed ? "justify-center px-2 py-4" : "justify-between px-5 py-6")}>
+        {collapsed ? null : <Brand />}
+        {onToggleCollapse ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={collapsed ? "Expand style navigation" : "Collapse style navigation"}
+                onClick={onToggleCollapse}
+              >
+                {collapsed ? <ChevronsRight /> : <ChevronsLeft />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">{collapsed ? "Expand styles" : "Collapse styles"}</TooltipContent>
+          </Tooltip>
+        ) : null}
       </div>
-      <div className="flex-1 overflow-y-auto px-3 py-5">
-        <div className="mb-3 flex items-center justify-between px-2">
+      <div className={cn("flex-1 overflow-y-auto py-5", collapsed ? "px-2" : "px-3")}>
+        <div className={cn("mb-3 flex items-center", collapsed ? "justify-center" : "justify-between px-2")}>
           <p className="text-[0.68rem] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-            Dance styles
+            <span className={collapsed ? "sr-only" : undefined}>Dance styles</span>
           </p>
           <StyleDialog mode="create" onSubmit={onCreate}>
             <Button size="icon-sm" variant="ghost" aria-label="Add dance style">
@@ -74,6 +93,7 @@ export function StyleNavigation({
                 style={style}
                 active={style.id === activeStyleId}
                 pending={pendingStyleIds.has(style.id)}
+                collapsed={collapsed}
                 onSelect={() => {
                   onSelect(style.id);
                   onNavigate?.();
@@ -84,19 +104,30 @@ export function StyleNavigation({
             ))}
           </nav>
         ) : (
-          <div className="rounded-2xl border border-dashed border-sidebar-border px-4 py-7 text-center">
-            <p className="font-display text-lg">Your floor is open</p>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              Add a style to begin your repertoire.
-            </p>
-          </div>
+          collapsed ? (
+            <div className="grid place-items-center rounded-xl border border-dashed border-sidebar-border py-3 text-muted-foreground">
+              <span aria-hidden="true">—</span>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-sidebar-border px-4 py-7 text-center">
+              <p className="font-display text-lg">Your floor is open</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                Add a style to begin your repertoire.
+              </p>
+            </div>
+          )
         )}
       </div>
       <div className="border-t border-sidebar-border p-3">
-        <Button variant="ghost" className="w-full justify-start" onClick={cycleTheme}>
-          {theme === "light" ? <Sun /> : theme === "dark" ? <Moon /> : <Monitor />}
-          {theme === "light" ? "Light theme" : theme === "dark" ? "Dark theme" : "System theme"}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" className={cn("w-full justify-start", collapsed && "justify-center px-0")} onClick={cycleTheme}>
+              {theme === "light" ? <Sun /> : theme === "dark" ? <Moon /> : <Monitor />}
+              <span className={collapsed ? "sr-only" : undefined}>{theme === "light" ? "Light theme" : theme === "dark" ? "Dark theme" : "System theme"}</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">{theme === "light" ? "Light theme" : theme === "dark" ? "Dark theme" : "System theme"}</TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );
@@ -106,6 +137,7 @@ function StyleNavigationItem({
   style,
   active,
   pending,
+  collapsed,
   onSelect,
   onRename,
   onDelete,
@@ -113,12 +145,39 @@ function StyleNavigationItem({
   style: DanceStyle;
   active: boolean;
   pending: boolean;
+  collapsed: boolean;
   onSelect: () => void;
   onRename: (name: string) => void;
   onDelete: () => void;
 }) {
   const [renameOpen, setRenameOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  if (collapsed) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            aria-label={style.name}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "mx-auto grid size-10 place-items-center rounded-xl border text-sm font-bold outline-none transition focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+              active
+                ? "border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                : "border-transparent text-sidebar-foreground hover:bg-sidebar-accent/60",
+            )}
+            onClick={() => {
+              onSelect();
+            }}
+          >
+            {style.name.trim().slice(0, 1).toUpperCase()}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="right">{style.name}</TooltipContent>
+      </Tooltip>
+    );
+  }
 
   return (
     <div

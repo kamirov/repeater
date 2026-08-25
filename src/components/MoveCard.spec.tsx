@@ -42,6 +42,23 @@ describe("MoveCard", () => {
     expect(screen.queryByLabelText("Move name")).not.toBeInTheDocument();
   });
 
+  it("does not show filler copy when a move has no description", () => {
+    render(
+      <TooltipProvider>
+        <MoveCard
+          move={{ ...move, description: "" }}
+          expanded={false}
+          onExpandedChange={vi.fn()}
+          onChange={vi.fn()}
+          onDelete={vi.fn()}
+          dragHandle={<button type="button">Drag</button>}
+        />
+      </TooltipProvider>,
+    );
+
+    expect(screen.queryByText("Add notes, cues, or a reference video")).not.toBeInTheDocument();
+  });
+
   it("auto-saves fields and reports invalid reference URLs while expanded", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

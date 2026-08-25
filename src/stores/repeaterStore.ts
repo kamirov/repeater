@@ -252,7 +252,7 @@ export function createRepeaterStore(storage?: Storage, api: RepeaterApi = create
       addMove: async (styleId) => {
         const id = crypto.randomUUID();
         const draft: Move = { id, name: "", referenceUrl: "", description: "" };
-        set((state) => ({ styles: state.styles.map((style) => style.id === styleId ? { ...style, moves: [...style.moves, draft] } : style), pendingMoveIds: toggleId(state.pendingMoveIds, id, true) }));
+        set((state) => ({ styles: state.styles.map((style) => style.id === styleId ? { ...style, moves: [draft, ...style.moves] } : style), pendingMoveIds: toggleId(state.pendingMoveIds, id, true) }));
         try {
           await api.createMove(getSecret(), styleId, id);
         } catch (error) {
@@ -267,7 +267,6 @@ export function createRepeaterStore(storage?: Storage, api: RepeaterApi = create
       updateMove: (styleId, moveId, patch) => {
         set((state) => ({
           styles: state.styles.map((style) => style.id === styleId ? { ...style, moves: style.moves.map((move) => move.id === moveId ? { ...move, ...patch } : move) } : style),
-          pendingMoveIds: toggleId(state.pendingMoveIds, moveId, true),
         }));
         const current = moveTimers.get(moveId);
         if (current) clearTimeout(current);

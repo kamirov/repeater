@@ -1,7 +1,7 @@
 import { Clock3, Loader2, Play, RotateCcw, Square, Volume2, Waves } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Move } from "@/types/repeater";
@@ -47,10 +47,6 @@ export function PracticeCard({
           <Waves className="size-4" />
           <span className="text-[0.68rem] font-bold uppercase tracking-[0.2em]">Practice loop</span>
         </div>
-        <CardTitle>Let your body answer</CardTitle>
-        <CardDescription>
-          Repeater calls a move, then gives you room to dance before the next prompt.
-        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 pt-6">
         <div className="space-y-2">
@@ -80,7 +76,6 @@ export function PracticeCard({
             />
             <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-semibold text-muted-foreground">seconds</span>
           </div>
-          <p className="text-xs leading-relaxed text-muted-foreground">The countdown begins after each spoken move finishes.</p>
           {delaySaveStatus === "saving" ? <p className="flex items-center gap-1 text-xs text-muted-foreground"><Loader2 className="size-3 animate-spin" /> Saving delay…</p> : null}
           {delaySaveStatus === "error" ? <Button type="button" variant="ghost" size="sm" className="px-0 text-destructive" onClick={() => void onDelayBlur?.()}><RotateCcw /> Retry saving delay</Button> : null}
         </div>

@@ -19,7 +19,7 @@ describe("MoveWorkspace", () => {
     render(
       <TooltipProvider><MoveWorkspace
         style={style}
-        expandedMoveIds={new Set()}
+        expandedMoveId={null}
         onAddMove={onAddMove}
         onExpandedChange={onExpandedChange}
         onChangeMove={vi.fn()}
@@ -44,7 +44,7 @@ describe("MoveWorkspace", () => {
     render(
       <TooltipProvider><MoveWorkspace
         style={{ ...style, moves: [] }}
-        expandedMoveIds={new Set()}
+        expandedMoveId={null}
         onAddMove={vi.fn()}
         onExpandedChange={vi.fn()}
         onChangeMove={vi.fn()}
