@@ -11,12 +11,12 @@ import {
   updateMoveSchema,
   updateStyleSchema,
   validateSecretWordSchema,
-} from "./contracts";
+} from "./contracts.js";
 import {
   createDatabaseRepository,
   RepositoryConflictError,
   type RepeaterRepository,
-} from "./repository";
+} from "./repository.js";
 
 type Dependencies = { repository?: RepeaterRepository; secret?: string };
 
@@ -66,7 +66,10 @@ export function createApiHandler(dependencies: Dependencies = {}) {
         return response.status(200).json(await repository.getState());
       }
       if (method === "POST" && parts.join("/") === "state/import") {
-        return response.status(201).json(await repository.importState(repeaterDataSchema.parse(bodyOf(request))));
+        const data = repeaterDataSchema.parse(bodyOf(request)) as Parameters<
+          RepeaterRepository["importState"]
+        >[0];
+        return response.status(201).json(await repository.importState(data));
       }
       if (method === "POST" && parts.length === 1 && parts[0] === "styles") {
         return response.status(201).json(await repository.createStyle(createStyleSchema.parse(bodyOf(request))));

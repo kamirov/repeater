@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import { createApiHandler } from "./api";
+import { createApiHandler } from "./api.js";
 
 type Next = (error?: unknown) => void;
 

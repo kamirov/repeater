@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv, type Plugin } from "vite";
 
-import { createDevApiMiddleware } from "./server/devMiddleware";
+import { createDevApiMiddleware } from "./server/devMiddleware.js";
 
 function repeaterApiPlugin(): Plugin {
   return {

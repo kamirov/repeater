@@ -3,8 +3,8 @@ import { and, asc, count, eq, max } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import ws from "ws";
 
-import type { DanceStyle, Move, RepeaterDataV1 } from "../src/types/repeater";
-import { appSettings, danceStyles, moves } from "./db/schema";
+import type { DanceStyle, Move, RepeaterDataV1 } from "../src/types/repeater.js";
+import { appSettings, danceStyles, moves } from "./db/schema.js";
 
 export type SettingsPatch = Partial<Pick<RepeaterDataV1, "activeStyleId" | "delaySeconds">>;
 
