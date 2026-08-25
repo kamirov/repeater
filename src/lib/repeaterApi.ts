@@ -22,7 +22,16 @@ export function createRepeaterApi(fetcher: typeof fetch = fetch) {
         payload?.error?.code,
       );
     }
-    return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
+    if (response.status === 204) return undefined as T;
+    const contentType = response.headers.get("Content-Type") ?? "";
+    if (!contentType.toLowerCase().includes("application/json")) {
+      throw new RepeaterApiError(
+        "The backend API is unavailable. Start Repeater with `pnpm dev` so the local Vercel Functions are included.",
+        response.status,
+        "INVALID_API_RESPONSE",
+      );
+    }
+    return (await response.json()) as T;
   }
 
   return {

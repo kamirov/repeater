@@ -49,4 +49,16 @@ describe("createRepeaterApi", () => {
       expect.objectContaining<Partial<RepeaterApiError>>({ status: 401, code: "INVALID_SECRET", message: "Wrong secret" }),
     );
   });
+
+  it("explains when Vite returns the HTML app for a missing API route", async () => {
+    const api = createRepeaterApi(vi.fn().mockResolvedValue(new Response("<!doctype html>", {
+      status: 200,
+      headers: { "Content-Type": "text/html" },
+    })));
+
+    await expect(api.getState("secret")).rejects.toEqual(expect.objectContaining({
+      code: "INVALID_API_RESPONSE",
+      message: expect.stringMatching(/backend API is unavailable/i),
+    }));
+  });
 });
