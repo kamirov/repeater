@@ -9,7 +9,7 @@ import { EmptyOnboarding } from "@/components/EmptyOnboarding";
 import { LegacyImportDialog } from "@/components/LegacyImportDialog";
 import { MobileNavigation } from "@/components/MobileNavigation";
 import { MoveWorkspace } from "@/components/MoveWorkspace";
-import { PracticeCard } from "@/components/PracticeCard";
+import type { PracticeLoopProps } from "@/components/PracticeCard";
 import { StyleNavigation } from "@/components/StyleNavigation";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
@@ -143,9 +143,20 @@ function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
         {!activeStyle ? (
           <EmptyOnboarding onCreate={navigationProps.onCreate} />
         ) : (
-          <main className="mx-auto grid max-w-[1480px] gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
+          <main className="mx-auto w-full max-w-[1480px] px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
             <MoveWorkspace
               style={activeStyle}
+              practice={{
+                delaySeconds: state.delaySeconds,
+                eligibleMoveCount,
+                isRunning: practice.isRunning,
+                isSpeechSupported: practice.isSpeechSupported,
+                onDelayChange: state.setDelaySeconds,
+                onDelayBlur: state.flushDelay,
+                delaySaveStatus: state.delaySaveStatus,
+                onStart: practice.start,
+                onStop: practice.stop,
+              } satisfies PracticeLoopProps}
               expandedMoveId={expandedMoveId}
               activeMoveId={practice.currentMove?.id}
               onAddMove={addMove}
@@ -158,19 +169,6 @@ function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
               onFlushMove={(moveId) => state.flushMove(activeStyle.id, moveId)}
               onRetryMove={(moveId) => state.retryMove(activeStyle.id, moveId)}
               onReorderMoves={(moveIds) => void state.reorderMoves(activeStyle.id, moveIds).catch(() => toast.error("The previous move order was restored."))}
-            />
-            <PracticeCard
-              delaySeconds={state.delaySeconds}
-              eligibleMoveCount={eligibleMoveCount}
-              isRunning={practice.isRunning}
-              currentMove={practice.currentMove}
-              countdownSeconds={practice.countdownSeconds}
-              isSpeechSupported={practice.isSpeechSupported}
-              onDelayChange={state.setDelaySeconds}
-              onDelayBlur={state.flushDelay}
-              delaySaveStatus={state.delaySaveStatus}
-              onStart={practice.start}
-              onStop={practice.stop}
             />
           </main>
         )}

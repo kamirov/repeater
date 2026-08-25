@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 
+import { PracticeCard, type PracticeLoopProps } from "@/components/PracticeCard";
 import { SortableMoveList } from "@/components/SortableMoveList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,6 +8,7 @@ import type { DanceStyle, Move } from "@/types/repeater";
 
 type MoveWorkspaceProps = {
   style: DanceStyle;
+  practice: PracticeLoopProps;
   expandedMoveId: string | null;
   activeMoveId?: string;
   onAddMove: () => void;
@@ -24,6 +26,7 @@ type MoveWorkspaceProps = {
 /** Hosts the active style's heading, empty state, and sortable move editor. */
 export function MoveWorkspace({
   style,
+  practice,
   expandedMoveId,
   activeMoveId,
   onAddMove,
@@ -39,16 +42,19 @@ export function MoveWorkspace({
 }: MoveWorkspaceProps) {
   return (
     <section aria-labelledby="style-heading" className="min-w-0">
-      <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-7">
         <div>
           <p className="mb-2 text-[0.68rem] font-bold uppercase tracking-[0.2em] text-primary">Move library</p>
           <h1 id="style-heading" className="font-display text-4xl font-medium tracking-tight sm:text-5xl">{style.name}</h1>
         </div>
-        {style.moves.length ? (
-          <Button onClick={onAddMove}>
-            <Plus /> Add move
-          </Button>
-        ) : null}
+        <div className="mt-6 flex items-center justify-between gap-4">
+          <PracticeCard {...practice} />
+          {style.moves.length ? (
+            <Button onClick={onAddMove}>
+              <Plus /> Add move
+            </Button>
+          ) : null}
+        </div>
       </div>
       {style.moves.length ? (
         <SortableMoveList

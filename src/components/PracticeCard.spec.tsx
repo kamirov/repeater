@@ -9,8 +9,6 @@ const baseProps = {
   delaySeconds: 5,
   eligibleMoveCount: 2,
   isRunning: false,
-  currentMove: null,
-  countdownSeconds: null,
   isSpeechSupported: true,
   onDelayChange: vi.fn(),
   onStart: vi.fn(),
@@ -22,7 +20,7 @@ describe("PracticeCard", () => {
     render(<PracticeCard {...baseProps} eligibleMoveCount={0} />);
 
     expect(screen.getByRole("button", { name: "Start practice" })).toBeDisabled();
-    expect(screen.getByText(/name at least one move/i)).toBeVisible();
+    expect(screen.getByTitle(/name at least one move/i)).toBeVisible();
   });
 
   it("updates the delay and starts practice", async () => {
@@ -45,7 +43,7 @@ describe("PracticeCard", () => {
     }
     render(<Harness />);
 
-    const delay = screen.getByLabelText("Delay between moves");
+    const delay = screen.getByLabelText("Practice delay in seconds");
     await user.clear(delay);
     await user.type(delay, "8");
     expect(onDelayChange).toHaveBeenLastCalledWith(8);
@@ -53,26 +51,17 @@ describe("PracticeCard", () => {
     expect(onStart).toHaveBeenCalled();
   });
 
-  it("shows the active move, countdown, and stop control", async () => {
+  it("shows the pause control while practice is running", async () => {
     const user = userEvent.setup();
     const onStop = vi.fn();
     render(
       <PracticeCard
         {...baseProps}
         isRunning
-        currentMove={{
-          id: "move-1",
-          name: "Inside turn",
-          description: "",
-          referenceUrl: "",
-        }}
-        countdownSeconds={3}
         onStop={onStop}
       />,
     );
 
-    expect(screen.getByText("Inside turn")).toBeVisible();
-    expect(screen.getByText(/next move in 3 seconds/i)).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Stop practice" }));
     expect(onStop).toHaveBeenCalled();
   });

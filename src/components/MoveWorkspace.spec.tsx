@@ -3,12 +3,24 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { MoveWorkspace } from "@/components/MoveWorkspace";
+import type { PracticeLoopProps } from "@/components/PracticeCard";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 const style = {
   id: "00000000-0000-4000-8000-000000000001",
   name: "Salsa",
   moves: [{ id: "00000000-0000-4000-8000-000000000101", name: "Cross-body lead", referenceUrl: "", description: "Keep the slot." }],
+};
+
+const practice: PracticeLoopProps = {
+  delaySeconds: 5,
+  eligibleMoveCount: 1,
+  isRunning: false,
+  isSpeechSupported: true,
+  onDelayChange: vi.fn(),
+  onDelayBlur: vi.fn(),
+  onStart: vi.fn(),
+  onStop: vi.fn(),
 };
 
 describe("MoveWorkspace", () => {
@@ -19,6 +31,7 @@ describe("MoveWorkspace", () => {
     render(
       <TooltipProvider><MoveWorkspace
         style={style}
+        practice={practice}
         expandedMoveId={null}
         onAddMove={onAddMove}
         onExpandedChange={onExpandedChange}
@@ -44,6 +57,7 @@ describe("MoveWorkspace", () => {
     render(
       <TooltipProvider><MoveWorkspace
         style={{ ...style, moves: [] }}
+        practice={practice}
         expandedMoveId={null}
         onAddMove={vi.fn()}
         onExpandedChange={vi.fn()}
