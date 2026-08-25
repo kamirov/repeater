@@ -27,7 +27,7 @@ function response() {
   return result;
 }
 
-function request(method: string, route: string[], body?: unknown, secret?: string): VercelRequest {
+function request(method: string, route: string | string[], body?: unknown, secret?: string): VercelRequest {
   return {
     method,
     query: { route },
@@ -43,7 +43,7 @@ describe("Repeater API", () => {
     const valid = response();
     const invalid = response();
 
-    await handler(request("POST", ["auth", "secret-word", "validate"], { secretWord: "correct" }), valid as unknown as VercelResponse);
+    await handler(request("POST", "auth/secret-word/validate", { secretWord: "correct" }), valid as unknown as VercelResponse);
     await handler(request("POST", ["auth", "secret-word", "validate"], { secretWord: "wrong" }), invalid as unknown as VercelResponse);
 
     expect(valid.statusCode).toBe(200);
