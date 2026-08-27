@@ -8,7 +8,7 @@ Repeater is a browser-based dance practice studio. Dance styles, ordered moves, 
 - Expandable move editors for names, reference URLs, and notes
 - Pointer, touch, and keyboard-accessible drag-and-drop ordering
 - Random spoken prompts with no immediate repeats when alternatives exist
-- Shared-secret access for every backend request
+- Shared-secret access for every production backend request
 - Optimistic saves with focused loading, error, retry, and rollback states
 - One-time import from the former browser-local data format
 - Light, dark, and system themes
@@ -31,7 +31,7 @@ DATABASE_URL=postgresql://...
 # Direct connection used by Drizzle migrations
 DATABASE_URL_UNPOOLED=postgresql://...
 
-# Shared word or phrase entered in the frontend access dialog
+# Shared word or phrase required by deployed production requests
 REPEATER_SECRET_WORD=...
 ```
 
@@ -53,6 +53,8 @@ pnpm dev
 ```
 
 Vite mounts the same API handler as local middleware, so this single command serves both the frontend and `/api/*` routes without requiring `vercel dev`.
+
+Localhost development bypasses the shared-secret gate, so `REPEATER_SECRET_WORD` is not required for `pnpm dev`. The Vercel API handler remains authenticated and requires the secret in preview and production deployments.
 
 ## Database changes
 

@@ -21,7 +21,7 @@ async function readBody(request: IncomingMessage): Promise<unknown> {
 
 /** Serves the same API handler inside Vite so `pnpm dev` runs the full app. */
 export function createDevApiMiddleware() {
-  const handler = createApiHandler();
+  const handler = createApiHandler({ allowUnauthenticated: true });
 
   return async (request: IncomingMessage, response: ServerResponse, next: Next) => {
     const url = new URL(request.url ?? "/", "http://localhost");

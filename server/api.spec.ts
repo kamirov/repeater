@@ -67,6 +67,29 @@ describe("Repeater API", () => {
     expect(repo.getState).not.toHaveBeenCalled();
   });
 
+  it("allows local development requests without a configured secret", async () => {
+    const repo = repository();
+    const handler = createApiHandler({ repository: repo, allowUnauthenticated: true });
+    const res = response();
+
+    await handler(request("GET", ["state"]), res as unknown as VercelResponse);
+
+    expect(res.statusCode).toBe(200);
+    expect(repo.getState).toHaveBeenCalledOnce();
+  });
+
+  it("requires production authentication configuration unless explicitly bypassed", async () => {
+    const repo = repository();
+    const handler = createApiHandler({ repository: repo, secret: "" });
+    const res = response();
+
+    await handler(request("GET", ["state"]), res as unknown as VercelResponse);
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toMatchObject({ error: { code: "SERVER_MISCONFIGURED" } });
+    expect(repo.getState).not.toHaveBeenCalled();
+  });
+
   it("loads state with no-store caching for an authenticated request", async () => {
     const repo = repository();
     const handler = createApiHandler({ repository: repo, secret: "correct" });

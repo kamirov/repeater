@@ -18,10 +18,14 @@ import {
   type RepeaterRepository,
 } from "./repository.js";
 
-type Dependencies = { repository?: RepeaterRepository; secret?: string };
+type Dependencies = {
+  repository?: RepeaterRepository;
+  secret?: string;
+  allowUnauthenticated?: boolean;
+};
 
-function secretMatches(provided: string | undefined, expected: string): boolean {
-  if (!provided) return false;
+function secretMatches(provided: string | undefined, expected: string | undefined): boolean {
+  if (!provided || !expected) return false;
   const providedBuffer = Buffer.from(provided);
   const expectedBuffer = Buffer.from(expected);
   return providedBuffer.length === expectedBuffer.length && timingSafeEqual(providedBuffer, expectedBuffer);
@@ -40,8 +44,9 @@ function bodyOf(request: VercelRequest): unknown {
 export function createApiHandler(dependencies: Dependencies = {}) {
   return async (request: VercelRequest, response: VercelResponse) => {
     response.setHeader("Cache-Control", "no-store");
+    const allowUnauthenticated = dependencies.allowUnauthenticated === true;
     const expectedSecret = dependencies.secret ?? process.env.REPEATER_SECRET_WORD;
-    if (!expectedSecret) {
+    if (!allowUnauthenticated && !expectedSecret) {
       return response.status(500).json({ error: { code: "SERVER_MISCONFIGURED", message: "Server authentication is not configured." } });
     }
     let ownedRepository: RepeaterRepository | undefined;
@@ -51,13 +56,15 @@ export function createApiHandler(dependencies: Dependencies = {}) {
 
       if (method === "POST" && parts.join("/") === "auth/secret-word/validate") {
         const { secretWord } = validateSecretWordSchema.parse(bodyOf(request));
-        return response.status(200).json({ valid: secretMatches(secretWord, expectedSecret) });
+        return response.status(200).json({ valid: allowUnauthenticated || secretMatches(secretWord, expectedSecret) });
       }
 
-      const providedSecret = request.headers["x-repeater-secret"];
-      const normalizedSecret = Array.isArray(providedSecret) ? providedSecret[0] : providedSecret;
-      if (!secretMatches(normalizedSecret, expectedSecret)) {
-        return response.status(401).json({ error: { code: "INVALID_SECRET", message: "The secret word is incorrect." } });
+      if (!allowUnauthenticated) {
+        const providedSecret = request.headers["x-repeater-secret"];
+        const normalizedSecret = Array.isArray(providedSecret) ? providedSecret[0] : providedSecret;
+        if (!secretMatches(normalizedSecret, expectedSecret)) {
+          return response.status(401).json({ error: { code: "INVALID_SECRET", message: "The secret word is incorrect." } });
+        }
       }
 
       const repository = dependencies.repository ?? (ownedRepository = createDatabaseRepository());

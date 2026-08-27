@@ -27,6 +27,18 @@ function fakeApi(state: RepeaterDataV1 = empty): RepeaterApi {
 }
 
 describe("createRepeaterStore", () => {
+  it("loads local development state without asking for a secret", async () => {
+    const api = fakeApi({ ...empty, delaySeconds: 7 });
+    const store = createRepeaterStore(localStorage, api, { bypassAuth: true });
+
+    await store.getState().initialize();
+
+    expect(store.getState().loadStatus).toBe("ready");
+    expect(store.getState().delaySeconds).toBe(7);
+    expect(api.getState).toHaveBeenCalledWith("");
+    expect(localStorage.getItem(REPEATER_SECRET_KEY)).toBeNull();
+  });
+
   it("stays locked until a valid secret hydrates backend state", async () => {
     const api = fakeApi({ ...empty, delaySeconds: 9 });
     const store = createRepeaterStore(localStorage, api);

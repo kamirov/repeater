@@ -2,6 +2,7 @@ import { useStore } from "zustand";
 import { createStore, type StoreApi } from "zustand/vanilla";
 
 import { createRepeaterApi, RepeaterApiError, type RepeaterApi } from "@/lib/repeaterApi";
+import { isLocalhost } from "@/lib/environment";
 import type { Move, RepeaterDataV1 } from "@/types/repeater";
 import { repeaterDataSchema } from "../../server/contracts";
 
@@ -13,6 +14,10 @@ type SaveStatus = "saving" | "error";
 type MovePatch = Pick<Move, "name" | "referenceUrl" | "description">;
 
 const emptyData: RepeaterDataV1 = { version: 1, styles: [], activeStyleId: null, delaySeconds: 5 };
+
+type RepeaterStoreOptions = {
+  bypassAuth?: boolean;
+};
 
 export type RepeaterStoreState = RepeaterDataV1 & {
   loadStatus: LoadStatus;
@@ -64,14 +69,19 @@ function toggleId(ids: Set<string>, id: string, add: boolean): Set<string> {
   return next;
 }
 
-export function createRepeaterStore(storage?: Storage, api: RepeaterApi = createRepeaterApi()): StoreApi<RepeaterStoreState> {
+export function createRepeaterStore(
+  storage?: Storage,
+  api: RepeaterApi = createRepeaterApi(),
+  options: RepeaterStoreOptions = {},
+): StoreApi<RepeaterStoreState> {
+  const bypassAuth = options.bypassAuth === true;
   const moveTimers = new Map<string, ReturnType<typeof setTimeout>>();
   let delayTimer: ReturnType<typeof setTimeout> | null = null;
   let retryAfterAuth: (() => Promise<void>) | null = null;
   let lastCandidateSecret = "";
 
   return createStore<RepeaterStoreState>((set, get) => {
-    const getSecret = () => storage?.getItem(REPEATER_SECRET_KEY) ?? "";
+    const getSecret = () => bypassAuth ? "" : storage?.getItem(REPEATER_SECRET_KEY) ?? "";
     const lockForAuth = (retry?: () => Promise<void>) => {
       if (retry) retryAfterAuth = retry;
       storage?.removeItem(REPEATER_SECRET_KEY);
@@ -145,7 +155,7 @@ export function createRepeaterStore(storage?: Storage, api: RepeaterApi = create
 
     return {
       ...emptyData,
-      loadStatus: getSecret() ? "loading" : "locked",
+      loadStatus: bypassAuth || getSecret() ? "loading" : "locked",
       authError: null,
       loadError: null,
       legacyImport: null,
@@ -156,11 +166,16 @@ export function createRepeaterStore(storage?: Storage, api: RepeaterApi = create
       reorderingStyleIds: new Set(),
       delaySaveStatus: null,
       initialize: async () => {
+        if (bypassAuth) {
+          await hydrate("");
+          return;
+        }
         const stored = getSecret();
         if (!stored) set({ loadStatus: "locked" });
         else await validateAndHydrate(stored);
       },
       submitSecret: async (candidate) => {
+        if (bypassAuth) return get().loadStatus === "ready" || hydrate("");
         const normalized = candidate.trim();
         if (!normalized) return false;
         const accepted = await validateAndHydrate(normalized);
@@ -172,6 +187,10 @@ export function createRepeaterStore(storage?: Storage, api: RepeaterApi = create
         return accepted;
       },
       retryLoad: async () => {
+        if (bypassAuth) {
+          await hydrate("");
+          return;
+        }
         const stored = getSecret() || lastCandidateSecret;
         if (stored) await validateAndHydrate(stored);
         else set({ loadStatus: "locked" });
@@ -330,7 +349,11 @@ export function createRepeaterStore(storage?: Storage, api: RepeaterApi = create
   });
 }
 
-export const repeaterStore = createRepeaterStore(typeof window === "undefined" ? undefined : window.localStorage);
+export const repeaterStore = createRepeaterStore(
+  typeof window === "undefined" ? undefined : window.localStorage,
+  createRepeaterApi(),
+  { bypassAuth: isLocalhost() },
+);
 
 export function useRepeaterStore<T>(selector: (state: RepeaterStoreState) => T): T {
   return useStore(repeaterStore, selector);
