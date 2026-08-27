@@ -1,16 +1,22 @@
 import type { Move } from "@/types/repeater";
 
+function getPracticeWeight(moveCount: number, moveIndex: number): number {
+  if (moveCount <= 1) return 1;
+  return 1 + 0.5 * ((moveCount - 1 - moveIndex) / (moveCount - 1));
+}
+
 /** Returns each move's rounded baseline chance based on its order among named moves. */
 export function getMovePracticeChances(moves: Move[]): Map<string, number> {
   const eligible = moves.filter((move) => move.name.trim().length > 0);
-  const totalWeight = (eligible.length * (eligible.length + 1)) / 2;
+  const weights = eligible.map((_, index) => getPracticeWeight(eligible.length, index));
+  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
 
   return new Map(
     moves.map((move) => {
       const eligibleIndex = eligible.indexOf(move);
       if (eligibleIndex < 0 || totalWeight === 0) return [move.id, 0];
 
-      const weight = eligible.length - eligibleIndex;
+      const weight = weights[eligibleIndex] ?? 0;
       return [move.id, Math.round((weight / totalWeight) * 100)];
     }),
   );
@@ -31,7 +37,7 @@ export function selectRandomMove(
       : eligible;
   const weightedCandidates = candidates.map((move) => ({
     move,
-    weight: eligible.length - eligible.indexOf(move),
+    weight: getPracticeWeight(eligible.length, eligible.indexOf(move)),
   }));
   const totalWeight = weightedCandidates.reduce((sum, candidate) => sum + candidate.weight, 0);
   const target = Math.min(

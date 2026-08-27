@@ -16,18 +16,18 @@ describe("selectRandomMove", () => {
     const moves = [move("a", "Alpha"), move("draft", "  "), move("b", "Beta"), move("c", "Gamma")];
 
     expect([...getMovePracticeChances(moves).entries()]).toEqual([
-      ["a", 50],
+      ["a", 40],
       ["draft", 0],
       ["b", 33],
-      ["c", 17],
+      ["c", 27],
     ]);
   });
 
-  it("splits two named moves according to their linear weights", () => {
+  it("gives two named moves a slight order-based preference", () => {
     expect(getMovePracticeChances([move("a", "Alpha"), move("b", "Beta")])).toEqual(
       new Map([
-        ["a", 67],
-        ["b", 33],
+        ["a", 60],
+        ["b", 40],
       ]),
     );
   });
@@ -59,12 +59,12 @@ describe("selectRandomMove", () => {
     expect(selectRandomMove([move("draft", "")], null, () => 0.5)).toBeNull();
   });
 
-  it("uses weighted boundaries with the provided random source", () => {
+  it("uses mildly weighted boundaries with the provided random source", () => {
     const moves = [move("a", "Alpha"), move("b", "Beta"), move("c", "Gamma")];
 
     expect(selectRandomMove(moves, null, () => 0)?.id).toBe("a");
-    expect(selectRandomMove(moves, null, () => 0.49)?.id).toBe("a");
-    expect(selectRandomMove(moves, null, () => 0.5)?.id).toBe("b");
+    expect(selectRandomMove(moves, null, () => 0.39)?.id).toBe("a");
+    expect(selectRandomMove(moves, null, () => 0.4)?.id).toBe("b");
     expect(selectRandomMove(moves, null, () => 0.99)?.id).toBe("c");
   });
 
