@@ -8,7 +8,7 @@ const styleId = "00000000-0000-4000-8000-000000000001";
 const moveId = "00000000-0000-4000-8000-000000000101";
 const styleTwoId = "00000000-0000-4000-8000-000000000002";
 const moveTwoId = "00000000-0000-4000-8000-000000000102";
-const empty: RepeaterDataV1 = { version: 1, styles: [], activeStyleId: null, delaySeconds: 5 };
+const empty: RepeaterDataV1 = { version: 1, styles: [], activeStyleId: null, delaySeconds: 5, comboDelaySeconds: 8 };
 
 function fakeApi(state: RepeaterDataV1 = empty): RepeaterApi {
   return {
@@ -18,7 +18,7 @@ function fakeApi(state: RepeaterDataV1 = empty): RepeaterApi {
     createStyle: vi.fn().mockImplementation(async (_secret, style) => ({ ...style, moves: [] })),
     updateStyle: vi.fn().mockImplementation(async (_secret, id, name) => ({ id, name, moves: [] })),
     deleteStyle: vi.fn().mockResolvedValue({ activeStyleId: null }),
-    createMove: vi.fn().mockImplementation(async (_secret, _styleId, id) => ({ id, name: "", referenceUrl: "", description: "" })),
+    createMove: vi.fn().mockImplementation(async (_secret, _styleId, id) => ({ id, name: "", referenceUrl: "", description: "", isCombo: false })),
     updateMove: vi.fn().mockImplementation(async (_secret, _styleId, move) => move),
     deleteMove: vi.fn().mockResolvedValue(undefined),
     reorderMoves: vi.fn().mockResolvedValue(undefined),
@@ -65,9 +65,9 @@ describe("createRepeaterStore", () => {
   });
 
   it("offers and imports valid local data only after an empty backend load", async () => {
-    const legacy: RepeaterDataV1 = {
+    const legacy = {
       version: 1,
-      styles: [{ id: styleId, name: "Salsa", moves: [] }],
+      styles: [{ id: styleId, name: "Salsa", moves: [{ id: moveId, name: "One", referenceUrl: "", description: "" }] }],
       activeStyleId: styleId,
       delaySeconds: 8,
     };
@@ -76,10 +76,10 @@ describe("createRepeaterStore", () => {
     const store = createRepeaterStore(localStorage, api);
 
     await store.getState().submitSecret("secret");
-    expect(store.getState().legacyImport).toEqual(legacy);
+    expect(store.getState().legacyImport).toMatchObject({ comboDelaySeconds: 8, styles: [{ moves: [{ isCombo: false }] }] });
     await store.getState().importLegacyData();
 
-    expect(api.importState).toHaveBeenCalledWith("secret", legacy);
+    expect(api.importState).toHaveBeenCalledWith("secret", expect.objectContaining({ comboDelaySeconds: 8 }));
     expect(store.getState().styles[0].name).toBe("Salsa");
     expect(localStorage.getItem(REPEATER_STORAGE_KEY)).toBeNull();
   });
@@ -107,12 +107,13 @@ describe("createRepeaterStore", () => {
         id: styleId,
         name: "Salsa",
         moves: [
-          { id: moveId, name: "One", referenceUrl: "", description: "" },
-          { id: moveTwoId, name: "Two", referenceUrl: "", description: "" },
+          { id: moveId, name: "One", referenceUrl: "", description: "", isCombo: false },
+          { id: moveTwoId, name: "Two", referenceUrl: "", description: "", isCombo: true },
         ],
       }],
       activeStyleId: styleId,
       delaySeconds: 5,
+      comboDelaySeconds: 8,
     };
     const newMoveId = "00000000-0000-4000-8000-000000000103";
     vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValueOnce(newMoveId);
@@ -128,9 +129,10 @@ describe("createRepeaterStore", () => {
     vi.useFakeTimers();
     const state: RepeaterDataV1 = {
       version: 1,
-      styles: [{ id: styleId, name: "Salsa", moves: [{ id: moveId, name: "", referenceUrl: "", description: "" }] }],
+      styles: [{ id: styleId, name: "Salsa", moves: [{ id: moveId, name: "", referenceUrl: "", description: "", isCombo: false }] }],
       activeStyleId: styleId,
       delaySeconds: 5,
+      comboDelaySeconds: 8,
     };
     const api = fakeApi(state);
     let resolveUpdate: ((move: Move) => void) | undefined;
@@ -140,15 +142,15 @@ describe("createRepeaterStore", () => {
     const store = createRepeaterStore(localStorage, api);
     await store.getState().submitSecret("secret");
 
-    store.getState().updateMove(styleId, moveId, { name: "Cross", referenceUrl: "", description: "" });
-    store.getState().updateMove(styleId, moveId, { name: "Cross-body lead", referenceUrl: "", description: "" });
+    store.getState().updateMove(styleId, moveId, { name: "Cross", referenceUrl: "", description: "", isCombo: false });
+    store.getState().updateMove(styleId, moveId, { name: "Cross-body lead", referenceUrl: "", description: "", isCombo: false });
     expect(store.getState().pendingMoveIds.has(moveId)).toBe(false);
     await vi.advanceTimersByTimeAsync(500);
 
     expect(api.updateMove).toHaveBeenCalledTimes(1);
     expect(api.updateMove).toHaveBeenCalledWith("secret", styleId, expect.objectContaining({ name: "Cross-body lead" }));
     expect(store.getState().pendingMoveIds.has(moveId)).toBe(true);
-    resolveUpdate?.({ id: moveId, name: "Cross-body lead", referenceUrl: "", description: "" });
+    resolveUpdate?.({ id: moveId, name: "Cross-body lead", referenceUrl: "", description: "", isCombo: false });
     await vi.advanceTimersByTimeAsync(0);
     expect(store.getState().pendingMoveIds.has(moveId)).toBe(false);
     vi.useRealTimers();
@@ -159,13 +161,14 @@ describe("createRepeaterStore", () => {
       version: 1,
       styles: [
         { id: styleId, name: "Salsa", moves: [
-          { id: moveId, name: "One", referenceUrl: "", description: "" },
-          { id: moveTwoId, name: "Two", referenceUrl: "", description: "" },
+          { id: moveId, name: "One", referenceUrl: "", description: "", isCombo: false },
+          { id: moveTwoId, name: "Two", referenceUrl: "", description: "", isCombo: true },
         ] },
         { id: styleTwoId, name: "Bachata", moves: [] },
       ],
       activeStyleId: styleId,
       delaySeconds: 5,
+      comboDelaySeconds: 8,
     };
     const api = fakeApi(state);
     vi.mocked(api.deleteStyle).mockResolvedValue({ activeStyleId: styleTwoId });
@@ -178,6 +181,8 @@ describe("createRepeaterStore", () => {
     await store.getState().deleteMove(styleId, moveId);
     store.getState().setDelaySeconds(12);
     await store.getState().flushDelay();
+    store.getState().setComboDelaySeconds(20);
+    await store.getState().flushComboDelay();
     await store.getState().deleteStyle(styleId);
 
     expect(api.updateStyle).toHaveBeenCalledWith("secret", styleId, "Salsa on 2");
@@ -185,15 +190,17 @@ describe("createRepeaterStore", () => {
     expect(api.reorderMoves).toHaveBeenCalledWith("secret", styleId, [moveTwoId, moveId]);
     expect(api.deleteMove).toHaveBeenCalledWith("secret", styleId, moveId);
     expect(api.updateSettings).toHaveBeenCalledWith("secret", { delaySeconds: 12 });
+    expect(api.updateSettings).toHaveBeenCalledWith("secret", { comboDelaySeconds: 20 });
     expect(store.getState().styles.map((style) => style.id)).toEqual([styleTwoId]);
   });
 
   it("rolls back a failed destructive mutation and retains failed move edits", async () => {
     const state: RepeaterDataV1 = {
       version: 1,
-      styles: [{ id: styleId, name: "Salsa", moves: [{ id: moveId, name: "Old", referenceUrl: "", description: "" }] }],
+      styles: [{ id: styleId, name: "Salsa", moves: [{ id: moveId, name: "Old", referenceUrl: "", description: "", isCombo: false }] }],
       activeStyleId: styleId,
       delaySeconds: 5,
+      comboDelaySeconds: 8,
     };
     const api = fakeApi(state);
     vi.mocked(api.deleteMove).mockRejectedValue(new Error("offline"));
@@ -204,7 +211,7 @@ describe("createRepeaterStore", () => {
     await expect(store.getState().deleteMove(styleId, moveId)).rejects.toThrow("offline");
     expect(store.getState().styles[0].moves).toHaveLength(1);
 
-    store.getState().updateMove(styleId, moveId, { name: "New", referenceUrl: "", description: "" });
+    store.getState().updateMove(styleId, moveId, { name: "New", referenceUrl: "", description: "", isCombo: false });
     await store.getState().flushMove(styleId, moveId);
     expect(store.getState().styles[0].moves[0].name).toBe("New");
     expect(store.getState().moveSaveErrors[moveId]).toBe("save failed");

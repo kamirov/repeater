@@ -12,6 +12,7 @@ const move: Move = {
   name: "Cross-body lead",
   referenceUrl: "https://example.com",
   description: "Clear the slot before leading across.",
+  isCombo: false,
 };
 
 describe("MoveCard", () => {
@@ -94,6 +95,28 @@ describe("MoveCard", () => {
     await user.type(reference, "youtube.com/watch");
     expect(screen.getByText(/enter a complete http/i)).toBeVisible();
     expect(screen.queryByRole("link", { name: /open reference/i })).not.toBeInTheDocument();
+  });
+
+  it("toggles the combo switch beside the move name", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <TooltipProvider>
+        <MoveCard
+          move={move}
+          expanded
+          onExpandedChange={vi.fn()}
+          onChange={onChange}
+          onDelete={vi.fn()}
+          dragHandle={<button type="button">Drag</button>}
+        />
+      </TooltipProvider>,
+    );
+
+    const combo = screen.getByRole("switch", { name: "Combo" });
+    expect(combo).toHaveAttribute("aria-checked", "false");
+    await user.click(combo);
+    expect(onChange).toHaveBeenCalledWith({ ...move, isCombo: true });
   });
 
   it("confirms destructive move deletion", async () => {

@@ -53,6 +53,7 @@ function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
     styleId: activeStyle?.id ?? null,
     moves,
     delaySeconds: state.delaySeconds,
+    comboDelaySeconds: state.comboDelaySeconds,
     onError: onPracticeError,
   });
 
@@ -148,12 +149,16 @@ function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
               style={activeStyle}
               practice={{
                 delaySeconds: state.delaySeconds,
+                comboDelaySeconds: state.comboDelaySeconds,
                 eligibleMoveCount,
                 isRunning: practice.isRunning,
                 isSpeechSupported: practice.isSpeechSupported,
                 onDelayChange: state.setDelaySeconds,
                 onDelayBlur: state.flushDelay,
                 delaySaveStatus: state.delaySaveStatus,
+                onComboDelayChange: state.setComboDelaySeconds,
+                onComboDelayBlur: state.flushComboDelay,
+                comboDelaySaveStatus: state.comboDelaySaveStatus,
                 onStart: practice.start,
                 onStop: practice.stop,
               } satisfies PracticeLoopProps}

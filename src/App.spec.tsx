@@ -7,7 +7,7 @@ import type { RepeaterApi } from "@/lib/repeaterApi";
 import { REPEATER_SECRET_KEY, createRepeaterStore } from "@/stores/repeaterStore";
 import type { RepeaterDataV1 } from "@/types/repeater";
 
-const empty: RepeaterDataV1 = { version: 1, styles: [], activeStyleId: null, delaySeconds: 5 };
+const empty: RepeaterDataV1 = { version: 1, styles: [], activeStyleId: null, delaySeconds: 5, comboDelaySeconds: 8 };
 
 function apiWithState(state = empty): RepeaterApi {
   return {
@@ -44,6 +44,7 @@ describe("RepeaterApp startup", () => {
       styles: [{ id: "00000000-0000-4000-8000-000000000001", name: "Salsa", moves: [] }],
       activeStyleId: "00000000-0000-4000-8000-000000000001",
       delaySeconds: 5,
+      comboDelaySeconds: 8,
     };
     render(<RepeaterApp store={createRepeaterStore(localStorage, apiWithState(state))} />);
 
@@ -62,12 +63,13 @@ describe("RepeaterApp startup", () => {
         id: "00000000-0000-4000-8000-000000000001",
         name: "Salsa",
         moves: [
-          { id: "move-one", name: "One", referenceUrl: "", description: "" },
-          { id: "move-two", name: "Two", referenceUrl: "", description: "" },
+          { id: "move-one", name: "One", referenceUrl: "", description: "", isCombo: false },
+          { id: "move-two", name: "Two", referenceUrl: "", description: "", isCombo: true },
         ],
       }],
       activeStyleId: "00000000-0000-4000-8000-000000000001",
       delaySeconds: 5,
+      comboDelaySeconds: 8,
     };
     localStorage.setItem(REPEATER_SECRET_KEY, "secret");
     render(<RepeaterApp store={createRepeaterStore(localStorage, apiWithState(state))} />);
@@ -88,6 +90,7 @@ describe("RepeaterApp startup", () => {
       styles: [{ id: "00000000-0000-4000-8000-000000000001", name: "Salsa", moves: [] }],
       activeStyleId: "00000000-0000-4000-8000-000000000001",
       delaySeconds: 8,
+      comboDelaySeconds: 8,
     }));
     render(<RepeaterApp store={createRepeaterStore(localStorage, apiWithState())} />);
 

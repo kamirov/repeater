@@ -22,7 +22,7 @@ describe("createRepeaterApi", () => {
       }), { status: noContent ? 204 : 200, headers: { "Content-Type": "application/json" } });
     });
     const api = createRepeaterApi(fetcher as typeof fetch);
-    const state = { version: 1 as const, styles: [], activeStyleId: null, delaySeconds: 5 };
+  const state = { version: 1 as const, styles: [], activeStyleId: null, delaySeconds: 5, comboDelaySeconds: 8 };
 
     await api.validateSecretWord("secret");
     await api.getState("secret");
@@ -31,10 +31,10 @@ describe("createRepeaterApi", () => {
     await api.updateStyle("secret", styleId, "Salsa on 2");
     await api.deleteStyle("secret", styleId);
     await api.createMove("secret", styleId, moveId);
-    await api.updateMove("secret", styleId, { id: moveId, name: "CBL", referenceUrl: "", description: "" });
+    await api.updateMove("secret", styleId, { id: moveId, name: "CBL", referenceUrl: "", description: "", isCombo: true });
     await api.deleteMove("secret", styleId, moveId);
     await api.reorderMoves("secret", styleId, [moveId]);
-    await api.updateSettings("secret", { delaySeconds: 8 });
+    await api.updateSettings("secret", { delaySeconds: 8, comboDelaySeconds: 12 });
 
     expect(fetcher).toHaveBeenCalledTimes(11);
     expect(fetcher.mock.calls[0][1]?.headers).not.toHaveProperty("X-Repeater-Secret");

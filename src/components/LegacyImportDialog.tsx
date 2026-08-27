@@ -23,7 +23,7 @@ export function LegacyImportDialog({
           <div className="mb-1 grid size-11 place-items-center rounded-2xl bg-primary/10 text-primary"><Download /></div>
           <DialogTitle>Import this browser’s library?</DialogTitle>
           <DialogDescription>
-            Found {data?.styles.length ?? 0} dance styles and {moveCount} moves saved locally, with a {data?.delaySeconds ?? 5}-second delay.
+            Found {data?.styles.length ?? 0} dance styles and {moveCount} moves saved locally, with a {data?.delaySeconds ?? 5}-second move period. Combo period will start at the same duration.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

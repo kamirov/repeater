@@ -10,12 +10,14 @@ const alpha: Move = {
   name: "Alpha",
   referenceUrl: "",
   description: "",
+  isCombo: false,
 };
 const beta: Move = {
   id: "beta",
   name: "Beta",
   referenceUrl: "",
   description: "",
+  isCombo: true,
 };
 
 function deferred() {
@@ -42,6 +44,7 @@ describe("usePracticeSession", () => {
         styleId: "salsa",
         moves: [alpha, beta],
         delaySeconds: 3,
+        comboDelaySeconds: 7,
         speech,
         random: () => 0,
       }),
@@ -66,6 +69,33 @@ describe("usePracticeSession", () => {
     expect(result.current.progress).toBe(0);
   });
 
+  it("uses the combo period for a selected combo move", async () => {
+    vi.useFakeTimers();
+    const speech: SpeechAdapter = {
+      isSupported: () => true,
+      speak: vi.fn().mockResolvedValue(undefined),
+      cancel: vi.fn(),
+    };
+    const { result } = renderHook(() =>
+      usePracticeSession({
+        styleId: "salsa",
+        moves: [beta],
+        delaySeconds: 3,
+        comboDelaySeconds: 7,
+        speech,
+      }),
+    );
+
+    act(() => result.current.start());
+    await act(async () => Promise.resolve());
+
+    expect(result.current.countdownSeconds).toBe(7);
+    await act(async () => vi.advanceTimersByTimeAsync(6_999));
+    expect(speech.speak).toHaveBeenCalledTimes(1);
+    await act(async () => vi.advanceTimersByTimeAsync(1));
+    expect(speech.speak).toHaveBeenCalledTimes(2);
+  });
+
   it("stops speech and timers explicitly", async () => {
     vi.useFakeTimers();
     const speech: SpeechAdapter = {
@@ -78,6 +108,7 @@ describe("usePracticeSession", () => {
         styleId: "salsa",
         moves: [alpha],
         delaySeconds: 2,
+        comboDelaySeconds: 4,
         speech,
       }),
     );
@@ -102,7 +133,7 @@ describe("usePracticeSession", () => {
     };
     const { result, rerender } = renderHook(
       ({ styleId }) =>
-        usePracticeSession({ styleId, moves: [alpha], delaySeconds: 5, speech }),
+        usePracticeSession({ styleId, moves: [alpha], delaySeconds: 5, comboDelaySeconds: 5, speech }),
       { initialProps: { styleId: "salsa" as string | null } },
     );
 
@@ -125,6 +156,7 @@ describe("usePracticeSession", () => {
         styleId: "salsa",
         moves: [alpha],
         delaySeconds: 5,
+        comboDelaySeconds: 5,
         speech: unsupported,
         onError,
       }),
@@ -143,6 +175,7 @@ describe("usePracticeSession", () => {
         styleId: "salsa",
         moves: [alpha],
         delaySeconds: 5,
+        comboDelaySeconds: 5,
         speech: failed,
         onError,
       }),

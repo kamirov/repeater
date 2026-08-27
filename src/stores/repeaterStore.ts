@@ -11,9 +11,9 @@ export const REPEATER_SECRET_KEY = "repeater:secret-word:v1";
 
 type LoadStatus = "locked" | "loading" | "ready" | "error";
 type SaveStatus = "saving" | "error";
-type MovePatch = Pick<Move, "name" | "referenceUrl" | "description">;
+type MovePatch = Pick<Move, "name" | "referenceUrl" | "description" | "isCombo">;
 
-const emptyData: RepeaterDataV1 = { version: 1, styles: [], activeStyleId: null, delaySeconds: 5 };
+const emptyData: RepeaterDataV1 = { version: 1, styles: [], activeStyleId: null, delaySeconds: 5, comboDelaySeconds: 5 };
 
 type RepeaterStoreOptions = {
   bypassAuth?: boolean;
@@ -30,6 +30,7 @@ export type RepeaterStoreState = RepeaterDataV1 & {
   moveSaveErrors: Record<string, string>;
   reorderingStyleIds: Set<string>;
   delaySaveStatus: SaveStatus | null;
+  comboDelaySaveStatus: SaveStatus | null;
   initialize: () => Promise<void>;
   submitSecret: (secret: string) => Promise<boolean>;
   retryLoad: () => Promise<void>;
@@ -47,6 +48,8 @@ export type RepeaterStoreState = RepeaterDataV1 & {
   reorderMoves: (styleId: string, orderedMoveIds: string[]) => Promise<void>;
   setDelaySeconds: (seconds: number) => void;
   flushDelay: () => Promise<void>;
+  setComboDelaySeconds: (seconds: number) => void;
+  flushComboDelay: () => Promise<void>;
 };
 
 function getLegacyData(storage?: Storage): { data: RepeaterDataV1 | null; warning: string | null } {
@@ -77,6 +80,7 @@ export function createRepeaterStore(
   const bypassAuth = options.bypassAuth === true;
   const moveTimers = new Map<string, ReturnType<typeof setTimeout>>();
   let delayTimer: ReturnType<typeof setTimeout> | null = null;
+  let comboDelayTimer: ReturnType<typeof setTimeout> | null = null;
   let retryAfterAuth: (() => Promise<void>) | null = null;
   let lastCandidateSecret = "";
 
@@ -165,6 +169,7 @@ export function createRepeaterStore(
       moveSaveErrors: {},
       reorderingStyleIds: new Set(),
       delaySaveStatus: null,
+      comboDelaySaveStatus: null,
       initialize: async () => {
         if (bypassAuth) {
           await hydrate("");
@@ -270,7 +275,7 @@ export function createRepeaterStore(
       },
       addMove: async (styleId) => {
         const id = crypto.randomUUID();
-        const draft: Move = { id, name: "", referenceUrl: "", description: "" };
+        const draft: Move = { id, name: "", referenceUrl: "", description: "", isCombo: false };
         set((state) => ({ styles: state.styles.map((style) => style.id === styleId ? { ...style, moves: [draft, ...style.moves] } : style), pendingMoveIds: toggleId(state.pendingMoveIds, id, true) }));
         try {
           await api.createMove(getSecret(), styleId, id);
@@ -326,7 +331,7 @@ export function createRepeaterStore(
         }
       },
       setDelaySeconds: (seconds) => {
-        set({ delaySeconds: Math.min(300, Math.max(1, Math.round(seconds))), delaySaveStatus: "saving" });
+        set({ delaySeconds: Math.min(300, Math.max(1, Math.round(seconds))), delaySaveStatus: null });
         if (delayTimer) clearTimeout(delayTimer);
         delayTimer = setTimeout(() => void get().flushDelay(), 500);
       },
@@ -334,6 +339,7 @@ export function createRepeaterStore(
         if (delayTimer) clearTimeout(delayTimer);
         delayTimer = null;
         const delaySeconds = get().delaySeconds;
+        set({ delaySaveStatus: "saving" });
         try {
           await api.updateSettings(getSecret(), { delaySeconds });
           set({ delaySaveStatus: null });
@@ -343,6 +349,27 @@ export function createRepeaterStore(
             await get().flushDelay();
           });
           set({ delaySaveStatus: "error" });
+        }
+      },
+      setComboDelaySeconds: (seconds) => {
+        set({ comboDelaySeconds: Math.min(300, Math.max(1, Math.round(seconds))), comboDelaySaveStatus: null });
+        if (comboDelayTimer) clearTimeout(comboDelayTimer);
+        comboDelayTimer = setTimeout(() => void get().flushComboDelay(), 500);
+      },
+      flushComboDelay: async () => {
+        if (comboDelayTimer) clearTimeout(comboDelayTimer);
+        comboDelayTimer = null;
+        const comboDelaySeconds = get().comboDelaySeconds;
+        set({ comboDelaySaveStatus: "saving" });
+        try {
+          await api.updateSettings(getSecret(), { comboDelaySeconds });
+          set({ comboDelaySaveStatus: null });
+        } catch (error) {
+          handleFailure(error, async () => {
+            set({ comboDelaySeconds, comboDelaySaveStatus: "saving" });
+            await get().flushComboDelay();
+          });
+          set({ comboDelaySaveStatus: "error" });
         }
       },
     };

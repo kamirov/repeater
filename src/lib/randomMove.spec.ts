@@ -8,6 +8,7 @@ const move = (id: string, name: string): Move => ({
   name,
   referenceUrl: "",
   description: "",
+  isCombo: false,
 });
 
 describe("selectRandomMove", () => {

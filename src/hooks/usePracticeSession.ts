@@ -8,6 +8,7 @@ type UsePracticeSessionOptions = {
   styleId: string | null;
   moves: Move[];
   delaySeconds: number;
+  comboDelaySeconds: number;
   speech?: SpeechAdapter;
   random?: () => number;
   onError?: (message: string) => void;
@@ -28,6 +29,7 @@ export function usePracticeSession({
   styleId,
   moves,
   delaySeconds,
+  comboDelaySeconds,
   speech = browserSpeech,
   random = Math.random,
   onError,
@@ -42,6 +44,7 @@ export function usePracticeSession({
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const movesRef = useRef(moves);
   const delayRef = useRef(delaySeconds);
+  const comboDelayRef = useRef(comboDelaySeconds);
   const runNextRef = useRef<(sessionId: number, previousMoveId: string | null) => void>(
     () => undefined,
   );
@@ -53,6 +56,10 @@ export function usePracticeSession({
   useEffect(() => {
     delayRef.current = delaySeconds;
   }, [delaySeconds]);
+
+  useEffect(() => {
+    comboDelayRef.current = comboDelaySeconds;
+  }, [comboDelaySeconds]);
 
   const clearTimers = useCallback(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -96,7 +103,7 @@ export function usePracticeSession({
       }
 
       if (sessionId !== sessionIdRef.current) return;
-      const delay = delayRef.current;
+      const delay = selectedMove.isCombo ? comboDelayRef.current : delayRef.current;
       setCountdownSeconds(delay);
       const countdownStartedAt = Date.now();
       setProgress(0);

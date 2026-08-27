@@ -119,7 +119,32 @@ export function MoveCard({
       {expanded ? (
         <div className="grid gap-5 border-t border-border/70 bg-muted/25 px-5 py-5">
           <div className="space-y-2">
-            <Label htmlFor={`move-name-${move.id}`}>Move name</Label>
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor={`move-name-${move.id}`}>Move name</Label>
+              <div className="flex items-center gap-2">
+                <span id={`move-combo-label-${move.id}`} className="text-xs font-semibold text-muted-foreground">Combo</span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-label="Combo"
+                  aria-labelledby={`move-combo-label-${move.id}`}
+                  aria-checked={move.isCombo}
+                  className={cn(
+                    "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-input bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+                    move.isCombo && "border-primary bg-primary",
+                  )}
+                  onClick={() => onChange({ ...move, isCombo: !move.isCombo })}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "pointer-events-none size-3.5 translate-x-0.5 rounded-full bg-background shadow-sm transition-transform",
+                      move.isCombo && "translate-x-[17px]",
+                    )}
+                  />
+                </button>
+              </div>
+            </div>
             <Input
               id={`move-name-${move.id}`}
               autoFocus={!move.name}

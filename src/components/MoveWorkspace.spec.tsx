@@ -9,16 +9,19 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const style = {
   id: "00000000-0000-4000-8000-000000000001",
   name: "Salsa",
-  moves: [{ id: "00000000-0000-4000-8000-000000000101", name: "Cross-body lead", referenceUrl: "", description: "Keep the slot." }],
+  moves: [{ id: "00000000-0000-4000-8000-000000000101", name: "Cross-body lead", referenceUrl: "", description: "Keep the slot.", isCombo: false }],
 };
 
 const practice: PracticeLoopProps = {
   delaySeconds: 5,
+  comboDelaySeconds: 8,
   eligibleMoveCount: 1,
   isRunning: false,
   isSpeechSupported: true,
   onDelayChange: vi.fn(),
   onDelayBlur: vi.fn(),
+  onComboDelayChange: vi.fn(),
+  onComboDelayBlur: vi.fn(),
   onStart: vi.fn(),
   onStop: vi.fn(),
 };

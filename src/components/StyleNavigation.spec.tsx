@@ -11,7 +11,7 @@ const salsa: DanceStyle = {
   id: "salsa",
   name: "Salsa",
   moves: [
-    { id: "move-1", name: "Inside turn", referenceUrl: "", description: "" },
+    { id: "move-1", name: "Inside turn", referenceUrl: "", description: "", isCombo: false },
   ],
 };
 

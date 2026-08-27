@@ -1,5 +1,6 @@
 import {
   check,
+  boolean,
   integer,
   pgTable,
   text,
@@ -31,6 +32,7 @@ export const moves = pgTable(
     name: text("name").notNull().default(""),
     referenceUrl: text("reference_url").notNull().default(""),
     description: text("description").notNull().default(""),
+    isCombo: boolean("is_combo").notNull().default(false),
     position: integer("position").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
@@ -46,6 +48,7 @@ export const appSettings = pgTable(
       onDelete: "set null",
     }),
     delaySeconds: integer("delay_seconds").notNull().default(5),
+    comboDelaySeconds: integer("combo_delay_seconds").notNull().default(5),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
@@ -53,6 +56,10 @@ export const appSettings = pgTable(
     check(
       "app_settings_delay_range",
       sql`${table.delaySeconds} between 1 and 300`,
+    ),
+    check(
+      "app_settings_combo_delay_range",
+      sql`${table.comboDelaySeconds} between 1 and 300`,
     ),
   ],
 );

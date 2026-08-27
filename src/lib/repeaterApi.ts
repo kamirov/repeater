@@ -54,11 +54,11 @@ export function createRepeaterApi(fetcher: typeof fetch = fetch) {
     createMove: (secret: string, styleId: string, id: string) => request<Move>(secret, `/api/styles/${styleId}/moves`, { method: "POST", body: JSON.stringify({ id }) }),
     updateMove: (secret: string, styleId: string, move: Move) => request<Move>(secret, `/api/styles/${styleId}/moves/${move.id}`, {
       method: "PATCH",
-      body: JSON.stringify({ name: move.name, referenceUrl: move.referenceUrl, description: move.description }),
+      body: JSON.stringify({ name: move.name, referenceUrl: move.referenceUrl, description: move.description, isCombo: move.isCombo }),
     }),
     deleteMove: (secret: string, styleId: string, moveId: string) => request<void>(secret, `/api/styles/${styleId}/moves/${moveId}`, { method: "DELETE" }),
     reorderMoves: (secret: string, styleId: string, moveIds: string[]) => request<void>(secret, `/api/styles/${styleId}/move-order`, { method: "PUT", body: JSON.stringify({ moveIds }) }),
-    updateSettings: (secret: string, patch: Partial<Pick<RepeaterDataV1, "activeStyleId" | "delaySeconds">>) =>
-      request<Pick<RepeaterDataV1, "activeStyleId" | "delaySeconds">>(secret, "/api/settings", { method: "PATCH", body: JSON.stringify(patch) }),
+    updateSettings: (secret: string, patch: Partial<Pick<RepeaterDataV1, "activeStyleId" | "delaySeconds" | "comboDelaySeconds">>) =>
+      request<Pick<RepeaterDataV1, "activeStyleId" | "delaySeconds" | "comboDelaySeconds">>(secret, "/api/settings", { method: "PATCH", body: JSON.stringify(patch) }),
   };
 }

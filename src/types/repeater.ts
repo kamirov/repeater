@@ -3,6 +3,7 @@ export type Move = {
   name: string;
   referenceUrl: string;
   description: string;
+  isCombo: boolean;
 };
 
 export type DanceStyle = {
@@ -16,4 +17,5 @@ export type RepeaterDataV1 = {
   styles: DanceStyle[];
   activeStyleId: string | null;
   delaySeconds: number;
+  comboDelaySeconds: number;
 };

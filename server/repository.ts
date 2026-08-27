@@ -6,7 +6,7 @@ import ws from "ws";
 import type { DanceStyle, Move, RepeaterDataV1 } from "../src/types/repeater.js";
 import { appSettings, danceStyles, moves } from "./db/schema.js";
 
-export type SettingsPatch = Partial<Pick<RepeaterDataV1, "activeStyleId" | "delaySeconds">>;
+export type SettingsPatch = Partial<Pick<RepeaterDataV1, "activeStyleId" | "delaySeconds" | "comboDelaySeconds">>;
 
 export interface RepeaterRepository {
   close?(): Promise<void>;
@@ -19,7 +19,7 @@ export interface RepeaterRepository {
   updateMove(styleId: string, moveId: string, patch: Omit<Move, "id">): Promise<Move | null>;
   deleteMove(styleId: string, moveId: string): Promise<boolean>;
   reorderMoves(styleId: string, moveIds: string[]): Promise<boolean>;
-  updateSettings(patch: SettingsPatch): Promise<Pick<RepeaterDataV1, "activeStyleId" | "delaySeconds"> | null>;
+  updateSettings(patch: SettingsPatch): Promise<Pick<RepeaterDataV1, "activeStyleId" | "delaySeconds" | "comboDelaySeconds"> | null>;
 }
 
 export function createDatabaseRepository(databaseUrl = process.env.DATABASE_URL): RepeaterRepository {
@@ -47,6 +47,7 @@ export function createDatabaseRepository(databaseUrl = process.env.DATABASE_URL)
         name: move.name,
         referenceUrl: move.referenceUrl,
         description: move.description,
+        isCombo: move.isCombo,
       });
       movesByStyle.set(move.styleId, current);
     }
@@ -60,6 +61,7 @@ export function createDatabaseRepository(databaseUrl = process.env.DATABASE_URL)
       })),
       activeStyleId: settings?.activeStyleId ?? null,
       delaySeconds: settings?.delaySeconds ?? 5,
+      comboDelaySeconds: settings?.comboDelaySeconds ?? settings?.delaySeconds ?? 5,
     };
   };
 
@@ -81,12 +83,13 @@ export function createDatabaseRepository(databaseUrl = process.env.DATABASE_URL)
         }
         await tx
           .insert(appSettings)
-          .values({ id: 1, activeStyleId: data.activeStyleId, delaySeconds: data.delaySeconds })
+          .values({ id: 1, activeStyleId: data.activeStyleId, delaySeconds: data.delaySeconds, comboDelaySeconds: data.comboDelaySeconds })
           .onConflictDoUpdate({
             target: appSettings.id,
             set: {
               activeStyleId: data.activeStyleId,
               delaySeconds: data.delaySeconds,
+              comboDelaySeconds: data.comboDelaySeconds,
               updatedAt: new Date(),
             },
           });
@@ -117,11 +120,12 @@ export function createDatabaseRepository(databaseUrl = process.env.DATABASE_URL)
       return {
         id: updated.id,
         name: updated.name,
-        moves: styleMoves.map(({ id, name: moveName, referenceUrl, description }) => ({
+        moves: styleMoves.map(({ id, name: moveName, referenceUrl, description, isCombo }) => ({
           id,
           name: moveName,
           referenceUrl,
           description,
+          isCombo,
         })),
       };
     },
@@ -151,7 +155,7 @@ export function createDatabaseRepository(databaseUrl = process.env.DATABASE_URL)
         const [existing] = await tx.select().from(moves).where(eq(moves.id, moveId)).limit(1);
         if (existing) {
           return existing.styleId === styleId
-            ? { id: existing.id, name: existing.name, referenceUrl: existing.referenceUrl, description: existing.description }
+            ? { id: existing.id, name: existing.name, referenceUrl: existing.referenceUrl, description: existing.description, isCombo: existing.isCombo }
             : null;
         }
         const existingMoves = await tx
@@ -166,7 +170,7 @@ export function createDatabaseRepository(databaseUrl = process.env.DATABASE_URL)
         for (const [index, move] of existingMoves.entries()) {
           await tx.update(moves).set({ position: index + 1, updatedAt: new Date() }).where(eq(moves.id, move.id));
         }
-        return { id: created.id, name: created.name, referenceUrl: created.referenceUrl, description: created.description };
+        return { id: created.id, name: created.name, referenceUrl: created.referenceUrl, description: created.description, isCombo: created.isCombo };
       });
     },
     async updateMove(styleId, moveId, patch) {
@@ -176,7 +180,7 @@ export function createDatabaseRepository(databaseUrl = process.env.DATABASE_URL)
         .where(and(eq(moves.id, moveId), eq(moves.styleId, styleId)))
         .returning();
       return updated
-        ? { id: updated.id, name: updated.name, referenceUrl: updated.referenceUrl, description: updated.description }
+        ? { id: updated.id, name: updated.name, referenceUrl: updated.referenceUrl, description: updated.description, isCombo: updated.isCombo }
         : null;
     },
     async deleteMove(styleId, moveId) {
@@ -218,7 +222,11 @@ export function createDatabaseRepository(databaseUrl = process.env.DATABASE_URL)
         .set({ ...patch, updatedAt: new Date() })
         .where(eq(appSettings.id, 1))
         .returning();
-      return { activeStyleId: updated.activeStyleId, delaySeconds: updated.delaySeconds };
+      return {
+        activeStyleId: updated.activeStyleId,
+        delaySeconds: updated.delaySeconds,
+        comboDelaySeconds: updated.comboDelaySeconds,
+      };
     },
   };
 }

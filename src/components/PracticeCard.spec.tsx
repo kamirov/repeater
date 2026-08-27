@@ -7,10 +7,12 @@ import { PracticeCard } from "@/components/PracticeCard";
 
 const baseProps = {
   delaySeconds: 5,
+  comboDelaySeconds: 8,
   eligibleMoveCount: 2,
   isRunning: false,
   isSpeechSupported: true,
   onDelayChange: vi.fn(),
+  onComboDelayChange: vi.fn(),
   onStart: vi.fn(),
   onStop: vi.fn(),
 };
@@ -43,10 +45,14 @@ describe("PracticeCard", () => {
     }
     render(<Harness />);
 
-    const delay = screen.getByLabelText("Practice delay in seconds");
+    const delay = screen.getByLabelText("Move period in seconds");
     await user.clear(delay);
     await user.type(delay, "8");
     expect(onDelayChange).toHaveBeenLastCalledWith(8);
+    const comboDelay = screen.getByLabelText("Combo period in seconds");
+    await user.clear(comboDelay);
+    await user.type(comboDelay, "12");
+    expect(baseProps.onComboDelayChange).toHaveBeenLastCalledWith(12);
     await user.click(screen.getByRole("button", { name: "Start practice" }));
     expect(onStart).toHaveBeenCalled();
   });
