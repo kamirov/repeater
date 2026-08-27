@@ -21,6 +21,7 @@ import { GripVertical } from "lucide-react";
 
 import { MoveCard } from "@/components/MoveCard";
 import { Button } from "@/components/ui/button";
+import { getMovePracticeChances } from "@/lib/randomMove";
 import type { Move } from "@/types/repeater";
 
 type SortableMoveListProps = {
@@ -66,6 +67,7 @@ export function SortableMoveList({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
   const ids = moves.map((move) => move.id);
+  const practiceChances = getMovePracticeChances(moves);
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over) return;
@@ -94,6 +96,7 @@ export function SortableMoveList({
               onExpandedChange={(expanded) => onExpandedChange(move.id, expanded)}
               onChange={onChange}
               onDelete={() => onDelete(move.id)}
+              practiceChance={practiceChances.get(move.id) ?? 0}
               saving={pendingMoveIds.has(move.id)}
               saveError={moveSaveErrors[move.id]}
               disabled={reordering}
@@ -114,6 +117,7 @@ function SortableMove({
   onExpandedChange,
   onChange,
   onDelete,
+  practiceChance,
   saving,
   saveError,
   disabled,
@@ -126,6 +130,7 @@ function SortableMove({
   onExpandedChange: (expanded: boolean) => void;
   onChange: (move: Move) => void;
   onDelete: () => void;
+  practiceChance: number;
   saving: boolean;
   saveError?: string;
   disabled: boolean;
@@ -147,6 +152,7 @@ function SortableMove({
         onExpandedChange={onExpandedChange}
         onChange={onChange}
         onDelete={onDelete}
+        practiceChance={practiceChance}
         saving={saving}
         saveError={saveError}
         onFlush={onFlush}

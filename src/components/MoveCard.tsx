@@ -29,6 +29,7 @@ type MoveCardProps = {
   onExpandedChange: (expanded: boolean) => void;
   onChange: (move: Move) => void;
   onDelete: () => void;
+  practiceChance: number;
   saving?: boolean;
   saveError?: string;
   onFlush?: () => void;
@@ -44,6 +45,7 @@ export function MoveCard({
   onExpandedChange,
   onChange,
   onDelete,
+  practiceChance,
   saving = false,
   saveError,
   onFlush,
@@ -126,6 +128,12 @@ export function MoveCard({
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          <span
+            aria-label={`${practiceChance}% chance in practice`}
+            className="rounded-md border border-muted-foreground/10 bg-muted-foreground/5 px-1.5 py-0.5 text-[0.65rem] font-medium tabular-nums text-muted-foreground/55"
+          >
+            {practiceChance}%
+          </span>
           <ChevronDown className={cn("ml-1 size-4 text-muted-foreground transition-transform", expanded && "rotate-180")} aria-hidden="true" />
         </div>
       </div>

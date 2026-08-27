@@ -7,7 +7,7 @@ Repeater is a browser-based dance practice studio. Dance styles, ordered moves, 
 - Multiple dance styles with rename and delete controls
 - Expandable move editors for names, reference URLs, and notes
 - Pointer, touch, and keyboard-accessible drag-and-drop ordering
-- Random spoken prompts with no immediate repeats when alternatives exist, using a separate period for combo moves
+- Weighted spoken prompts with no immediate repeats when alternatives exist, using a separate period for combo moves
 - Shared-secret access for every production backend request
 - Optimistic saves with focused loading, error, retry, and rollback states
 - One-time import from the former browser-local data format

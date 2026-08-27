@@ -28,6 +28,7 @@ describe("MoveCard", () => {
           onExpandedChange={onExpandedChange}
           onChange={onChange}
           onDelete={vi.fn()}
+          practiceChance={67}
           dragHandle={<button type="button">Drag</button>}
         />
       </TooltipProvider>,
@@ -52,6 +53,7 @@ describe("MoveCard", () => {
           onExpandedChange={vi.fn()}
           onChange={vi.fn()}
           onDelete={vi.fn()}
+          practiceChance={67}
           dragHandle={<button type="button">Drag</button>}
         />
       </TooltipProvider>,
@@ -76,6 +78,7 @@ describe("MoveCard", () => {
               onChange(nextMove);
             }}
             onDelete={vi.fn()}
+            practiceChance={67}
             dragHandle={<button type="button">Drag</button>}
           />
         </TooltipProvider>
@@ -116,6 +119,7 @@ describe("MoveCard", () => {
           onExpandedChange={vi.fn()}
           onChange={onChange}
           onDelete={vi.fn()}
+          practiceChance={67}
           dragHandle={<button type="button">Drag</button>}
         />
       </TooltipProvider>,
@@ -136,6 +140,7 @@ describe("MoveCard", () => {
           onExpandedChange={vi.fn()}
           onChange={vi.fn()}
           onDelete={vi.fn()}
+          practiceChance={67}
           dragHandle={<button type="button">Drag</button>}
         />
       </TooltipProvider>,
@@ -158,6 +163,7 @@ describe("MoveCard", () => {
           onExpandedChange={vi.fn()}
           onChange={vi.fn()}
           onDelete={onDelete}
+          practiceChance={67}
           dragHandle={<button type="button">Drag</button>}
         />
       </TooltipProvider>,
@@ -178,6 +184,7 @@ describe("MoveCard", () => {
           onExpandedChange={vi.fn()}
           onChange={vi.fn()}
           onDelete={vi.fn()}
+          practiceChance={67}
           dragHandle={<button type="button">Drag</button>}
         />
       </TooltipProvider>,
@@ -185,5 +192,28 @@ describe("MoveCard", () => {
 
     expect(screen.getByRole("status", { name: "Saving move" })).toBeVisible();
     expect(screen.queryByText("Saving…")).not.toBeInTheDocument();
+  });
+
+  it("shows the faint practice chance badge after the delete action", () => {
+    render(
+      <TooltipProvider>
+        <MoveCard
+          move={move}
+          expanded={false}
+          practiceChance={67}
+          onExpandedChange={vi.fn()}
+          onChange={vi.fn()}
+          onDelete={vi.fn()}
+          dragHandle={<button type="button">Drag</button>}
+        />
+      </TooltipProvider>,
+    );
+
+    const badge = screen.getByLabelText("67% chance in practice");
+    expect(badge).toHaveTextContent("67%");
+    expect(badge).toHaveClass("bg-muted-foreground/5", "text-muted-foreground/55");
+    expect(screen.getByRole("button", { name: /delete cross-body lead/i }).compareDocumentPosition(badge)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
   });
 });

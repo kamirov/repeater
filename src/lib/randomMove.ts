@@ -1,6 +1,22 @@
 import type { Move } from "@/types/repeater";
 
-/** Selects uniformly from named moves while excluding the prior move when possible. */
+/** Returns each move's rounded baseline chance based on its order among named moves. */
+export function getMovePracticeChances(moves: Move[]): Map<string, number> {
+  const eligible = moves.filter((move) => move.name.trim().length > 0);
+  const totalWeight = (eligible.length * (eligible.length + 1)) / 2;
+
+  return new Map(
+    moves.map((move) => {
+      const eligibleIndex = eligible.indexOf(move);
+      if (eligibleIndex < 0 || totalWeight === 0) return [move.id, 0];
+
+      const weight = eligible.length - eligibleIndex;
+      return [move.id, Math.round((weight / totalWeight) * 100)];
+    }),
+  );
+}
+
+/** Selects from named moves using list-order weighting while excluding the prior move when possible. */
 export function selectRandomMove(
   moves: Move[],
   previousMoveId: string | null,
@@ -13,9 +29,21 @@ export function selectRandomMove(
     eligible.length > 1
       ? eligible.filter((move) => move.id !== previousMoveId)
       : eligible;
-  const randomIndex = Math.min(
-    candidates.length - 1,
-    Math.max(0, Math.floor(random() * candidates.length)),
+  const weightedCandidates = candidates.map((move) => ({
+    move,
+    weight: eligible.length - eligible.indexOf(move),
+  }));
+  const totalWeight = weightedCandidates.reduce((sum, candidate) => sum + candidate.weight, 0);
+  const target = Math.min(
+    totalWeight - Number.EPSILON,
+    Math.max(0, random()) * totalWeight,
   );
-  return candidates[randomIndex] ?? null;
+
+  let accumulatedWeight = 0;
+  for (const candidate of weightedCandidates) {
+    accumulatedWeight += candidate.weight;
+    if (target < accumulatedWeight) return candidate.move;
+  }
+
+  return weightedCandidates.at(-1)?.move ?? null;
 }
