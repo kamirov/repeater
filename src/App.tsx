@@ -157,6 +157,8 @@ function Studio({ store }: { store: StoreApi<RepeaterStoreState> }) {
                 onStart: practice.start,
                 onStop: practice.stop,
               } satisfies PracticeLoopProps}
+              currentMove={practice.currentMove}
+              progress={practice.progress}
               expandedMoveId={expandedMoveId}
               activeMoveId={practice.currentMove?.id}
               onAddMove={addMove}

@@ -17,6 +17,7 @@ type PracticeSession = {
   isRunning: boolean;
   currentMove: Move | null;
   countdownSeconds: number | null;
+  progress: number | null;
   isSpeechSupported: boolean;
   start: () => void;
   stop: () => void;
@@ -34,9 +35,11 @@ export function usePracticeSession({
   const [isRunning, setIsRunning] = useState(false);
   const [currentMove, setCurrentMove] = useState<Move | null>(null);
   const [countdownSeconds, setCountdownSeconds] = useState<number | null>(null);
+  const [progress, setProgress] = useState<number | null>(null);
   const sessionIdRef = useRef(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const movesRef = useRef(moves);
   const delayRef = useRef(delaySeconds);
   const runNextRef = useRef<(sessionId: number, previousMoveId: string | null) => void>(
@@ -54,8 +57,10 @@ export function usePracticeSession({
   const clearTimers = useCallback(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     if (intervalRef.current) clearInterval(intervalRef.current);
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     timeoutRef.current = null;
     intervalRef.current = null;
+    progressIntervalRef.current = null;
   }, []);
 
   const stop = useCallback(() => {
@@ -65,6 +70,7 @@ export function usePracticeSession({
     setIsRunning(false);
     setCurrentMove(null);
     setCountdownSeconds(null);
+    setProgress(null);
   }, [clearTimers, speech]);
 
   const runNext = useCallback(
@@ -79,6 +85,7 @@ export function usePracticeSession({
 
       setCurrentMove(selectedMove);
       setCountdownSeconds(null);
+      setProgress(0);
       try {
         await speech.speak(selectedMove.name.trim());
       } catch {
@@ -91,11 +98,16 @@ export function usePracticeSession({
       if (sessionId !== sessionIdRef.current) return;
       const delay = delayRef.current;
       setCountdownSeconds(delay);
+      const countdownStartedAt = Date.now();
+      setProgress(0);
       let remaining = delay;
       intervalRef.current = setInterval(() => {
         remaining -= 1;
         setCountdownSeconds(Math.max(0, remaining));
       }, 1_000);
+      progressIntervalRef.current = setInterval(() => {
+        setProgress(Math.min(1, (Date.now() - countdownStartedAt) / (delay * 1_000)));
+      }, 50);
       timeoutRef.current = setTimeout(() => {
         clearTimers();
         runNextRef.current(sessionId, selectedMove.id);
@@ -146,6 +158,7 @@ export function usePracticeSession({
     isRunning,
     currentMove,
     countdownSeconds,
+    progress,
     isSpeechSupported: speech.isSupported(),
     start,
     stop,

@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 
+import { CurrentMoveIndicator } from "@/components/CurrentMoveIndicator";
 import { PracticeCard, type PracticeLoopProps } from "@/components/PracticeCard";
 import { SortableMoveList } from "@/components/SortableMoveList";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,8 @@ import type { DanceStyle, Move } from "@/types/repeater";
 type MoveWorkspaceProps = {
   style: DanceStyle;
   practice: PracticeLoopProps;
+  currentMove: Move | null;
+  progress: number | null;
   expandedMoveId: string | null;
   activeMoveId?: string;
   onAddMove: () => void;
@@ -27,6 +30,8 @@ type MoveWorkspaceProps = {
 export function MoveWorkspace({
   style,
   practice,
+  currentMove,
+  progress,
   expandedMoveId,
   activeMoveId,
   onAddMove,
@@ -47,13 +52,22 @@ export function MoveWorkspace({
           <p className="mb-2 text-[0.68rem] font-bold uppercase tracking-[0.2em] text-primary">Move library</p>
           <h1 id="style-heading" className="font-display text-4xl font-medium tracking-tight sm:text-5xl">{style.name}</h1>
         </div>
-        <div className="mt-6 flex items-center justify-between gap-4">
-          <PracticeCard {...practice} />
-          {style.moves.length ? (
-            <Button onClick={onAddMove}>
-              <Plus /> Add move
-            </Button>
-          ) : null}
+        <div className="mt-6 grid grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-2 sm:gap-4">
+          <div className="min-w-0 justify-self-start">
+            <PracticeCard {...practice} />
+          </div>
+          <CurrentMoveIndicator
+            currentMove={currentMove}
+            progress={progress}
+            active={practice.isRunning && currentMove !== null}
+          />
+          <div className="min-w-0 justify-self-end">
+            {style.moves.length ? (
+              <Button onClick={onAddMove}>
+                <Plus /> Add move
+              </Button>
+            ) : null}
+          </div>
         </div>
       </div>
       {style.moves.length ? (

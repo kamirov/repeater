@@ -49,16 +49,21 @@ describe("usePracticeSession", () => {
 
     act(() => result.current.start());
     expect(result.current.currentMove?.id).toBe("alpha");
+    expect(result.current.progress).toBe(0);
     expect(speech.speak).toHaveBeenCalledWith("Alpha");
 
     await act(async () => firstSpeech.resolve());
     expect(result.current.countdownSeconds).toBe(3);
+    expect(result.current.progress).toBe(0);
 
-    await act(async () => vi.advanceTimersByTimeAsync(2_999));
+    await act(async () => vi.advanceTimersByTimeAsync(1_500));
+    expect(result.current.progress).toBeCloseTo(0.5, 1);
+    await act(async () => vi.advanceTimersByTimeAsync(1_499));
     expect(speech.speak).toHaveBeenCalledTimes(1);
     await act(async () => vi.advanceTimersByTimeAsync(1));
     expect(speech.speak).toHaveBeenCalledTimes(2);
     expect(result.current.currentMove?.id).toBe("beta");
+    expect(result.current.progress).toBe(0);
   });
 
   it("stops speech and timers explicitly", async () => {
@@ -84,6 +89,7 @@ describe("usePracticeSession", () => {
 
     expect(result.current.isRunning).toBe(false);
     expect(result.current.currentMove).toBeNull();
+    expect(result.current.progress).toBeNull();
     expect(speech.cancel).toHaveBeenCalled();
     expect(speech.speak).toHaveBeenCalledTimes(1);
   });

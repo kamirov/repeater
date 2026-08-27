@@ -23,6 +23,11 @@ const practice: PracticeLoopProps = {
   onStop: vi.fn(),
 };
 
+const activePractice: PracticeLoopProps = {
+  ...practice,
+  isRunning: true,
+};
+
 describe("MoveWorkspace", () => {
   it("renders a pending move and exposes its editor callbacks", async () => {
     const user = userEvent.setup();
@@ -31,7 +36,9 @@ describe("MoveWorkspace", () => {
     render(
       <TooltipProvider><MoveWorkspace
         style={style}
-        practice={practice}
+        practice={activePractice}
+        currentMove={style.moves[0]}
+        progress={0.4}
         expandedMoveId={null}
         onAddMove={onAddMove}
         onExpandedChange={onExpandedChange}
@@ -53,11 +60,67 @@ describe("MoveWorkspace", () => {
     expect(onAddMove).toHaveBeenCalledOnce();
   });
 
+  it("renders the centered current move and progress value", () => {
+    render(
+      <TooltipProvider><MoveWorkspace
+        style={style}
+        practice={activePractice}
+        currentMove={style.moves[0]}
+        progress={0.4}
+        expandedMoveId={null}
+        onAddMove={vi.fn()}
+        onExpandedChange={vi.fn()}
+        onChangeMove={vi.fn()}
+        onDeleteMove={vi.fn()}
+        onReorderMoves={vi.fn()}
+        pendingMoveIds={new Set()}
+        moveSaveErrors={{}}
+        reordering={false}
+        onFlushMove={vi.fn()}
+        onRetryMove={vi.fn()}
+      /></TooltipProvider>,
+    );
+
+    const progressbar = screen.getByRole("progressbar", { name: /time until next move/i });
+    expect(progressbar).toBeVisible();
+    expect(progressbar).toHaveTextContent("Cross-body lead");
+    expect(progressbar).toHaveAttribute("aria-valuenow", "40");
+  });
+
+  it("keeps the inactive indicator mounted while fading it out", () => {
+    render(
+      <TooltipProvider><MoveWorkspace
+        style={style}
+        practice={practice}
+        currentMove={null}
+        progress={null}
+        expandedMoveId={null}
+        onAddMove={vi.fn()}
+        onExpandedChange={vi.fn()}
+        onChangeMove={vi.fn()}
+        onDeleteMove={vi.fn()}
+        onReorderMoves={vi.fn()}
+        pendingMoveIds={new Set()}
+        moveSaveErrors={{}}
+        reordering={false}
+        onFlushMove={vi.fn()}
+        onRetryMove={vi.fn()}
+      /></TooltipProvider>,
+    );
+
+    const indicator = screen.getByTestId("current-move-indicator");
+    expect(indicator).toBeInTheDocument();
+    expect(indicator).toHaveClass("opacity-0");
+    expect(indicator).toHaveAttribute("aria-hidden", "true");
+  });
+
   it("renders the empty move state", () => {
     render(
       <TooltipProvider><MoveWorkspace
         style={{ ...style, moves: [] }}
         practice={practice}
+        currentMove={null}
+        progress={null}
         expandedMoveId={null}
         onAddMove={vi.fn()}
         onExpandedChange={vi.fn()}
