@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 
 import { CurrentMoveIndicator } from "@/components/CurrentMoveIndicator";
+import { CurrentMoveOverlay } from "@/components/CurrentMoveOverlay";
 import { PracticeCard, type PracticeLoopProps } from "@/components/PracticeCard";
 import { SortableMoveList } from "@/components/SortableMoveList";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,11 @@ export function MoveWorkspace({
           </div>
         </div>
       </div>
+      <CurrentMoveOverlay
+        currentMove={currentMove}
+        progress={progress}
+        active={practice.isRunning && currentMove !== null}
+      />
       {style.moves.length ? (
         <SortableMoveList
           moves={style.moves}

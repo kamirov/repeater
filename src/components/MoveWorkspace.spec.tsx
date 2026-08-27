@@ -88,6 +88,8 @@ describe("MoveWorkspace", () => {
     expect(progressbar).toBeVisible();
     expect(progressbar).toHaveTextContent("Cross-body lead");
     expect(progressbar).toHaveAttribute("aria-valuenow", "40");
+    expect(screen.getByTestId("current-move-overlay")).toHaveClass("opacity-100");
+    expect(screen.getByTestId("current-move-overlay")).toHaveTextContent("Cross-body lead");
   });
 
   it("keeps the inactive indicator mounted while fading it out", () => {
@@ -115,6 +117,8 @@ describe("MoveWorkspace", () => {
     expect(indicator).toBeInTheDocument();
     expect(indicator).toHaveClass("opacity-0");
     expect(indicator).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByTestId("current-move-overlay")).toHaveClass("opacity-0");
+    expect(screen.getByTestId("current-move-overlay")).toHaveAttribute("aria-hidden", "true");
   });
 
   it("renders the empty move state", () => {
