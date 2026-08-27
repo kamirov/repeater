@@ -56,7 +56,7 @@ describe("MoveWorkspace", () => {
       /></TooltipProvider>,
     );
 
-    expect(screen.getByText("Saving…")).toBeVisible();
+    expect(screen.getByRole("status", { name: "Saving move" })).toBeVisible();
     await user.click(screen.getByRole("button", { name: /edit cross-body lead/i }));
     expect(onExpandedChange).toHaveBeenCalledWith(style.moves[0].id, true);
     await user.click(screen.getByRole("button", { name: "Add move" }));

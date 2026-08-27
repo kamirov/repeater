@@ -1,4 +1,4 @@
-import { ChevronDown, ExternalLink, FileText, Loader2, RotateCcw, Trash2 } from "lucide-react";
+import { ChevronDown, Component, ExternalLink, FileText, Loader2, RotateCcw, Trash2 } from "lucide-react";
 import type { ReactNode } from "react";
 
 import {
@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { isValidReferenceUrl } from "@/lib/referenceUrl";
+import { isValidReferenceUrl, normalizeReferenceUrl } from "@/lib/referenceUrl";
 import { cn } from "@/lib/utils";
 import type { Move } from "@/types/repeater";
 
@@ -51,6 +51,7 @@ export function MoveCard({
 }: MoveCardProps) {
   const displayName = move.name.trim() || "Untitled move";
   const validReference = isValidReferenceUrl(move.referenceUrl);
+  const referenceHref = normalizeReferenceUrl(move.referenceUrl);
 
   return (
     <article
@@ -70,8 +71,10 @@ export function MoveCard({
           className="min-w-0 flex-1 px-4 py-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
           onClick={() => onExpandedChange(!expanded)}
         >
-          <span className={cn("block truncate font-semibold", !move.name.trim() && "italic text-muted-foreground")}>{displayName}</span>
-          {saving ? <span className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><Loader2 className="size-3 animate-spin" /> Saving…</span> : null}
+          <span className="flex min-w-0 items-center gap-2">
+            {move.isCombo ? <Component role="img" aria-label="Combo move" className="size-4 shrink-0 text-primary" /> : null}
+            <span className={cn("min-w-0 truncate font-semibold", !move.name.trim() && "italic text-muted-foreground")}>{displayName}</span>
+          </span>
           {!expanded && move.description.trim() ? (
             <span className="mt-1 block truncate text-sm text-muted-foreground">
               {move.description.trim()}
@@ -79,16 +82,26 @@ export function MoveCard({
           ) : null}
         </button>
         <div className="flex shrink-0 items-center gap-0.5 px-2">
-          {move.referenceUrl && validReference ? (
+          {referenceHref ? (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button asChild variant="ghost" size="icon-sm">
-                  <a href={move.referenceUrl} target="_blank" rel="noreferrer" aria-label={`Open reference for ${displayName}`}>
+                  <a href={referenceHref} target="_blank" rel="noreferrer" aria-label={`Open reference for ${displayName}`}>
                     <ExternalLink />
                   </a>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Open reference</TooltipContent>
+            </Tooltip>
+          ) : null}
+          {saving ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span role="status" aria-label="Saving move" className="grid size-8 place-items-center text-muted-foreground">
+                  <Loader2 className="size-4 animate-spin" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Saving…</TooltipContent>
             </Tooltip>
           ) : null}
           <AlertDialog>
@@ -162,7 +175,7 @@ export function MoveCard({
               id={`move-url-${move.id}`}
               type="url"
               inputMode="url"
-              placeholder="https://youtube.com/..."
+              placeholder="youtube.com/..."
               value={move.referenceUrl}
               aria-invalid={!validReference}
               aria-describedby={!validReference ? `move-url-error-${move.id}` : undefined}
@@ -171,7 +184,7 @@ export function MoveCard({
             />
             {!validReference ? (
               <p id={`move-url-error-${move.id}`} className="text-xs font-medium text-destructive">
-                Enter a complete http:// or https:// URL.
+                Enter a URL like youtube.com/... or include http:// or https://.
               </p>
             ) : null}
           </div>

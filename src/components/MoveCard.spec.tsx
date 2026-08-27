@@ -60,7 +60,7 @@ describe("MoveCard", () => {
     expect(screen.queryByText("Add notes, cues, or a reference video")).not.toBeInTheDocument();
   });
 
-  it("auto-saves fields and reports invalid reference URLs while expanded", async () => {
+  it("accepts protocol-less reference URLs and reports malformed URLs while expanded", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
     function Harness() {
@@ -93,7 +93,15 @@ describe("MoveCard", () => {
     const reference = screen.getByLabelText("Reference URL");
     await user.clear(reference);
     await user.type(reference, "youtube.com/watch");
-    expect(screen.getByText(/enter a complete http/i)).toBeVisible();
+    expect(screen.queryByText(/enter a url like/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /open reference/i })).toHaveAttribute(
+      "href",
+      "https://youtube.com/watch",
+    );
+
+    await user.clear(reference);
+    await user.type(reference, "https://");
+    expect(screen.getByText(/enter a url like/i)).toBeVisible();
     expect(screen.queryByRole("link", { name: /open reference/i })).not.toBeInTheDocument();
   });
 
@@ -119,6 +127,26 @@ describe("MoveCard", () => {
     expect(onChange).toHaveBeenCalledWith({ ...move, isCombo: true });
   });
 
+  it("shows the combo icon before the move name in the trigger", () => {
+    render(
+      <TooltipProvider>
+        <MoveCard
+          move={{ ...move, isCombo: true }}
+          expanded={false}
+          onExpandedChange={vi.fn()}
+          onChange={vi.fn()}
+          onDelete={vi.fn()}
+          dragHandle={<button type="button">Drag</button>}
+        />
+      </TooltipProvider>,
+    );
+
+    expect(screen.getByRole("img", { name: "Combo move" })).toBeVisible();
+    expect(screen.getByRole("button", { name: /edit cross-body lead/i })).toContainElement(
+      screen.getByRole("img", { name: "Combo move" }),
+    );
+  });
+
   it("confirms destructive move deletion", async () => {
     const user = userEvent.setup();
     const onDelete = vi.fn();
@@ -138,5 +166,24 @@ describe("MoveCard", () => {
     await user.click(screen.getByRole("button", { name: /delete cross-body lead/i }));
     await user.click(screen.getByRole("button", { name: "Delete move" }));
     expect(onDelete).toHaveBeenCalled();
+  });
+
+  it("shows saving beside the delete action", () => {
+    render(
+      <TooltipProvider>
+        <MoveCard
+          move={move}
+          expanded={false}
+          saving
+          onExpandedChange={vi.fn()}
+          onChange={vi.fn()}
+          onDelete={vi.fn()}
+          dragHandle={<button type="button">Drag</button>}
+        />
+      </TooltipProvider>,
+    );
+
+    expect(screen.getByRole("status", { name: "Saving move" })).toBeVisible();
+    expect(screen.queryByText("Saving…")).not.toBeInTheDocument();
   });
 });
