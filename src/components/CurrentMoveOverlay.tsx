@@ -1,3 +1,6 @@
+import { ArrowLeft } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import type { Move } from "@/types/repeater";
 
 import { cn } from "@/lib/utils";
@@ -6,10 +9,11 @@ type CurrentMoveOverlayProps = {
   currentMove: Move | null;
   progress: number | null;
   active: boolean;
+  onStop: () => void;
 };
 
 /** Shows the active move as a full-screen progress surface on small screens. */
-export function CurrentMoveOverlay({ currentMove, progress, active }: CurrentMoveOverlayProps) {
+export function CurrentMoveOverlay({ currentMove, progress, active, onStop }: CurrentMoveOverlayProps) {
   const displayName = currentMove?.name.trim() || "Untitled move";
   const progressValue = Math.round(Math.max(0, Math.min(1, progress ?? 0)) * 100);
 
@@ -31,6 +35,15 @@ export function CurrentMoveOverlay({ currentMove, progress, active }: CurrentMov
       <span className="relative z-10 max-w-full break-words font-display text-[clamp(2.75rem,14vw,6rem)] font-medium leading-none tracking-tight">
         {displayName}
       </span>
+      <Button
+        variant="secondary"
+        size="lg"
+        className="absolute bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-[calc(1.5rem+env(safe-area-inset-left))] z-10"
+        onClick={onStop}
+        aria-label="Back to move library"
+      >
+        <ArrowLeft /> Back
+      </Button>
     </div>
   );
 }

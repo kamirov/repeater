@@ -75,6 +75,7 @@ export function MoveWorkspace({
         currentMove={currentMove}
         progress={progress}
         active={practice.isRunning && currentMove !== null}
+        onStop={practice.onStop}
       />
       {style.moves.length ? (
         <SortableMoveList

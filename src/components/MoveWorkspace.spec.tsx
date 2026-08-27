@@ -64,10 +64,11 @@ describe("MoveWorkspace", () => {
   });
 
   it("renders the centered current move and progress value", () => {
+    const onStop = vi.fn();
     render(
       <TooltipProvider><MoveWorkspace
         style={style}
-        practice={activePractice}
+        practice={{ ...activePractice, onStop }}
         currentMove={style.moves[0]}
         progress={0.4}
         expandedMoveId={null}
@@ -90,6 +91,10 @@ describe("MoveWorkspace", () => {
     expect(progressbar).toHaveAttribute("aria-valuenow", "40");
     expect(screen.getByTestId("current-move-overlay")).toHaveClass("opacity-100");
     expect(screen.getByTestId("current-move-overlay")).toHaveTextContent("Cross-body lead");
+    expect(screen.getByRole("button", { name: "Back to move library" })).toBeVisible();
+
+    screen.getByRole("button", { name: "Back to move library" }).click();
+    expect(onStop).toHaveBeenCalledOnce();
   });
 
   it("keeps the inactive indicator mounted while fading it out", () => {
